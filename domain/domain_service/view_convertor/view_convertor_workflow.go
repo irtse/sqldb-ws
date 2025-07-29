@@ -137,16 +137,10 @@ func (d *ViewConvertor) populateWorkflowSteps(workflow *sm.WorkflowModel, id str
 
 func (d *ViewConvertor) populateTaskDetails(newStep *sm.WorkflowStepModel, step map[string]interface{}, requestID string) {
 	tasks := d.FetchRecord(ds.DBTask.Name, map[string]interface{}{
-		utils.SpecialIDParam: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-			ds.UserDBField: d.Domain.GetUserID(),
-			ds.EntityDBField: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name,
-				map[string]interface{}{
-					ds.UserDBField: d.Domain.GetUserID(),
-				}, false, ds.EntityDBField),
-		}, false, utils.SpecialIDParam),
 		ds.RequestDBField:        requestID,
 		ds.WorkflowSchemaDBField: utils.GetInt(step, utils.SpecialIDParam),
 	})
+	fmt.Println("tasks", tasks)
 	if len(tasks) > 0 {
 		fmt.Println(tasks[0]["state"])
 		newStep.IsClose = utils.Compare(tasks[0]["is_close"], true)
