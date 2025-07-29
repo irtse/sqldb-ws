@@ -149,6 +149,6 @@ func (d *ViewConvertor) populateTaskDetails(newStep *sm.WorkflowStepModel, step 
 	if len(tasks) > 0 {
 		newStep.IsClose = utils.Compare(tasks[0]["is_close"], true)
 		newStep.IsCurrent = utils.Compare(tasks[0]["state"], "pending")
-		newStep.IsDismiss = utils.Compare(tasks[0]["is_dismiss"], "dismiss")
+		newStep.IsDismiss = utils.Compare(tasks[0]["state"], "dismiss") || utils.Compare(tasks[0]["state"], "refused")
 	}
 }
