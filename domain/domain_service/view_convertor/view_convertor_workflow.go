@@ -1,7 +1,6 @@
 package view_convertor
 
 import (
-	"fmt"
 	"slices"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -39,12 +38,11 @@ func (d *ViewConvertor) EnrichWithWorkFlowView(record utils.Record, tableName st
 }
 
 func (d *ViewConvertor) InitializeWorkflow(record map[string]interface{}) sm.WorkflowModel {
-	fmt.Println(record)
 	return sm.WorkflowModel{
 		IsDismiss: record["state"] == "dismiss" || record["state"] == "refused" || record["state"] == "canceled",
 		Current:   utils.ToString(record["current_index"]),
 		Position:  utils.ToString(record["current_index"]),
-		IsClose:   utils.GetBool(record, "is_close"),
+		IsClose:   utils.GetBool(record, "is_close") || record["state"] == "dismiss" || record["state"] == "refused" || record["state"] == "canceled",
 	}
 }
 
