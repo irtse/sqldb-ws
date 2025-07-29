@@ -182,6 +182,7 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 			}
 		}
 		for _, to := range toUsers {
+			fmt.Println("TO USER", to)
 			if len(dest) > 0 {
 				if fmt.Sprintf("%v", toSchemaID) == utils.GetString(mail, ds.SchemaDBField+"_on_response") {
 					destOnResponse = utils.GetInt(dest[0], utils.SpecialIDParam)
