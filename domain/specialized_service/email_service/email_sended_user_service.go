@@ -61,6 +61,7 @@ func (s *EmailSendedUserService) SpecializedCreateRow(record map[string]interfac
 }
 
 func (s *EmailSendedUserService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
+	fmt.Println("SEND TO 1", record)
 	if utils.GetString(record, "name") == "" && utils.GetString(record, ds.UserDBField) == "" {
 		return record, errors.New("no email to send to"), false
 	}
@@ -73,6 +74,6 @@ func (s *EmailSendedUserService) VerifyDataIntegrity(record map[string]interface
 	}, false); err == nil && len(res) > 0 {
 		return record, errors.New("already send"), false
 	}
-	fmt.Println("SEND TO", record)
+	fmt.Println("SEND TO 2", record)
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }

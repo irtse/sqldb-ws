@@ -197,7 +197,8 @@ func (t *TriggerService) handleOverrideEmailTo(record, dest map[string]interface
 
 func (t *TriggerService) triggerMail(record utils.Record, fromSchema *sm.SchemaModel, triggerID, toSchemaID, destID int64) {
 	for _, mail := range t.TriggerManualMail("auto", record, fromSchema, triggerID, toSchemaID, destID) {
-		t.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name).RootRaw(), mail)
+		r, err := t.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name).RootRaw(), mail)
+		fmt.Println("MAIL", r, err)
 	}
 }
 

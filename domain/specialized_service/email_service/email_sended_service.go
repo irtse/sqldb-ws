@@ -122,6 +122,7 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 			s.To = append(s.To, utils.ToString(utils.ToMap(e)["name"]))
 		}
 	}
+	fmt.Println("VerifyDataIntegrity", s.To)
 	delete(record, "to_email")
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }
