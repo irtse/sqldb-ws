@@ -194,7 +194,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			newRecRequest["closing_comment"] = utils.GetString(res, "closing_comment")
 		}
 		if CheckStateIsEnded(requests[0]["state"]) {
-			newRecRequest["current_index"] = 0
+			newRecRequest["current_index"] = -1
 		}
 		s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBRequest.Name, newRecRequest[utils.SpecialIDParam]).RootRaw(), newRecRequest)
 		for _, scheme := range schemes {
