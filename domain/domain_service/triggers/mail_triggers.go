@@ -245,7 +245,7 @@ func (t *TriggerService) getLinkLabel(toSchema sm.SchemaModel, record utils.Reco
 		if linkScheme, err := sm.GetSchemaByID(field.GetLink()); err == nil {
 			key := utils.SpecialIDParam
 			v := record[field.Name]
-			if i, err := strconv.Atoi(utils.GetString(record, field.Name)); i == 0 || err == nil {
+			if i, err := strconv.Atoi(utils.GetString(record, field.Name)); i == 0 || err != nil {
 				key = "name"
 				v = db.Quote(utils.ToString(v))
 			}
