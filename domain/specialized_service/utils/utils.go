@@ -150,9 +150,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ff.Name, map[string]interface{}{
-					ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-				}, false)
+				s.delete(&ff, ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range om {
 					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
 					delete(m, utils.SpecialIDParam)
