@@ -298,12 +298,11 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 	if ds.DBRequest.Name == s.Domain.GetTable() && utils.GetBool(results[0], "is_close") {
 		return []map[string]interface{}{}
 	} else {
-		fmt.Println("qsdqsdqdq")
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 			"is_close":          true,
 			ds.SchemaDBField:    schemaID,
 			ds.DestTableDBField: results[0][utils.SpecialIDParam],
-		}, false); err != nil && len(res) > 0 {
+		}, false); err == nil && len(res) > 0 {
 			return []map[string]interface{}{}
 		}
 	}
