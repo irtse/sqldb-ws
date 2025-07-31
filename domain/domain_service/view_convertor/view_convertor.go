@@ -206,7 +206,11 @@ func (d *ViewConvertor) ConvertRecordToView(index int, view *sm.ViewModel, chann
 	if !isEmpty {
 		synthesisPath = d.getSynthesis(record, schema)
 		historyPath = utils.BuildPath(ds.DBDataAccess.Name, utils.ReservedParam, utils.RootOrderParam+"=access_date", utils.RootDirParam+"=asc", utils.RootDestTableIDParam+"="+record.GetString(utils.SpecialIDParam), ds.RootID(ds.DBSchema.Name)+"="+utils.ToString(schema.ID))
-		commentPath = utils.BuildPath(ds.DBComment.Name, utils.ReservedParam, utils.RootDestTableIDParam+"="+record.GetString(utils.SpecialIDParam), ds.RootID(ds.DBSchema.Name)+"="+utils.ToString(schema.ID))
+		if record[ds.DestTableDBField] != nil && record[ds.SchemaDBField] != nil {
+			commentPath = utils.BuildPath(ds.DBComment.Name, utils.ReservedParam, utils.RootDestTableIDParam+"="+record.GetString(ds.DestTableDBField), ds.RootID(ds.DBSchema.Name)+"="+record.GetString(ds.SchemaDBField))
+		} else {
+			commentPath = utils.BuildPath(ds.DBComment.Name, utils.ReservedParam, utils.RootDestTableIDParam+"="+record.GetString(utils.SpecialIDParam), ds.RootID(ds.DBSchema.Name)+"="+utils.ToString(schema.ID))
+		}
 		vals[utils.SpecialIDParam] = record.GetString(utils.SpecialIDParam)
 	}
 	for _, field := range schema.Fields {
