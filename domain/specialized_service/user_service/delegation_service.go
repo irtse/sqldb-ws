@@ -2,6 +2,7 @@ package user_service
 
 import (
 	"errors"
+	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -88,6 +89,7 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 				}, false, ds.EntityDBField),
 				ds.UserDBField: s.Domain.GetUserID(),
 			}, false); err == nil && len(res) > 0 {
+				fmt.Println("RESULTS", len(res))
 				for _, r := range res {
 					go func() {
 						newTask := utils.Record{}
@@ -98,7 +100,7 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 						newTask[ds.EntityDBField] = nil
 						newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
 						delete(newTask, utils.SpecialIDParam)
-						s.Domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name).RootRaw(), newTask)
+						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return "", true })
 					}()
 				}
 			}
