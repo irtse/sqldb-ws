@@ -29,6 +29,7 @@ func (s *ShareService) SpecializedCreateRow(record map[string]interface{}, table
 				rec := utils.ToRecord(record).Copy()
 				rec[ds.DestTableDBField] = r[utils.SpecialIDParam]
 				rec[ds.SchemaDBField] = sch.ID
+				s.Domain.CreateSuperCall(utils.AllParams(sch.Name), rec)
 			}
 		}
 	}
