@@ -118,7 +118,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ff.Name, map[string]interface{}{
+				s.Domain.DeleteSuperCall(utils.AllParams(ff.Name).RootRaw(), map[string]interface{}{
 					ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
 				}, false)
 				for _, m := range mm {
@@ -151,7 +151,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ff.Name, map[string]interface{}{
+				s.Domain.DeleteSuperCall(utils.AllParams(ff.Name).RootRaw(), map[string]interface{}{
 					ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
 				}, false)
 				for _, m := range om {
