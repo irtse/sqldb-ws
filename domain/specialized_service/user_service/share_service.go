@@ -2,6 +2,7 @@ package user_service
 
 import (
 	"errors"
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -22,14 +23,22 @@ func NewShareService() utils.SpecializedServiceITF {
 
 func (s *ShareService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
 	if sch, err := schema.GetSchemaByID(utils.GetInt(record, ds.SchemaDBField)); err == nil && sch.HasField(ds.DestTableDBField) {
+		fmt.Println(sch.Name, record[ds.DestTableDBField], sch.HasField(ds.DestTableDBField), ds.DestTableDBField)
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 			utils.SpecialIDParam: record[ds.DestTableDBField],
 		}, false); err == nil {
 			for _, r := range res {
-				rec := utils.ToRecord(record).Copy()
-				rec[ds.DestTableDBField] = r[utils.SpecialIDParam]
-				rec[ds.SchemaDBField] = sch.ID
-				s.Domain.CreateSuperCall(utils.AllParams(sch.Name), rec)
+				share := map[string]interface{}{
+					"shared_" + ds.UserDBField: record["shared_"+ds.UserDBField],
+					ds.UserDBField:             record[ds.UserDBField],
+					"start_date":               record["start_date"],
+					"end_date":                 record["end_date"],
+					ds.SchemaDBField:           sch.ID,
+					ds.DestTableDBField:        r[ds.DestTableDBField],
+					"update_access":            record["update_access"],
+					"delete_access":            record["delete_access"],
+				}
+				s.Domain.CreateSuperCall(utils.AllParams(ds.DBShare.Name).RootRaw(), share)
 			}
 		}
 	}
