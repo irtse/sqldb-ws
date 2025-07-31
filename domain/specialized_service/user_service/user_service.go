@@ -38,7 +38,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
 					ds.SchemaDBField:    utils.ToInt64(splitted[0]),
 					ds.UserDBField:      s.Domain.GetUserID(),
-				}, true, "shared_"+ds.UserDBField),
+				}, false, "shared_"+ds.UserDBField),
 			}, true))
 		}
 	} else if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "disable_share") && s.Domain.GetUserID() != "" {
@@ -50,7 +50,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 					ds.UserDBField:      s.Domain.GetUserID(),
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
 					ds.SchemaDBField:    utils.ToInt64(splitted[0]),
-				}, true, "shared_"+ds.UserDBField),
+				}, false, "shared_"+ds.UserDBField),
 			}, true))
 		}
 	}
