@@ -156,7 +156,7 @@ func (p *PermDomainService) LocalPermsCheck(tableName string, colName string, le
 	}
 	accesGranted := true
 	if method == utils.SELECT && !p.hasReadAccess(level, perms.Read) {
-		accesGranted = false
+		accesGranted = p.IsShared(schema, destID, "read_access", true)
 	}
 	// Handle UPDATE and CREATE permissions
 	if method == utils.CREATE && !perms.Create {

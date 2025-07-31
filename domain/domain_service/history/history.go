@@ -103,6 +103,24 @@ func GetCreatedAccessData(schemaID string, domain utils.DomainITF) []string {
 			}
 		}
 	}
+	key := "read_access"
+	if domain.GetMethod() == utils.UPDATE {
+		key = "update_access"
+	}
+	if domain.GetMethod() == utils.DELETE {
+		key = "delete_access"
+	}
+	if shares, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+		key:                        true,
+		ds.SchemaDBField:           schemaID,
+		"shared_" + ds.UserDBField: domain.GetUserID(),
+	}, false); err == nil && len(shares) > 0 {
+		for _, share := range shares {
+			if !slices.Contains(ids, utils.ToString(share[utils.RootDestTableIDParam])) && utils.ToString(share[utils.RootDestTableIDParam]) != "" {
+				ids = append(ids, utils.ToString(share[utils.RootDestTableIDParam]))
+			}
+		}
+	}
 	return ids
 }
 
