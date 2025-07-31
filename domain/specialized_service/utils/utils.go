@@ -118,9 +118,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ff.Name, map[string]interface{}{
-					ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-				}, false)
+				s.delete(&ff, utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range mm {
 					if ff.HasField(ds.RootID(ff.Name)) {
 						if m[utils.SpecialIDParam] != nil {
@@ -182,6 +180,23 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 			}
 		}
 	}
+}
+func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, id string) {
+	res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+		ds.RootID(s.Domain.GetTable()): id,
+	}, false)
+	if err == nil && len(res) > 0 {
+		for _, f := range sch.Fields {
+			if ff, err := schema.GetSchemaByID(f.GetLink()); err == nil {
+				for _, r := range res {
+					s.delete(&ff, utils.GetString(r, utils.SpecialIDParam))
+				}
+			}
+		}
+	}
+	s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(sch.Name, map[string]interface{}{
+		ds.RootID(s.Domain.GetTable()): id,
+	}, false)
 }
 
 func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
