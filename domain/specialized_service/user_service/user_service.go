@@ -1,6 +1,7 @@
 package user_service
 
 import (
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -31,6 +32,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "enable_share") && s.Domain.GetUserID() != "" {
 		splitted := strings.Split(strings.ReplaceAll(scope, "enable_share_", ""), "_")
 		if len(splitted) > 1 {
+			fmt.Println("SCHEMA", splitted[0], splitted[1])
 			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 				"!" + utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
@@ -42,6 +44,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 	} else if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "disable_share") && s.Domain.GetUserID() != "" {
 		splitted := strings.Split(strings.ReplaceAll(scope, "disable_share", ""), "_")
 		if len(splitted) > 1 {
+			fmt.Println("DIS SCHEMA", splitted[0], splitted[1])
 			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 					ds.UserDBField:      s.Domain.GetUserID(),
