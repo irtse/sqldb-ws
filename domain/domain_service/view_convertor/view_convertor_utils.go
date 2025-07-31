@@ -137,13 +137,13 @@ func GetSharing(schemaID string, rec sm.ViewItemModel, domain utils.DomainITF) s
 		m[ds.DestTableDBField] = id
 	}
 	rec.Sharing = sm.SharingModel{
-		SharedWithPath: fmt.Sprintf("/%s/%s?%s=%s&%s=disable_"+kind, utils.MAIN_PREFIX, ds.DBUser.Name, utils.RootRowsParam,
+		SharedWithPath: fmt.Sprintf("/%s/%s?%s=%s&%s=disable_"+kind+"_"+schemaID+"_"+utils.ToString(id), utils.MAIN_PREFIX, ds.DBUser.Name, utils.RootRowsParam,
 			utils.ReservedParam, utils.RootScope),
 		Body:            m,
 		AdditionnalDate: addDate,
 		AdditionnalBool: addBool,
 		ShallowPath: map[string]string{
-			kind + "d_" + ds.UserDBField: fmt.Sprintf("/%s/%s?%s=%s&%s=enable&%s=enable_"+kind, utils.MAIN_PREFIX, ds.DBUser.Name,
+			kind + "d_" + ds.UserDBField: fmt.Sprintf("/%s/%s?%s=%s&%s=enable&%s=enable_"+kind+"_"+schemaID+"_"+utils.ToString(id), utils.MAIN_PREFIX, ds.DBUser.Name,
 				utils.RootRowsParam, utils.ReservedParam, utils.RootShallow, utils.RootScope),
 		},
 		Path: fmt.Sprintf("/%s/%s?%s=%s&%s=enable", utils.MAIN_PREFIX, table, utils.RootRowsParam, utils.ReservedParam, utils.RootShallow),
