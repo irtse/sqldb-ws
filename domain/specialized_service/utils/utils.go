@@ -118,8 +118,9 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.Domain.DeleteSuperCall(utils.AllParams(ff.Name).RootRaw(),
-					utils.ToString(ds.RootID(s.Domain.GetTable()))+"="+utils.ToString(record[utils.SpecialIDParam]), false)
+				s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ff.Name, map[string]interface{}{
+					ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
+				}, false)
 				for _, m := range mm {
 					if ff.HasField(ds.RootID(ff.Name)) {
 						if m[utils.SpecialIDParam] != nil {
@@ -150,8 +151,9 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.Domain.DeleteSuperCall(utils.AllParams(ff.Name).RootRaw(),
-					utils.ToString(ds.RootID(s.Domain.GetTable()))+"="+utils.ToString(record[utils.SpecialIDParam]), false)
+				s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ff.Name, map[string]interface{}{
+					ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
+				}, false)
 				for _, m := range om {
 					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
 					delete(m, utils.SpecialIDParam)
@@ -252,7 +254,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				}
 			}
 		}
-		if tablename == ds.DBTask.Name && record["state"] == "completed" { // if a task in completed only
+		if tablename == ds.DBTask.Name && record["state"] == "completed" { // if a task in completed
 			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBConsent.Name, map[string]interface{}{
 				ds.SchemaDBField: record[ds.SchemaDBField],
 				"optionnal":      false,
