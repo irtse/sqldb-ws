@@ -301,6 +301,8 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 		ds.DestTableDBField: results[0][utils.SpecialIDParam],
 	}, false); err != nil && len(res) > 0 {
 		return []map[string]interface{}{}
+	} else {
+		fmt.Println(res, err)
 	}
 	key := "on_create"
 	if s.Domain.GetMethod() == utils.UPDATE || (s.Domain.GetMethod() == utils.SELECT && !s.Domain.GetEmpty() && !utils.GetBool(results[0], "is_draft")) {
