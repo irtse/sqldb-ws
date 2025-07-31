@@ -1,7 +1,6 @@
 package view_convertor
 
 import (
-	"fmt"
 	"slices"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -140,9 +139,7 @@ func (d *ViewConvertor) populateTaskDetails(newStep *sm.WorkflowStepModel, step 
 		ds.RequestDBField:        requestID,
 		ds.WorkflowSchemaDBField: utils.GetInt(step, utils.SpecialIDParam),
 	})
-	fmt.Println("tasks", tasks)
 	if len(tasks) > 0 {
-		fmt.Println(tasks[0]["state"])
 		newStep.IsClose = utils.Compare(tasks[0]["is_close"], true)
 		newStep.IsCurrent = utils.Compare(tasks[0]["state"], "pending")
 		newStep.IsDismiss = utils.Compare(tasks[0]["state"], "dismiss") || utils.Compare(tasks[0]["state"], "refused")

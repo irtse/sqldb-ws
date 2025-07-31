@@ -23,7 +23,7 @@ func NewShareService() utils.SpecializedServiceITF {
 
 func (s *ShareService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
 	if sch, err := schema.GetSchemaByID(utils.GetInt(record, ds.SchemaDBField)); err == nil && sch.HasField(ds.DestTableDBField) {
-		fmt.Println(sch.Name, record[ds.DestTableDBField], sch.HasField(ds.DestTableDBField), ds.DestTableDBField)
+		fmt.Println("SCH", sch.Name, record[ds.DestTableDBField], sch.HasField(ds.DestTableDBField), ds.DestTableDBField)
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 			utils.SpecialIDParam: record[ds.DestTableDBField],
 		}, false); err == nil {

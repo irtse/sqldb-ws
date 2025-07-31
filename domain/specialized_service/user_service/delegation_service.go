@@ -2,7 +2,6 @@ package user_service
 
 import (
 	"errors"
-	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -95,10 +94,8 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 							"update_access":            false,
 							"delete_access":            false,
 						}
-						fmt.Println("SHARE", share, newTask)
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 						s.Domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name).RootRaw(), newTask)
-						fmt.Println(res, err)
 					}()
 				}
 			}
