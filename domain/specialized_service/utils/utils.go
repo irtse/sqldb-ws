@@ -119,7 +119,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.delete(&ff, ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
+				s.delete(&ff, ds.RootID(s.Domain.GetTable()), s.Domain.GetTable(), utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range mm {
 					if ff.HasField(ds.RootID(ff.Name)) {
 						if m[utils.SpecialIDParam] != nil {
@@ -150,7 +150,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.delete(&ff, ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
+				s.delete(&ff, ds.RootID(s.Domain.GetTable()), s.Domain.GetTable(), utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range om {
 					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
 					delete(m, utils.SpecialIDParam)
@@ -180,16 +180,16 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 		}
 	}
 }
-func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, fieldName string, id string) {
+func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string, fieldName string, id string) {
 	fmt.Println(sch.Name, fieldName, id)
 	res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 		fieldName: id,
 	}, false)
 	if err == nil && len(res) > 0 {
 		for _, f := range sch.Fields {
-			if ff, err := schema.GetSchemaByID(f.GetLink()); err == nil {
+			if ff, err := schema.GetSchemaByID(f.GetLink()); err == nil && from != ff.Name {
 				for _, r := range res {
-					s.delete(&ff, ds.RootID(sch.Name), utils.GetString(r, utils.SpecialIDParam))
+					s.delete(&ff, ds.RootID(sch.Name), sch.Name, utils.GetString(r, utils.SpecialIDParam))
 				}
 			}
 		}
