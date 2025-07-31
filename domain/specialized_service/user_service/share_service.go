@@ -33,7 +33,7 @@ func (s *ShareService) SpecializedCreateRow(record map[string]interface{}, table
 					ds.UserDBField:             record[ds.UserDBField],
 					"start_date":               record["start_date"],
 					"end_date":                 record["end_date"],
-					ds.SchemaDBField:           sch.ID,
+					ds.SchemaDBField:           r[ds.SchemaDBField],
 					ds.DestTableDBField:        r[ds.DestTableDBField],
 					"update_access":            record["update_access"],
 					"delete_access":            record["delete_access"],
