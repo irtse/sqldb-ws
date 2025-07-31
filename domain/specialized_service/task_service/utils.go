@@ -262,6 +262,9 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 }
 
 func HandleHierarchicalVerification(domain utils.DomainITF, request utils.Record, record map[string]interface{}) map[string]interface{} {
+	if utils.GetBool(request, "is_close") {
+		return record
+	}
 	if hierarchy, err := GetHierarchical(domain); err == nil {
 		for _, hierarch := range hierarchy {
 			CreateHierarchicalTask(domain, request, record, hierarch)
