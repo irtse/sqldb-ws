@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 	sch "sqldb-ws/domain/schema"
@@ -98,7 +97,6 @@ func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.Sche
 	if len(orFilter) > 0 {
 		filter = append(filter, "("+strings.Join(orFilter, " OR ")+")")
 	}
-	fmt.Println("FFF", filter)
 	return strings.Join(filter, " AND ")
 }
 
