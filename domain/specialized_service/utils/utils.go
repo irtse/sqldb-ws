@@ -185,7 +185,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, fieldName string, id string) {
 	fmt.Println(sch.Name, fieldName, id)
 	res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-		ds.RootID(s.Domain.GetTable()): id,
+		fieldName: id,
 	}, false)
 	if err == nil && len(res) > 0 {
 		for _, f := range sch.Fields {
