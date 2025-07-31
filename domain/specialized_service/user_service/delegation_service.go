@@ -64,24 +64,7 @@ func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{
 
 func (s *DelegationService) Write(results []map[string]interface{}, record map[string]interface{}) {
 	for _, rr := range results {
-		if taskID := utils.GetInt(rr, ds.TaskDBField); taskID >= 0 {
-			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-				"is_close":           false,
-				utils.SpecialIDParam: taskID,
-			}, false); err == nil && len(res) > 0 {
-				for _, r := range res {
-					newTask := utils.Record{}
-					for k, v := range r {
-						newTask[k] = v
-					}
-					newTask[ds.UserDBField] = rr["delegated_"+ds.UserDBField]
-					newTask[ds.EntityDBField] = nil
-					newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
-					delete(newTask, utils.SpecialIDParam)
-					s.Domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name).RootRaw(), newTask)
-				}
-			}
-		} else if utils.GetBool(rr, "all_tasks") {
+		if utils.GetBool(rr, "all_tasks") {
 			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				"is_close": false,
 				ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
@@ -116,6 +99,23 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 						fmt.Println(res, err)
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return "", true })
 					}()
+				}
+			}
+		} else if taskID := utils.GetInt(rr, ds.TaskDBField); taskID >= 0 {
+			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				"is_close":           false,
+				utils.SpecialIDParam: taskID,
+			}, false); err == nil && len(res) > 0 {
+				for _, r := range res {
+					newTask := utils.Record{}
+					for k, v := range r {
+						newTask[k] = v
+					}
+					newTask[ds.UserDBField] = rr["delegated_"+ds.UserDBField]
+					newTask[ds.EntityDBField] = nil
+					newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
+					delete(newTask, utils.SpecialIDParam)
+					s.Domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name).RootRaw(), newTask)
 				}
 			}
 		}
