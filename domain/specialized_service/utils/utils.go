@@ -182,6 +182,9 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 }
 func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string, fieldName string, id string) {
 	fmt.Println(sch.Name, fieldName, id)
+	if !sch.HasField(fieldName) {
+		return
+	}
 	res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 		fieldName: id,
 	}, false)
