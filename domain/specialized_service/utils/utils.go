@@ -189,7 +189,7 @@ func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string
 		for _, f := range sch.Fields {
 			if ff, err := schema.GetSchemaByID(f.GetLink()); err == nil && from != ff.Name {
 				for _, r := range res {
-					s.delete(&ff, ds.RootID(sch.Name), sch.Name, utils.GetString(r, utils.SpecialIDParam))
+					s.delete(&ff, sch.Name, ds.RootID(sch.Name), utils.GetString(r, utils.SpecialIDParam))
 				}
 			}
 		}
