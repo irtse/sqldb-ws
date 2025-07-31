@@ -112,7 +112,8 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 							"delete_access":            false,
 						}
 						fmt.Println("SHARE", share)
-						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+						res, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+						fmt.Println(res, err)
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return "", true })
 					}()
 				}
