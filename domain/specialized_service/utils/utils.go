@@ -254,9 +254,9 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				}
 			}
 		}
-		/*if _, ok := record["is_draft"]; ok && !utils.GetBool(record, "is_draft") {
+		if tablename == ds.DBTask.Name && record["state"] == "completed" { // if a task in completed only
 			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBConsent.Name, map[string]interface{}{
-				ds.SchemaDBField: sch.ID,
+				ds.SchemaDBField: record[ds.SchemaDBField],
 				"optionnal":      false,
 			}, false); err == nil {
 				for _, r := range res {
@@ -270,7 +270,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 				}
 			}
-		}*/
+		}
 	}
 	return record, nil, true
 }
