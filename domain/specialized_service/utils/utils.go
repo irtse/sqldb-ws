@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -182,6 +183,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 	}
 }
 func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, fieldName string, id string) {
+	fmt.Println(sch.Name, fieldName, id)
 	res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 		ds.RootID(s.Domain.GetTable()): id,
 	}, false)
