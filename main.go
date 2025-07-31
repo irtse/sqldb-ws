@@ -60,12 +60,14 @@ func main() {
 			}
 		}
 	}
+	GetResponse()
 	beego.Run()
 }
 
 func GetResponse() {
 	url := os.Getenv("RESPONSE_URL")
 	if url == "" {
+		fmt.Println("No response URL to reach...")
 		return
 	}
 	for true {
