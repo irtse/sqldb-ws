@@ -67,10 +67,12 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 		if utils.GetBool(rr, "all_tasks") {
 			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				"is_close": false,
-				ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+						ds.UserDBField: s.Domain.GetUserID(),
+					}, false, ds.EntityDBField),
 					ds.UserDBField: s.Domain.GetUserID(),
-				}, false, ds.EntityDBField),
-				ds.UserDBField: s.Domain.GetUserID(),
+				}, true, "id"),
 			}, false); err == nil && len(res) > 0 {
 				fmt.Println("RESULTS", len(res))
 				for _, r := range res {
