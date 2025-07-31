@@ -100,6 +100,18 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 						newTask[ds.EntityDBField] = nil
 						newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
 						delete(newTask, utils.SpecialIDParam)
+						share := map[string]interface{}{
+							"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
+							ds.UserDBField:             rr[ds.UserDBField],
+							"start_date":               rr["start_date"],
+							"end_date":                 rr["end_date"],
+							ds.SchemaDBField:           r[ds.SchemaDBField],
+							ds.DelegationDBField:       rr[utils.SpecialIDParam],
+							ds.DestTableDBField:        r[ds.DestTableDBField],
+							"update_access":            false,
+							"delete_access":            false,
+						}
+						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return "", true })
 					}()
 				}
