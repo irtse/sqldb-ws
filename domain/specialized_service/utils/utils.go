@@ -203,8 +203,15 @@ func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string
 }
 
 func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
+
 	if s.Domain.GetAutoload() {
 		return record, nil, true
+	}
+	if s.Domain.GetMethod() != utils.DELETE {
+		rec, err := sch.ValidateBySchema(record, tablename, s.Domain.GetMethod(), s.Domain, s.Domain.VerifyAuth)
+		if err != nil {
+			return rec, err, err == nil
+		}
 	}
 	if sch, err := sch.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
