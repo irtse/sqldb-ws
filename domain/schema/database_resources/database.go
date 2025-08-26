@@ -215,9 +215,11 @@ var DBTriggerCondition = models.SchemaModel{
 	Category: "trigger",
 	Fields: []models.FieldModel{
 		{Name: "value", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 0},
-		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template to check condition", Index: 5},
-		{Name: RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: true, Readonly: true, Label: "field to check condition", Index: 6},
-		{Name: RootID(DBTrigger.Name), Type: models.INTEGER.String(), ForeignTable: DBTrigger.Name, Required: true, Readonly: true, Label: "related trigger", Index: 6},
+		{Name: "not_null", Type: models.BOOLEAN.String(), Required: false, Readonly: false, Default: false, Index: 1},
+
+		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template to check condition", Index: 2},
+		{Name: RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: true, Readonly: true, Label: "field to check condition", Index: 3},
+		{Name: RootID(DBTrigger.Name), Type: models.INTEGER.String(), ForeignTable: DBTrigger.Name, Required: true, Readonly: true, Label: "related trigger", Index: 4},
 	},
 }
 
@@ -274,13 +276,31 @@ var DBFieldRule = models.SchemaModel{
 	Category: "schema",
 	Fields: []models.FieldModel{
 		{Name: "value", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 0},
-		{Name: "first_own", Type: models.BOOLEAN.String(), Label: "first of our data", Required: false, Readonly: false, Default: false, Index: 1},
-		{Name: "operator", Type: models.ENUMOPERATOR.String(), Required: false, Index: 2},
+		{Name: "operator", Type: models.ENUMOPERATOR.String(), Required: false, Index: 1},
+		{Name: "separator", Type: models.ENUMSEPARATOR.String(), Required: false, Index: 2},
+
 		{Name: "from_" + RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: false, Readonly: true, Label: "template to extract value modification", Index: 2},
 		{Name: "from_" + RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: false, Readonly: true, Label: "field  to extract value modification", Index: 3},
 		{Name: "from_" + RootID("dest_table"), Type: models.INTEGER.String(), Required: false, Readonly: true, Label: "reference", Index: 4},
 
-		{Name: RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: true, Readonly: true, Label: "field to bind rule", Index: 5},
+		{Name: RootID("field_rule"), Type: models.INTEGER.String(), ForeignTable: RootID("field_rule"), Required: false, Readonly: true, Label: "dependents to another rule", Index: 4},
+		{Name: "related_" + RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: false, Readonly: true, Label: "related field", Index: 5},
+		{Name: RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: false, Readonly: true, Label: "field to bind rule", Index: 6},
+	},
+}
+
+var DBFieldCondition = models.SchemaModel{
+	Name:     RootName("field_condition"),
+	Label:    "field conditions",
+	Category: "schema",
+	Fields: []models.FieldModel{
+		{Name: "value", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 0}, // if not then use schemafield value.
+		{Name: "not_null", Type: models.BOOLEAN.String(), Required: false, Readonly: false, Default: false, Index: 1},
+
+		{Name: "from_" + RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: false, Readonly: true, Label: "template to extract value modification", Index: 2},
+		{Name: "from_" + RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: false, Readonly: true, Label: "field  to extract value modification", Index: 3},
+
+		{Name: RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: false, Readonly: true, Label: "field to check condition", Index: 4},
 	},
 }
 
@@ -700,7 +720,7 @@ var ROOTTABLES = []models.SchemaModel{DBSchemaField, DBUser, DBWorkflow, DBView,
 	DBComment, DBDelegation,
 	DBConsentResponse, DBEmailTemplate,
 	DBTrigger, DBTriggerRule, DBTriggerCondition, DBTriggerDestination,
-	DBFieldAutoFill, DBFieldRule,
+	DBFieldAutoFill, DBFieldRule, DBFieldCondition,
 	DBViewSchema,
 	DBEmailSended, DBEmailTemplate, DBEmailResponse, DBEmailSendedUser, DBEmailList,
 }
@@ -725,6 +745,7 @@ func RootID(name string) string {
 
 func RootName(name string) string { return "db" + name }
 
+var FieldRuleDBField = RootID(DBFieldRule.Name)
 var ConsentDBField = RootID(DBConsent.Name)
 var SchemaDBField = RootID(DBSchema.Name)
 var SchemaFieldDBField = RootID(DBSchemaField.Name)

@@ -25,7 +25,7 @@ var Axis = models.SchemaModel{
 	Category: "domain",
 	Fields: []models.FieldModel{
 		{Name: "code", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Translatable: false, Readonly: false, Index: 0},
-		{Name: "name", Type: models.VARCHAR.String(), Required: false, Translatable: false, Readonly: true, Index: 1},
+		{Name: "name", Type: models.VARCHAR.String(), Constraint: "unique", Required: false, Translatable: false, Readonly: true, Index: 1},
 		{Name: "domain_code", Label: "code domaine", Type: models.VARCHAR.String(), Translatable: false, Required: false, Readonly: true, Index: 2},
 		{Name: ds.RootID(ds.DBEntity.Name), Type: models.INTEGER.String(), ForeignTable: ds.DBEntity.Name, Required: true, Index: 3, Label: "entité en relation"},
 	},
@@ -38,7 +38,7 @@ var ProjectFR = models.SchemaModel{ // todo
 	Category: "global data",
 	Fields: []models.FieldModel{
 		{Name: "code", Label: "code", Type: models.VARCHAR.String(), Constraint: "unique", Translatable: false, Required: true, Readonly: true, Index: 0},
-		{Name: "name", Type: models.VARCHAR.String(), Required: false, Translatable: false, Readonly: true, Index: 1},
+		{Name: "name", Type: models.VARCHAR.String(), Required: false, Constraint: "unique", Translatable: false, Readonly: true, Index: 1},
 		{Name: "state", Type: models.VARCHAR.String(), Required: false, Default: models.STATEPENDING, Level: models.LEVELRESPONSIBLE, Index: 2},
 		{Name: "project_task", Label: "lot projet", Type: models.VARCHAR.String(), Required: false, Readonly: true, Index: 3},
 		{Name: "start_date", Label: "date de début de projet", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 4},

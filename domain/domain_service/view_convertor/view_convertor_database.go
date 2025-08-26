@@ -84,11 +84,11 @@ func (d *ViewConvertor) GetViewFields(tableName string, noRecursive bool, result
 		}
 		shallowField, additionalActions = d.ProcessPermissions(shallowField, scheme, tableName,
 			additionalActions, schema, noRecursive, results)
-		var m map[string]interface{}
+		m := map[string]interface{}{}
 		b, _ = json.Marshal(shallowField)
 		err := json.Unmarshal(b, &m)
 		if err == nil {
-			m = d.GetFieldsRules(&schema, m)
+			// m = d.GetFieldsRules(&schema, m)
 			m["autofill"], _ = d.GetFieldInfo(&scheme, ds.DBFieldAutoFill.Name)
 			m["translatable"] = scheme.Translatable
 			m["hidden"] = scheme.Hidden

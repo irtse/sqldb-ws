@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -202,8 +203,45 @@ func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string
 	}, false)
 }
 
-func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
+func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
+	if slices.Contains([]string{"true", "false"}, utils.ToString(val)) {
+		return val == "true" // should set type
+	} else if i, err := strconv.Atoi(utils.ToString(val)); err == nil && i >= 0 {
+		return i // should set type
+	} else {
+		return utils.ToString(val) // should set type
+	}
+}
 
+func (t *AbstractSpecializedService) GetFieldInfo(fromSchema sm.SchemaModel, record utils.Record) (bool, error) {
+	filterService := filter.NewFilterService(t.Domain)
+	for _, rule := range filterService.GetFieldCondition(fromSchema, record) {
+		f, err := fromSchema.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField))
+		if err == nil {
+			if val, ok := rule["value"]; ok && val != nil { // SIMPLE WAY...
+				if t.fromITF(record[f.Name]) != t.fromITF(val) {
+					return false, errors.New("no matching value <" + f.Name + ">")
+				}
+			} else if schFrom, err := sch.GetSchemaByID(utils.ToInt64(rule["from_"+ds.SchemaDBField])); err == nil {
+				if ff, err := schFrom.GetFieldByID(utils.GetInt(rule, "from_"+ds.SchemaFieldDBField)); err == nil {
+					t.Domain.GetDb().ClearQueryFilter().SetSQLRestriction(
+						filterService.GetFieldSQL(schFrom, &ff, rule, utils.GetInt(rule, "from_"+ds.DestTableDBField)))
+				} else {
+					t.Domain.GetDb().ClearQueryFilter().SetSQLRestriction(
+						filterService.GetFieldSQL(schFrom, nil, rule, utils.GetInt(rule, "from_"+ds.DestTableDBField)))
+				}
+				if res, err := t.Domain.GetDb().MathQuery("COUNT", schFrom.Name); err == nil && len(res) > 0 {
+					return utils.ToInt64(res[0]["results"]) > 0, nil
+				} else {
+					return false, errors.New("no matching value <" + f.Name + "> " + err.Error())
+				}
+			}
+		}
+	}
+	return true, nil
+}
+
+func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
 	if s.Domain.GetAutoload() {
 		return record, nil, true
 	}
@@ -216,6 +254,9 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 	if sch, err := sch.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
+		if ok, err := s.GetFieldInfo(sch, record); !ok {
+			return record, err, false
+		}
 		currentTime := time.Now()
 		if sch.HasField("start_date") && sch.HasField("end_date") {
 			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' < start_date OR "

@@ -22,23 +22,37 @@ func (s *ViewConvertor) GetFieldsFill(sch *sm.SchemaModel, values map[string]int
 	return values
 }
 
-func (s *ViewConvertor) GetFieldsRules(sch *sm.SchemaModel, values map[string]interface{}) map[string]interface{} {
+// field rule must verify every schema fields during a POST or a PUT
+// this verification is set to -> check is depending a condition a field got a proper value.
+// when no condition apply then apply on every way.
+// if condition meet then apply the rule verification
+// verification maybe simple such as same as value, not nil etc
+// or complex, depending a request on another table
+// ex: project only from coc
+
+func (s *ViewConvertor) GetFieldsRules(sch sm.SchemaModel, values map[string]interface{}) map[string]interface{} {
 	if !s.Domain.GetEmpty() {
 		return values
 	}
 	for k := range values {
-		if f, err := sch.GetField(k); err == nil {
-			val, operator := s.GetFieldInfo(&f, ds.DBFieldRule.Name)
+		rules := utils.ToMap(values[k])["rules"].([]map[string]interface{})
+		for _, rule := range filter.NewFilterService(s.Domain).GetFieldCondition(sch, utils.Record{}) {
 			if utils.ToMap(values[k])["rules"] == nil {
 				utils.ToMap(values[k])["rules"] = []map[string]interface{}{}
 			}
-			rules := utils.ToMap(values[k])["rules"].([]map[string]interface{})
-			rules = append(rules, map[string]interface{}{
-				"value":    val,
-				"operator": operator,
-			})
-			utils.ToMap(values[k])["rules"] = rules
+			if rule["related_"+ds.SchemaFieldDBField] == nil {
+				continue
+			}
+			if f, err := scheme.GetFieldByID(utils.ToInt64(rule["related_"+ds.SchemaFieldDBField])); err == nil {
+				if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
+					rules = append(rules, map[string]interface{}{
+						"value":    sch.Name + "." + f.Name,
+						"operator": rule["operator"],
+					})
+				}
+			}
 		}
+		utils.ToMap(values[k])["rules"] = rules
 	}
 	return values
 }
