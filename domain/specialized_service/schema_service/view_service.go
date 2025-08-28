@@ -15,7 +15,6 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
-	"sync"
 )
 
 // DONE - ~ 200 LINES - NOT TESTED
@@ -73,16 +72,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
 		fmt.Println("THERE")
-		var wg2 sync.WaitGroup
 		for _, schema := range schemas {
-			wg2.Add(1)
-			go func() {
-				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
-				fmt.Println("DONE", schema.Name)
-				wg2.Done()
-			}()
+			s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
 		}
-		wg2.Wait()
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
