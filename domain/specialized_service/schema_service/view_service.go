@@ -174,7 +174,6 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
 			params, datas, rec["max"] = s.fetchData(schema.Name, params, sqlFilter)
-			fmt.Println("max", rec["max"])
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
@@ -266,7 +265,6 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false)
 		if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
 			max = utils.ToInt64(res[0]["result"])
-			fmt.Println("fetch max", max)
 		}
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLView(sqlview)
@@ -277,7 +275,6 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 		for _, d := range dd {
 			datas = append(datas, d)
 		}
-		//datas, _ = s.Domain.Call(params.RootRaw(), utils.Record{}, utils.SELECT, []interface{}{sqlFilter}...)
 	}
 	return params, datas, max
 }

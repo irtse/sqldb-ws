@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
@@ -182,7 +181,6 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 	}
 }
 func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string, fieldName string, id string) {
-	fmt.Println(sch.Name, fieldName, id)
 	if !sch.HasField(fieldName) {
 		return
 	}

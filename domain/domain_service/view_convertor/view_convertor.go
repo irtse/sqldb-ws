@@ -89,10 +89,8 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 }
 
 func (v *ViewConvertor) TransformMultipleSchema(results utils.Results, schema *sm.SchemaModel, isWorkflow bool, params utils.Params) utils.Results {
-	max, _ := history.CountMaxDataAccess(schema.Name, []string{}, v.Domain)
 	view := sm.ViewModel{
 		Items: []sm.ViewItemModel{},
-		Max:   max,
 	}
 	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
 	// if there is only one item in the view, we can set the view readonly to the item readonly

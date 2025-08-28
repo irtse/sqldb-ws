@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 	sch "sqldb-ws/domain/schema"
@@ -301,7 +300,6 @@ func (t *FilterService) GetFieldSQL(fromSchema sm.SchemaModel, fromField *sm.Fie
 			}
 		}
 	}
-	fmt.Println("SQLRestriction", SQLRestriction)
 	return SQLRestriction
 }
 

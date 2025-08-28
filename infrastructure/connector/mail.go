@@ -96,7 +96,6 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 	body.WriteString(utils.GetString(mail, "content"))
 
 	code := utils.GetString(mail, "code")
-	fmt.Println("TO", from, to, isValidButton)
 	if isValidButton {
 		host := os.Getenv("HOST")
 		if host == "" {
