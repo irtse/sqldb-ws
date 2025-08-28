@@ -15,7 +15,6 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
-	"sync"
 )
 
 // DONE - ~ 200 LINES - NOT TESTED
@@ -50,6 +49,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	params := s.Domain.GetParams().Copy()
 	schemas := []*models.SchemaModel{}
 	if len(results) == 1 && !utils.GetBool(results[0], "is_empty") && !s.Domain.IsShallowed() {
+		if s, err := schserv.GetSchemaByID(utils.GetInt(results[0], ds.SchemaDBField)); err == nil {
+			schemas = append(schemas, &s)
+		}
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBViewSchema.Name, map[string]interface{}{
 			ds.ViewDBField: results[0][utils.SpecialIDParam],
 		}, false); err == nil {
@@ -60,27 +62,16 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
-
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
-		go s.TransformToView(record, false, nil, params, channel, dest_id...)
+		go s.TransformToView(record, false, schemas, params, channel, dest_id...)
 	}
 	for range results {
 		if rec := <-channel; rec != nil {
 			res = append(res, rec)
 		}
 	}
-	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
-		subChan := make(chan utils.Record, len(schemas))
-		var wg2 sync.WaitGroup
-		for _, schema := range schemas {
-			wg2.Add(1)
-			go func() {
-				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
-				wg2.Done()
-			}()
-		}
-		wg2.Wait()
+	if len(res) == 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
@@ -105,15 +96,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			res[0]["schema"] = newSchema
 		}
 		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
-		for range schemas {
-			if rec := <-subChan; rec != nil {
-				for _, i := range utils.ToList(rec["items"]) {
-					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
-				}
-				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
-				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
-			}
-		}
 	}
 	sort.SliceStable(res, func(i, j int) bool {
 		return utils.ToInt64(res[i]["index"]) <= utils.ToInt64(res[j]["index"])
@@ -121,19 +103,15 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	return
 }
 
-func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema *models.SchemaModel, domainParams utils.Params,
+func (s *ViewService) TransformToView(record utils.Record, multiple bool, schemas []*models.SchemaModel, domainParams utils.Params,
 	channel chan utils.Record, dest_id ...string) {
 	s.Domain.SetOwn(record.GetBool("own_view"))
-	if schema == nil {
-		if s, err := schserv.GetSchemaByID(utils.GetInt(record, ds.SchemaDBField)); err == nil {
-			schema = &s
-		}
-	}
-
 	dp := domainParams.Copy()
-	if schema == nil {
+	if len(schemas) == 0 {
 		channel <- nil
-	} else {
+		return
+	}
+	for _, schema := range schemas {
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
 			if val, operator := connector.GetFieldInInjection(line, "type"); val != "" {
