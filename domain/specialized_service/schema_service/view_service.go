@@ -259,14 +259,14 @@ func (s *ViewService) getFilterDetails(record utils.Record, schema *models.Schem
 func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter string) (utils.Params, utils.Results) {
 	datas := utils.Results{}
 	if !s.Domain.GetEmpty() {
-		s.Domain.GetDb().ClearQueryFilter()
 		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLView(sqlview)
 		s.Domain.GetDb().SetSQLOrder(sqlorder)
 		s.Domain.GetDb().SetSQLLimit(sqllimit)
-		fmt.Println("sqlrestr", sqlrestr, sqlview, sqlorder, sqllimit, sqlrestr)
-		dd, _ := s.Domain.GetDb().SelectQueryWithRestriction(tablename, sqlrestr, false)
+		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
+		fmt.Println("sqlrestr", sqlrestr)
+		dd, _ := s.Domain.GetDb().SelectQueryWithRestriction(tablename, map[string]interface{}{}, false)
 		for _, d := range dd {
 			datas = append(datas, d)
 		}
