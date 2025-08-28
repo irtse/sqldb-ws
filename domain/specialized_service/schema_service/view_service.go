@@ -72,7 +72,16 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			res = append(res, rec)
 		}
 	}
+<<<<<<< HEAD
 	if len(res) == 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
+=======
+	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
+		subChan := make(chan utils.Record, len(schemas))
+		fmt.Println("THERE")
+		for _, schema := range schemas {
+			s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
+		}
+>>>>>>> parent of fa444b7... view service
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
