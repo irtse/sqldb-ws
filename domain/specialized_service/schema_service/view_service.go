@@ -6,7 +6,6 @@ import (
 	"slices"
 	"sort"
 	filterserv "sqldb-ws/domain/domain_service/filter"
-	"sqldb-ws/domain/domain_service/history"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -262,8 +261,13 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
 		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, sqlFilter)
-		max, _ = history.CountMaxDataAccess(tablename, []string{sqlrestr}, s.Domain)
-		fmt.Println("max", max)
+		s.Domain.GetDb().ClearQueryFilter()
+		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
+		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false)
+		if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
+			max = utils.ToInt64(res[0]["result"])
+			fmt.Println("fetch max", max)
+		}
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLView(sqlview)
 		s.Domain.GetDb().SetSQLOrder(sqlorder)
