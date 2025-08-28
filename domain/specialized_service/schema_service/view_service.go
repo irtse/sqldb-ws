@@ -15,6 +15,7 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
+	"sync"
 )
 
 // DONE - ~ 200 LINES - NOT TESTED
@@ -49,9 +50,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	params := s.Domain.GetParams().Copy()
 	schemas := []*models.SchemaModel{}
 	if len(results) == 1 && !utils.GetBool(results[0], "is_empty") && !s.Domain.IsShallowed() {
-		if s, err := schserv.GetSchemaByID(utils.GetInt(results[0], ds.SchemaDBField)); err == nil {
-			schemas = append(schemas, &s)
-		}
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBViewSchema.Name, map[string]interface{}{
 			ds.ViewDBField: results[0][utils.SpecialIDParam],
 		}, false); err == nil {
@@ -62,26 +60,27 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
+
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
-		go s.TransformToView(record, false, schemas, params, channel, dest_id...)
+		go s.TransformToView(record, false, nil, params, channel, dest_id...)
 	}
-
 	for range results {
 		if rec := <-channel; rec != nil {
 			res = append(res, rec)
 		}
 	}
-<<<<<<< HEAD
-	if len(res) == 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
-=======
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
-		fmt.Println("THERE")
+		var wg2 sync.WaitGroup
 		for _, schema := range schemas {
-			s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
+			wg2.Add(1)
+			go func() {
+				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
+				wg2.Done()
+			}()
 		}
->>>>>>> parent of fa444b7... view service
+		wg2.Wait()
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
@@ -106,6 +105,15 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			res[0]["schema"] = newSchema
 		}
 		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
+		for range schemas {
+			if rec := <-subChan; rec != nil {
+				for _, i := range utils.ToList(rec["items"]) {
+					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
+				}
+				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
+				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
+			}
+		}
 	}
 	sort.SliceStable(res, func(i, j int) bool {
 		return utils.ToInt64(res[i]["index"]) <= utils.ToInt64(res[j]["index"])
@@ -113,16 +121,19 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	return
 }
 
-func (s *ViewService) TransformToView(record utils.Record, multiple bool, schemas []*models.SchemaModel, domainParams utils.Params,
+func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema *models.SchemaModel, domainParams utils.Params,
 	channel chan utils.Record, dest_id ...string) {
 	s.Domain.SetOwn(record.GetBool("own_view"))
-	dp := domainParams.Copy()
-	if len(schemas) == 0 {
-		channel <- nil
-		return
+	if schema == nil {
+		if s, err := schserv.GetSchemaByID(utils.GetInt(record, ds.SchemaDBField)); err == nil {
+			schema = &s
+		}
 	}
-	rec := NewViewFromRecord(*schemas[0], record)
-	for _, schema := range schemas {
+
+	dp := domainParams.Copy()
+	if schema == nil {
+		channel <- nil
+	} else {
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
 			if val, operator := connector.GetFieldInInjection(line, "type"); val != "" {
@@ -142,7 +153,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		// add type onto order and schema plus verify if filter not implied.
 		// may regenerate to get limits... for file... for type and for dest_table_id if needed.
 		s.Domain.HandleRecordAttributes(record)
-
+		rec := NewViewFromRecord(*schema, record)
 		s.addFavorizeInfo(record, rec)
 
 		params := utils.GetRowTargetParameters(schema.Name, s.combineDestinations(dest_id))
@@ -169,7 +180,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
-			datas, rec = s.fetchData(params, sqlFilter, rec)
+			params, datas = s.fetchData(params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
@@ -193,8 +204,8 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 				rec["actions"] = append(utils.ToList(rec["actions"]), "delete")
 			}
 		}
+		channel <- rec
 	}
-	channel <- rec
 }
 
 // this filter a view only with its property
@@ -251,13 +262,13 @@ func (s *ViewService) getFilterDetails(record utils.Record, schema *models.Schem
 		filter, viewFilter, *schema, s.Domain.GetParams())
 	return sqlFilter, view, dir
 }
-func (s *ViewService) fetchData(params utils.Params, sqlFilter string, rec utils.Record) (utils.Results, utils.Record) {
+func (s *ViewService) fetchData(params utils.Params, sqlFilter string) (utils.Params, utils.Results) {
 	datas := utils.Results{}
 	if !s.Domain.GetEmpty() {
 		s.Domain.GetDb().ClearQueryFilter()
 		datas, _ = s.Domain.Call(params.RootRaw(), utils.Record{}, utils.SELECT, []interface{}{sqlFilter}...)
 	}
-	return datas, rec
+	return params, datas
 }
 
 func (s *ViewService) processData(rec utils.Record, multiple bool, datas utils.Results, schema *sm.SchemaModel,
