@@ -80,6 +80,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			wg2.Add(1)
 			go func() {
 				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
+				fmt.Println("DONE", schema.Name)
 				wg2.Done()
 			}()
 		}
