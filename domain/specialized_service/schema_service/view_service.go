@@ -62,9 +62,11 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	}
 
 	channel := make(chan utils.Record, len(results))
+	fmt.Println("HERE")
 	for _, record := range results {
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
 	}
+	fmt.Println("AFTER HERE")
 	var wg sync.WaitGroup
 	for range results {
 		wg.Add(1)
@@ -81,6 +83,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	wg.Wait()
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
+		fmt.Println("THERE")
 		var wg2 sync.WaitGroup
 		for _, schema := range schemas {
 			wg2.Add(1)
@@ -90,6 +93,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}()
 		}
 		wg2.Wait()
+		fmt.Println("AFTER THERE")
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
