@@ -174,7 +174,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
 			fmt.Println("sqlFilter", sqlFilter)
-			params, datas = s.fetchData(params, sqlFilter)
+			params, datas = s.fetchData(schema.Name, params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
@@ -256,15 +256,23 @@ func (s *ViewService) getFilterDetails(record utils.Record, schema *models.Schem
 		filter, viewFilter, *schema, s.Domain.GetParams())
 	return sqlFilter, view, dir
 }
-func (s *ViewService) fetchData(params utils.Params, sqlFilter string) (utils.Params, utils.Results) {
+func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter string) (utils.Params, utils.Results) {
 	datas := utils.Results{}
 	if !s.Domain.GetEmpty() {
 		s.Domain.GetDb().ClearQueryFilter()
-		datas, _ = s.Domain.Call(params.RootRaw(), utils.Record{}, utils.SELECT, []interface{}{sqlFilter}...)
+		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, sqlFilter)
+		s.Domain.GetDb().ClearQueryFilter()
+		s.Domain.GetDb().SetSQLView(sqlview)
+		s.Domain.GetDb().SetSQLOrder(sqlorder)
+		s.Domain.GetDb().SetSQLOrder(sqllimit)
+		dd, _ := s.Domain.GetDb().SelectQueryWithRestriction(tablename, sqlrestr, false)
+		for _, d := range dd {
+			datas = append(datas, d)
+		}
+		//datas, _ = s.Domain.Call(params.RootRaw(), utils.Record{}, utils.SELECT, []interface{}{sqlFilter}...)
 	}
 	return params, datas
 }
-
 func (s *ViewService) processData(rec utils.Record, multiple bool, datas utils.Results, schema *sm.SchemaModel,
 	record utils.Record, newOrder []string, params utils.Params) (utils.Record, utils.Record, []string) {
 	if utils.Compare(record["is_empty"], true) {
