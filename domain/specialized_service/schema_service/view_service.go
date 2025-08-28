@@ -66,6 +66,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	for _, record := range results {
 		go s.TransformToView(record, false, schemas, params, channel, dest_id...)
 	}
+
 	for range results {
 		if rec := <-channel; rec != nil {
 			res = append(res, rec)
@@ -111,6 +112,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		channel <- nil
 		return
 	}
+	rec := NewViewFromRecord(*schemas[0], record)
 	for _, schema := range schemas {
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
@@ -131,7 +133,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		// add type onto order and schema plus verify if filter not implied.
 		// may regenerate to get limits... for file... for type and for dest_table_id if needed.
 		s.Domain.HandleRecordAttributes(record)
-		rec := NewViewFromRecord(*schema, record)
+
 		s.addFavorizeInfo(record, rec)
 
 		params := utils.GetRowTargetParameters(schema.Name, s.combineDestinations(dest_id))
@@ -182,8 +184,8 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 				rec["actions"] = append(utils.ToList(rec["actions"]), "delete")
 			}
 		}
-		channel <- rec
 	}
+	channel <- rec
 }
 
 // this filter a view only with its property
