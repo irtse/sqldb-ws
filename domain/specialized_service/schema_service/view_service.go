@@ -6,6 +6,7 @@ import (
 	"slices"
 	"sort"
 	filterserv "sqldb-ws/domain/domain_service/filter"
+	"sqldb-ws/domain/domain_service/history"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -173,7 +174,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
-			params, datas = s.fetchData(schema.Name, params, sqlFilter)
+			params, datas, rec["max"] = s.fetchData(schema.Name, params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
@@ -255,10 +256,12 @@ func (s *ViewService) getFilterDetails(record utils.Record, schema *models.Schem
 		filter, viewFilter, *schema, s.Domain.GetParams())
 	return sqlFilter, view, dir
 }
-func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter string) (utils.Params, utils.Results) {
+func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter string) (utils.Params, utils.Results, int64) {
 	datas := utils.Results{}
+	max := int64(0)
 	if !s.Domain.GetEmpty() {
 		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, sqlFilter)
+		max, _ = history.CountMaxDataAccess(tablename, []string{sqlrestr}, s.Domain)
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLView(sqlview)
 		s.Domain.GetDb().SetSQLOrder(sqlorder)
@@ -270,7 +273,7 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 		}
 		//datas, _ = s.Domain.Call(params.RootRaw(), utils.Record{}, utils.SELECT, []interface{}{sqlFilter}...)
 	}
-	return params, datas
+	return params, datas, max
 }
 func (s *ViewService) processData(rec utils.Record, multiple bool, datas utils.Results, schema *sm.SchemaModel,
 	record utils.Record, newOrder []string, params utils.Params) (utils.Record, utils.Record, []string) {

@@ -49,13 +49,13 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 	}
 }
 
-func CountMaxDataAccess(schema *sm.SchemaModel, filter []string, domain utils.DomainITF) (int64, string) {
+func CountMaxDataAccess(schemaName string, filter []string, domain utils.DomainITF) (int64, string) {
 	if domain.GetUserID() == "" {
 		return 0, ""
 	}
-	restr, _, _, _ := domain.GetSpecialized(schema.Name).GenerateQueryFilter(schema.Name, filter...)
+	restr, _, _, _ := domain.GetSpecialized(schemaName).GenerateQueryFilter(schemaName, filter...)
 	count := int64(0)
-	res, err := domain.GetDb().ClearQueryFilter().SimpleMathQuery("COUNT", schema.Name, []interface{}{restr}, false)
+	res, err := domain.GetDb().ClearQueryFilter().SimpleMathQuery("COUNT", schemaName, []interface{}{restr}, false)
 	if len(res) == 0 || err != nil || res[0]["result"] == nil {
 		return 0, restr
 	} else {
@@ -69,7 +69,7 @@ func CountNewDataAccess(schema *sm.SchemaModel, filter []string, domain utils.Do
 		return 0, 0
 	}
 	newCount := int64(0)
-	count, restr := CountMaxDataAccess(schema, filter, domain)
+	count, restr := CountMaxDataAccess(schema.Name, filter, domain)
 	newFilter := map[string]interface{}{
 		"!id": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			"write":  false,

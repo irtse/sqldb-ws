@@ -58,9 +58,8 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 			ds.DestTableDBField: utils.GetInt(results[0], utils.SpecialIDParam),
 		}
 	}
-	max, _ := history.CountMaxDataAccess(schema, []string{}, v.Domain)
 
-	view := sm.NewView(id, schema.Name, schema.Label, schema, schema.Name, max, []sm.ManualTriggerModel{})
+	view := sm.NewView(id, schema.Name, schema.Label, schema, schema.Name, 0, []sm.ManualTriggerModel{})
 	view.Redirection = getRedirection(v.Domain.GetDomainID())
 	view.Order, view.Schema = CompareOrder(schema, order, schemes, results, v.Domain)
 	sort.SliceStable(view.Order, func(i, j int) bool {
@@ -90,7 +89,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 }
 
 func (v *ViewConvertor) TransformMultipleSchema(results utils.Results, schema *sm.SchemaModel, isWorkflow bool, params utils.Params) utils.Results {
-	max, _ := history.CountMaxDataAccess(schema, []string{}, v.Domain)
+	max, _ := history.CountMaxDataAccess(schema.Name, []string{}, v.Domain)
 	view := sm.ViewModel{
 		Items: []sm.ViewItemModel{},
 		Max:   max,
@@ -138,7 +137,7 @@ func (v *ViewConvertor) transformShallowedView(results utils.Results, tableName 
 	if err != nil {
 		return res
 	}
-	max, _ = history.CountMaxDataAccess(&sch, []string{}, v.Domain)
+	max, _ = history.CountMaxDataAccess(sch.Name, []string{}, v.Domain)
 	t := tableName
 	if _, ok := v.Domain.GetParams().Get(utils.SpecialIDParam); ok && len(results) == 1 && results[0][ds.SchemaDBField] != nil {
 		if sch, err = scheme.GetSchemaByID(results[0].GetInt(ds.SchemaDBField)); err == nil {
