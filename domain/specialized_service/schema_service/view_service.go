@@ -264,7 +264,8 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLView(sqlview)
 		s.Domain.GetDb().SetSQLOrder(sqlorder)
-		s.Domain.GetDb().SetSQLOrder(sqllimit)
+		s.Domain.GetDb().SetSQLLimit(sqllimit)
+		fmt.Println("sqlrestr", sqlrestr, sqlview, sqlorder, sqllimit, sqlrestr)
 		dd, _ := s.Domain.GetDb().SelectQueryWithRestriction(tablename, sqlrestr, false)
 		for _, d := range dd {
 			datas = append(datas, d)
