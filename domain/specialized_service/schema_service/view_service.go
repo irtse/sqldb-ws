@@ -62,11 +62,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	}
 
 	channel := make(chan utils.Record, len(results))
-	fmt.Println("HERE")
 	for _, record := range results {
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
 	}
-	fmt.Println("AFTER HERE")
 	for range results {
 		if rec := <-channel; rec != nil {
 			res = append(res, rec)
@@ -283,9 +281,13 @@ func (s *ViewService) processData(rec utils.Record, multiple bool, datas utils.R
 	if !s.Domain.IsShallowed() {
 		treated := utils.Results{}
 		if !multiple {
+			fmt.Println("Classic", schema.Name)
 			treated = view_convertor.NewViewConvertor(s.Domain).TransformToView(datas, schema.Name, false, params)
+			fmt.Println("AFTER Classic", schema.Name)
 		} else {
+			fmt.Println("DATAS", schema.Name)
 			treated = view_convertor.NewViewConvertor(s.Domain).TransformMultipleSchema(datas, schema, false, params)
+			fmt.Println("AFTER DATAS", schema.Name)
 		}
 
 		if len(treated) > 0 {
