@@ -273,13 +273,9 @@ func (s *ViewService) processData(rec utils.Record, multiple bool, datas utils.R
 	if !s.Domain.IsShallowed() {
 		treated := utils.Results{}
 		if !multiple {
-			fmt.Println("Classic", schema.Name)
 			treated = view_convertor.NewViewConvertor(s.Domain).TransformToView(datas, schema.Name, false, params)
-			fmt.Println("AFTER Classic", schema.Name)
 		} else {
-			fmt.Println("DATAS", schema.Name)
 			treated = view_convertor.NewViewConvertor(s.Domain).TransformMultipleSchema(datas, schema, false, params)
-			fmt.Println("AFTER DATAS", schema.Name)
 		}
 
 		if len(treated) > 0 {
