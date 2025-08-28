@@ -67,32 +67,18 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
 	}
 	fmt.Println("AFTER HERE")
-	var wg sync.WaitGroup
-	for range results {
-		wg.Add(1)
-		go func() {
-			if rec := <-channel; rec != nil {
-				if s.Domain.IsOwn(false, false, s.Domain.GetMethod()) && !slices.Contains(utils.ToList(rec["actions"]), "delete") {
-					rec["actions"] = append(utils.ToList(rec["actions"]), "delete")
-				}
-				res = append(res, rec)
-			}
-			wg.Done()
-		}()
-	}
-	wg.Wait()
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
 		fmt.Println("THERE")
-		var wg2 sync.WaitGroup
+		var wg sync.WaitGroup
 		for _, schema := range schemas {
-			wg2.Add(1)
+			wg.Add(1)
 			go func() {
 				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
-				wg2.Done()
+				wg.Done()
 			}()
 		}
-		wg2.Wait()
+		wg.Wait()
 		fmt.Println("AFTER THERE")
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
@@ -211,6 +197,11 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		if f, ok := domainParams.Get(utils.RootGroupBy); ok {
 			rec["group_by"] = f
+		}
+		if !multiple && !slices.Contains(utils.ToList(rec["actions"]), "delete") {
+			if s.Domain.IsOwn(false, false, s.Domain.GetMethod()) {
+				rec["actions"] = append(utils.ToList(rec["actions"]), "delete")
+			}
 		}
 		channel <- rec
 	}
