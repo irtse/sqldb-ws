@@ -34,7 +34,6 @@ func ForgeMail(from utils.Record, to utils.Record, subject string, tpl string,
 			subject = subj.String()
 		}
 	}
-	fmt.Println("TO MAP", bodyToMap)
 	tmpl, err := template.New("email").Parse(tpl + "<br>" + signature)
 	if err != nil {
 		return utils.Record{}, err

@@ -173,7 +173,6 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
-			fmt.Println("sqlFilter", sqlFilter)
 			params, datas = s.fetchData(schema.Name, params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
