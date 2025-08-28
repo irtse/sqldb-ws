@@ -15,7 +15,6 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
-	"sync"
 )
 
 // DONE - ~ 200 LINES - NOT TESTED
@@ -72,15 +71,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	}
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
-		var wg2 sync.WaitGroup
 		for _, schema := range schemas {
-			wg2.Add(1)
-			go func() {
-				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
-				wg2.Done()
-			}()
+			s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
 		}
-		wg2.Wait()
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
@@ -180,6 +173,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
+			fmt.Println("sqlFilter", sqlFilter)
 			params, datas = s.fetchData(params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
