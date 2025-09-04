@@ -1,8 +1,10 @@
 package view_convertor
 
 import (
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
+	"sqldb-ws/domain/schema"
 	scheme "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -30,31 +32,28 @@ func (s *ViewConvertor) GetFieldsFill(sch *sm.SchemaModel, values map[string]int
 // or complex, depending a request on another table
 // ex: project only from coc
 
-func (s *ViewConvertor) GetFieldsRules(sch sm.SchemaModel, values map[string]interface{}) map[string]interface{} {
-	if !s.Domain.GetEmpty() {
-		return values
-	}
-	for k := range values {
-		rules := utils.ToMap(values[k])["rules"].([]map[string]interface{})
+func (s *ViewConvertor) GetFieldsRules(schName string, values map[string]interface{}) []map[string]interface{} {
+	rules := []map[string]interface{}{}
+
+	if sch, err := schema.GetSchema(schName); err == nil {
 		for _, rule := range filter.NewFilterService(s.Domain).GetFieldCondition(sch, utils.Record{}) {
-			if utils.ToMap(values[k])["rules"] == nil {
-				utils.ToMap(values[k])["rules"] = []map[string]interface{}{}
-			}
+			fmt.Println("RULES", rule)
 			if rule["related_"+ds.SchemaFieldDBField] == nil {
 				continue
 			}
-			if f, err := scheme.GetFieldByID(utils.ToInt64(rule["related_"+ds.SchemaFieldDBField])); err == nil {
-				if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
+			if f, err := scheme.GetFieldByID(utils.ToInt64(rule[ds.SchemaFieldDBField])); err == nil {
+				if ff, err := scheme.GetFieldByID(utils.ToInt64(rule["related_"+ds.SchemaFieldDBField])); err == nil {
 					rules = append(rules, map[string]interface{}{
-						"value":    sch.Name + "." + f.Name,
+						"related":  ff.Name,
+						"trigger":  f.Name,
+						"value":    nil,
 						"operator": rule["operator"],
 					})
 				}
 			}
 		}
-		utils.ToMap(values[k])["rules"] = rules
 	}
-	return values
+	return rules
 }
 
 func (s *ViewConvertor) GetFieldInfo(f *sm.FieldModel, from string) (interface{}, string) {

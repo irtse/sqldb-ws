@@ -3,6 +3,7 @@ package filter
 import (
 	"slices"
 	"sort"
+	"sqldb-ws/domain/schema"
 	sch "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -172,23 +173,53 @@ func (d *FilterService) LifeCycleRestriction(tableName string, SQLrestriction []
 
 func (t *FilterService) GetFieldCondition(fromSchema sm.SchemaModel, record utils.Record) []map[string]interface{} {
 	rules := []map[string]interface{}{}
+	fields := []string{}
 	for _, field := range fromSchema.Fields {
-		if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFieldCondition.Name, map[string]interface{}{
-			ds.SchemaFieldDBField: field.ID,
-		}, false); err == nil && len(res) > 0 {
-			for _, cond := range res {
-				if cond[ds.SchemaFieldDBField] == nil && utils.GetString(record, utils.SpecialIDParam) != utils.GetString(cond, "value") {
-					return []map[string]interface{}{}
+		fields = append(fields, field.ID)
+	}
+	value := map[string]string{}
+	if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFieldCondition.Name, map[string]interface{}{
+		ds.SchemaFieldDBField: fields,
+	}, false); err == nil && len(res) > 0 {
+		for _, cond := range res {
+			if cond["from_"+ds.SchemaDBField] != nil && cond["from_"+ds.SchemaFieldDBField] != nil {
+				if sche, err := sch.GetSchemaByID(utils.GetInt(cond, "from_"+ds.SchemaDBField)); err == nil {
+					if field, err := sche.GetFieldByID(utils.GetInt(cond, "from_"+ds.SchemaFieldDBField)); err == nil {
+						if p, ok := t.Domain.GetParams().Get(field.Name); ok {
+							if p == "" && utils.GetBool(cond, "not_null") {
+								return []map[string]interface{}{}
+							} else if p != utils.GetString(cond, "value") && utils.GetString(cond, "value") != "" {
+								return []map[string]interface{}{}
+							}
+							for _, f := range fields {
+								value[f] = p
+							}
+							continue
+						}
+					}
 				}
-				if f, err := fromSchema.GetFieldByID(utils.GetInt(cond, ds.SchemaFieldDBField)); err != nil || (record[f.Name] == nil && utils.GetBool(cond, "not_null")) || utils.GetString(record, f.Name) != utils.GetString(cond, "value") {
-					return []map[string]interface{}{}
+				return []map[string]interface{}{}
+			} else if f, err := fromSchema.GetFieldByID(utils.GetInt(cond, ds.SchemaFieldDBField)); err != nil || (len(record) > 0 && record[f.Name] == nil && utils.GetBool(cond, "not_null")) || utils.GetString(record, f.Name) != utils.GetString(cond, "value") {
+				return []map[string]interface{}{}
+			} else {
+				for _, ff := range fields {
+					value[ff] = utils.ToString(record[f.Name])
 				}
 			}
 		}
-		if rr, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFieldRule.Name, map[string]interface{}{
-			ds.SchemaFieldDBField: field.ID,
-		}, false); err != nil {
-			rules = append(rules, rr...)
+	}
+	if rr, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFieldRule.Name, map[string]interface{}{
+		ds.SchemaFieldDBField: fields,
+		"starting_rule":       true,
+	}, false); err == nil {
+		for _, r := range rr {
+			if r["value"] == nil || r["value"] == "" {
+				r["value"] = value[utils.ToString(r[ds.SchemaFieldDBField])]
+				if r["value"] == nil || r["value"] == "" {
+					continue
+				}
+			}
+			rules = append(rules, r)
 		}
 	}
 	return rules
@@ -203,126 +234,119 @@ func (t *FilterService) fromITF(val interface{}) interface{} {
 		return utils.ToString(val) // should set type
 	}
 }
-func (t *FilterService) GetFieldSQL(fromSchema sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64) string {
-	SQLRestriction := ""
-	if val, ok := rule["value"]; ok && val != nil { // SIMPLE WAY...
-		if fromField != nil {
-			k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(
-				fromField.Name, utils.ToString(t.fromITF(val)), utils.GetString(rule, "operator"), func(s string, search string) {})
-			if err == nil {
-				SQLRestriction += connector.MakeSqlItem("", typ, link, k, v, op)
-			}
-		} else {
-			k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(
-				utils.SpecialIDParam, utils.ToString(t.fromITF(val)), utils.GetString(rule, "operator"), func(s string, search string) {})
-			if err == nil {
-				SQLRestriction += connector.MakeSqlItem("", typ, link, k, v, op)
-			}
-		}
+
+func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64) string {
+	if key == "" {
+		key = "id"
 	}
-	if rule[ds.FieldRuleDBField] == nil {
-		m := map[string]interface{}{}
-		if dest != -1 {
-			m[utils.SpecialIDParam] = dest
-		}
-
-		key := utils.SpecialIDParam
-		if fromField != nil {
-			key = fromField.Name
-		}
-		val := ""
-		if s, ok := t.Domain.GetParams().Get(fromSchema.Name + "." + key); ok {
-			val = s
-		} else if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(fromSchema.Name, m, false); err == nil && len(res) > 0 {
-			val = utils.GetString(res[0], key)
-		} else {
-			return SQLRestriction
-		}
-
-		k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(
-			key, utils.ToString(t.fromITF(val)), utils.GetString(rule, "operator"), func(s string, search string) {})
-		if err == nil {
-			if len(SQLRestriction) > 0 {
-				SQLRestriction += " " + utils.GetString(rule, "separator") + " "
+	rules := []map[string]interface{}{}
+	if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFieldRule.Name, map[string]interface{}{
+		ds.FieldRuleDBField: rule[utils.SpecialIDParam],
+	}, false); err == nil && len(res) > 0 {
+		rules = res
+	}
+	if len(rules) > 0 {
+		sql := ""
+		for _, r := range rules {
+			fieldName := "id"
+			var fs *sm.SchemaModel
+			var ff *sm.FieldModel
+			if f, err := schema.GetFieldByID(utils.GetInt(r, ds.SchemaFieldDBField)); err == nil {
+				fieldName = f.Name
+				if ss, err := schema.GetSchemaByID(utils.ToInt64(f.SchemaID)); err == nil {
+					fs = &ss
+				}
 			}
-			SQLRestriction += connector.MakeSqlItem("", typ, link, k, v, op)
+			if r["from_"+ds.SchemaDBField] != nil {
+				if s, err := schema.GetSchemaByID(utils.GetInt(r, "from_"+ds.SchemaDBField)); err == nil {
+					fs = &s
+				}
+			}
+			if r["from_"+ds.SchemaFieldDBField] != nil {
+				if f, err := schema.GetFieldByID(utils.GetInt(r, "from_"+ds.SchemaFieldDBField)); err == nil {
+					ff = &f
+				}
+			}
+			if r["value"] == nil && (rule["value"] != nil || rule["value"] != "") {
+				r["value"] = rule["value"]
+			}
+			fromF := utils.SpecialIDParam
+			if fromField != nil {
+				fromF = fromField.Name
+			}
+			if fromSchema != nil {
+				if len(sql) > 0 {
+					if utils.GetString(r, "separator") != "" {
+						sql += " " + strings.ToUpper(utils.ToString(r["separator"])) + " "
+					} else {
+						sql += " AND "
+					}
+				}
+				sql += key + " " + operator + " " + "(SELECT " + fromF + " FROM " + fromSchema.Name + " WHERE " + t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField)) + ")"
+				continue
+			}
+			if len(sql) > 0 {
+				if utils.GetString(r, "separator") != "" {
+					sql += " " + utils.ToString(r["separator"]) + " "
+				} else {
+					sql += " AND "
+				}
+			}
+			sql += key + " " + operator + " " + t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
 		}
+		return "(" + sql + ")"
 	} else {
-		if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.FieldRuleDBField, map[string]interface{}{
-			utils.SpecialIDParam: rule[ds.FieldRuleDBField],
-		}, false); err == nil && len(res) > 0 {
-			r := res[0]
-			newRestr := ""
-			if schFrom, err := sch.GetSchemaByID(utils.ToInt64(r["from_"+ds.SchemaDBField])); err == nil {
-				o := "IN"
-				if strings.Contains(utils.GetString(r, "operator"), "!") {
-					o = "NOT " + o
-				}
-				if ff, err := schFrom.GetFieldByID(utils.GetInt(r, "from_"+ds.SchemaFieldDBField)); err == nil {
-					sql := t.GetFieldSQL(schFrom, &ff, r, utils.GetInt(r, "from_"+ds.DestTableDBField))
-					if sql != "" {
-						if len(SQLRestriction) > 0 {
-							SQLRestriction += " " + utils.GetString(rule, "separator") + " "
-						}
-						if fromField != nil {
-							SQLRestriction = SQLRestriction + " " + o + " (SELECT " + ff.Name + " FROM " + schFrom.Name + " WHERE " + sql + ")"
-						} else {
-							SQLRestriction = SQLRestriction + "id " + o + " (SELECT " + ff.Name + " FROM " + schFrom.Name + " WHERE " + sql + ")"
-						}
-					}
-
-				} else {
-					sql := t.GetFieldSQL(schFrom, nil, r, utils.GetInt(r, "from_"+ds.DestTableDBField))
-					if sql != "" {
-						if len(SQLRestriction) > 0 {
-							SQLRestriction += " " + utils.GetString(rule, "separator") + " "
-						}
-						if fromField != nil {
-							SQLRestriction = SQLRestriction + fromField.Name + " " + o + " (SELECT id FROM " + schFrom.Name + " WHERE " + sql + ")"
-						} else {
-							SQLRestriction = SQLRestriction + "id " + o + " (SELECT id FROM " + schFrom.Name + " WHERE " + sql + ")"
-						}
-					}
-				}
-			} else if val, ok := r["value"]; ok && val != nil {
-				if fromField == nil {
-					newRestr += utils.SpecialIDParam + utils.ToString(r["operator"]) + utils.ToString(val)
-				} else {
-					k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(
-						fromField.Name, utils.ToString(t.fromITF(val)), utils.GetString(r, "operator"), func(s string, search string) {})
-					if err == nil {
-						if len(SQLRestriction) > 0 {
-							SQLRestriction += " " + utils.GetString(rule, "separator") + " "
-						}
-						SQLRestriction += connector.MakeSqlItem("", typ, link, k, v, op)
-					}
+		val := rule["value"]
+		if fromSchema != nil && fromField != nil {
+			if dest >= 0 {
+				if res, err := t.Domain.GetDb().SelectQueryWithRestriction(
+					fromSchema.Name, map[string]interface{}{utils.SpecialIDParam: dest}, false); err == nil && len(res) > 0 {
+					val = res[0][fromField.Name]
 				}
 			}
 		}
+		if key == "id" || fromSchema == nil {
+			return key + " " + operator + " " + utils.ToString(t.fromITF(val))
+		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(
+			key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
+			kk := utils.SpecialIDParam
+			return "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
+		}
 	}
-	return SQLRestriction
+	return ""
 }
 
 func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, error) {
 	sql := ""
-	for _, rule := range t.GetFieldCondition(fromSchema, utils.Record{}) {
-		f, err := fromSchema.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField))
-		if err == nil {
-			if val, ok := rule["value"]; ok && val != nil { // SIMPLE WAY...
-				if len(sql) > 0 {
-					sql = " " + utils.ToString(rule["separator"]) + " "
-				}
-				sql += f.Name + " " + utils.ToString(rule["operator"]) + " " + utils.ToString(t.fromITF(val))
-			} else if schFrom, err := sch.GetSchemaByID(utils.ToInt64(rule["from_"+ds.SchemaDBField])); err == nil {
-				if len(sql) > 0 {
-					sql = " " + utils.ToString(rule["separator"]) + " "
-				}
-				if ff, err := schFrom.GetFieldByID(utils.GetInt(rule, "from_"+ds.SchemaFieldDBField)); err == nil {
-					sql = f.Name + " " + utils.ToString(rule["operator"]) + " " + t.GetFieldSQL(schFrom, &ff, rule, utils.GetInt(rule, "from_"+ds.DestTableDBField))
+	for _, rule := range t.GetFieldCondition(fromSchema, utils.Record{}) { // SIMPLE WAY...
+		fieldName := ""
+		var fs *sm.SchemaModel
+		var ff *sm.FieldModel
+		if f, err := schema.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField)); err == nil {
+			fieldName = f.Name
+			if ss, err := schema.GetSchemaByID(utils.ToInt64(f.SchemaID)); err == nil {
+				fs = &ss
+			}
+		}
+		if rule["from_"+ds.SchemaDBField] != nil {
+			if s, err := schema.GetSchemaByID(utils.GetInt(rule, "from_"+ds.SchemaDBField)); err == nil {
+				fs = &s
+			}
+		}
+		if rule["from_"+ds.SchemaFieldDBField] != nil {
+			if f, err := schema.GetFieldByID(utils.GetInt(rule, "from_"+ds.SchemaFieldDBField)); err == nil {
+				ff = &f
+			}
+		}
+		if ss := utils.ToString(t.GetFieldSQL(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField))); ss != "" {
+			if len(sql) > 0 {
+				if utils.GetString(rule, "separator") != "" {
+					sql += " " + strings.ToUpper(utils.ToString(rule["separator"])) + " "
 				} else {
-					sql = f.Name + " " + utils.ToString(rule["operator"]) + " " + t.GetFieldSQL(schFrom, nil, rule, utils.GetInt(rule, "from_"+ds.DestTableDBField))
+					sql += " AND "
 				}
 			}
+			sql += ss
 		}
 	}
 	return sql, nil

@@ -88,7 +88,6 @@ func (d *ViewConvertor) GetViewFields(tableName string, noRecursive bool, result
 		b, _ = json.Marshal(shallowField)
 		err := json.Unmarshal(b, &m)
 		if err == nil {
-			// m = d.GetFieldsRules(&schema, m)
 			m["autofill"], _ = d.GetFieldInfo(&scheme, ds.DBFieldAutoFill.Name)
 			m["translatable"] = scheme.Translatable
 			m["hidden"] = scheme.Hidden
@@ -156,7 +155,7 @@ func (d *ViewConvertor) ProcessPermissions(
 	for _, meth := range []utils.Method{utils.SELECT, utils.CREATE, utils.UPDATE, utils.DELETE} {
 		if utils.DELETE == meth && len(record) == 1 {
 			createdIds := history.GetCreatedAccessData(schema.ID, d.Domain)
-			if !IsReadonly(schema.Name, record[0], createdIds, d.Domain) {
+			if !IsReadonly(schema.Name, record[0], createdIds, d.Domain) && !slices.Contains(additionalActions, meth.Method()) {
 				if schema.Name == ds.DBTask.Name {
 					if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 						"is_close": false,
@@ -226,7 +225,9 @@ func (d *ViewConvertor) HandleRecursivePermissions(shallowField sm.ViewFieldMode
 			shallowField.Type = utils.TransformType(scheme.Type)
 		}
 		shallowField.ActionPath = fmt.Sprintf("/%s/%s?rows=%s&%s=enable", utils.MAIN_PREFIX, schema.Name, utils.ReservedParam, utils.RootShallow)
-		shallowField.Actions = append(shallowField.Actions, meth.Method())
+		if !slices.Contains(shallowField.Actions, meth.Method()) {
+			shallowField.Actions = append(shallowField.Actions, meth.Method())
+		}
 	}
 	return shallowField
 }

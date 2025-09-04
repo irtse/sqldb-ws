@@ -214,6 +214,7 @@ type FieldModel struct { // definition a db table columns
 	Translatable bool        `json:"translatable,omitempty"`
 	Transform    string      `json:"transform_function"`
 	GroupBy      string      `json:"group_by"`
+	SchemaID     string      `json:"dbschema_id"`
 }
 
 func (t FieldModel) Map(m map[string]interface{}) *FieldModel {
@@ -236,6 +237,7 @@ func (t FieldModel) Map(m map[string]interface{}) *FieldModel {
 		Translatable: utils.Compare(m["translatable"], true),
 		Hidden:       utils.Compare(m["hidden"], true),
 		Transform:    utils.ToString(m["transform"]),
+		SchemaID:     utils.ToString(m["dbschema_id"]),
 	}
 }
 
@@ -295,6 +297,7 @@ type ViewModel struct { // lightest struct based on SchemaModel dedicate to view
 	Redirection  string                   `json:"redirection,omitempty"`
 	Triggers     []ManualTriggerModel     `json:"triggers,omitempty"`
 	Max          int64                    `json:"max"`
+	Rules        []map[string]interface{} `json:"rules"`
 }
 
 func NewView(id int64, name string, label string, schema *SchemaModel, tableName string, max int64, triggers []ManualTriggerModel) ViewModel {

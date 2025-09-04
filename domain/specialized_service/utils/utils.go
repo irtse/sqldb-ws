@@ -213,27 +213,12 @@ func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
 
 func (t *AbstractSpecializedService) GetFieldInfo(fromSchema sm.SchemaModel, record utils.Record) (bool, error) {
 	filterService := filter.NewFilterService(t.Domain)
-	for _, rule := range filterService.GetFieldCondition(fromSchema, record) {
-		f, err := fromSchema.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField))
-		if err == nil {
-			if val, ok := rule["value"]; ok && val != nil { // SIMPLE WAY...
-				if t.fromITF(record[f.Name]) != t.fromITF(val) {
-					return false, errors.New("no matching value <" + f.Name + ">")
-				}
-			} else if schFrom, err := sch.GetSchemaByID(utils.ToInt64(rule["from_"+ds.SchemaDBField])); err == nil {
-				if ff, err := schFrom.GetFieldByID(utils.GetInt(rule, "from_"+ds.SchemaFieldDBField)); err == nil {
-					t.Domain.GetDb().ClearQueryFilter().SetSQLRestriction(
-						filterService.GetFieldSQL(schFrom, &ff, rule, utils.GetInt(rule, "from_"+ds.DestTableDBField)))
-				} else {
-					t.Domain.GetDb().ClearQueryFilter().SetSQLRestriction(
-						filterService.GetFieldSQL(schFrom, nil, rule, utils.GetInt(rule, "from_"+ds.DestTableDBField)))
-				}
-				if res, err := t.Domain.GetDb().MathQuery("COUNT", schFrom.Name); err == nil && len(res) > 0 {
-					return utils.ToInt64(res[0]["results"]) > 0, nil
-				} else {
-					return false, errors.New("no matching value <" + f.Name + "> " + err.Error())
-				}
-			}
+	if s, err := filterService.GetFieldRestriction(fromSchema); err == nil {
+		t.Domain.GetDb().ClearQueryFilter().SetSQLRestriction(s)
+		if res, err := t.Domain.GetDb().MathQuery("COUNT", fromSchema.Name); err == nil && len(res) > 0 {
+			return utils.ToInt64(res[0]["results"]) > 0, nil
+		} else {
+			return false, errors.New("no matching value <" + fromSchema.Name + "> " + err.Error())
 		}
 	}
 	return true, nil

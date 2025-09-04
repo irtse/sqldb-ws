@@ -12,9 +12,7 @@ import (
 var COUNTREQUEST = 0
 
 var SpecialTypes = []string{"char", "text", "date", "time", "interval", "var", "blob", "set", "enum", "year", "USER-DEFINED", "url",
-	"upload", "upload_str", "upload_img", "upload_class",
-	"upload_multiple", "upload_str_multiple", "upload_img_multiple", "upload_class_multiple",
-	"html", "link_add"}
+	"upload", "upload_multiple", "html", "link_add"}
 
 func Quote(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
 

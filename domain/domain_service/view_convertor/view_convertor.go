@@ -85,6 +85,9 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 		view.Actions = []string{"get"}
 	}
 	sort.SliceStable(view.Items, func(i, j int) bool { return view.Items[i].Sort < view.Items[j].Sort })
+	if len(results) == 1 {
+		view.Rules = v.GetFieldsRules(schema.Name, results[0])
+	}
 	return utils.Results{view.ToRecord()}
 }
 

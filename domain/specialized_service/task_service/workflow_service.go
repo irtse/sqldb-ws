@@ -48,6 +48,10 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 			rr[0]["schema"] = newSchema
 		}
 	}
+	vc := view_convertor.NewViewConvertor(s.Domain)
+	for _, r := range rr {
+		r["rules"] = vc.GetFieldsRules(utils.ToString(rr[0]["schema_name"]), r)
+	}
 	return rr
 }
 

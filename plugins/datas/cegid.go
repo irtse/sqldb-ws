@@ -75,7 +75,7 @@ var publicationFields = []models.FieldModel{
 		Index: 4, Label: "centre de compétence", ForeignTable: CoCFR.Name},
 	{Name: "affiliation", Type: models.VARCHAR.String(), Required: true,
 		Index: 5, Label: "affiliation (société ou laboratoire de ratachement du 1ier auteur)"},
-	{Name: "publication", Type: models.UPLOAD_STR.String(), Required: true,
+	{Name: "publication", Type: models.UPLOAD.String(), Required: true,
 		Index: 6, Label: "téléchargement de la publication"},
 }
 
@@ -87,7 +87,7 @@ var ArticleFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 		{Name: "published", Label: "la publication est elle publiée dans un journal du premier quartile de ta discipline scientifique", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false, Readonly: false, Index: -6},
@@ -132,7 +132,7 @@ var ConferenceFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 		{Name: "major_conference", Label: "la conférence visée est-elle incontournable dans ton domaine scientifique ?", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false, Readonly: false, Index: -8},
@@ -182,7 +182,7 @@ var PresentationFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 
@@ -227,7 +227,7 @@ var PosterFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 		{Name: "major_conference", Label: "la conférence visée est-elle incontournable dans ton domaine scientifique ?", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false, Readonly: false, Index: -8},
@@ -275,7 +275,7 @@ var HDRFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 
@@ -317,7 +317,7 @@ var ThesisFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 
@@ -363,7 +363,7 @@ var InternshipFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 
@@ -407,7 +407,7 @@ var DemoFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 
@@ -450,7 +450,7 @@ var OtherPublicationFR = models.SchemaModel{
 	Fields: append(publicationFields, []models.FieldModel{
 		{Name: "is_awarded", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false,
 			Index: -20, Label: "la production a-t-elle fait l'objet d'un award ?"},
-		{Name: "finalized_publication", Type: models.UPLOAD_STR.String(), Required: true,
+		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true,
 			Index: -10, Label: "téléchargement de la publication finalisée"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9},
 		{Name: "major_conference", Label: "la conférence visée est-elle incontournable dans ton domaine scientifique ?", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false, Readonly: false, Index: -8},

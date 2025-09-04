@@ -74,13 +74,7 @@ const (
 	ENUMCHART
 	ENUMTRIGGER
 	UPLOAD
-	UPLOAD_STR
-	UPLOAD_IMG
-	UPLOAD_CLASS
 	UPLOAD_MULTIPLE
-	UPLOAD_STR_MULTIPLE
-	UPLOAD_IMG_MULTIPLE
-	UPLOAD_CLASS_MULTIPLE
 	ENUMMODE
 	HTML
 	LINKADD
@@ -123,13 +117,7 @@ func DataTypeList() []string {
 		"ENUM('line', 'pie', 'bar')", // enrich later
 		"ENUM('mail', 'sms', 'teams notification', 'data')",
 		"UPLOAD",
-		"UPLOAD_STR",
-		"UPLOAD_IMG",
-		"UPLOAD_CLASS",
 		"UPLOAD_MULTIPLE",
-		"UPLOAD_STR_MULTIPLE",
-		"UPLOAD_IMG_MULTIPLE",
-		"UPLOAD_CLASS_MULTIPLE",
 		"ENUM('manual', 'auto')",
 		"HTML",
 		"LINK_ADD",
