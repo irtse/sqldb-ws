@@ -37,6 +37,8 @@ func ImportProjectAxis() {
 	filepath := os.Getenv("PROJECT_FILE_PATH")
 	if filepath == "" {
 		filepath = "./project_test.csv"
+	} else {
+		filepath = "/mnt/plugin_files/" + filepath
 	}
 	headers, datas := importFile(filepath)
 	inside := []string{}
@@ -199,6 +201,8 @@ func ImportUserHierachy() {
 	filepath := os.Getenv("USER_FILE_PATH")
 	if filepath == "" {
 		filepath = "./user_test.csv"
+	} else {
+		filepath = "/mnt/plugin_files/" + filepath
 	}
 
 	headers, datas := importFile(filepath)
