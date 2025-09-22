@@ -10,7 +10,7 @@ services:
     networks:
       - sqldb
     ports: 
-      - 8081:8080
+      - 8082:8080
     volumes:
       - ./files:/mnt/files
       - ./html:/opt/html
@@ -38,6 +38,8 @@ services:
       DBNAME: ${DBNAME:-test}
       DBSSL: ${DBSSL:-disable}
       HOST: ${HOST:-http://capitalisation.irt-aese.local}
+      USER_FILE_PATH: ${USER_FILE_PATH:-/opps/'OPPS - Extract MyReport - Salarie.csv'}
+      PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-/opps/'OPPS - Extract MyReport - Projets.csv'}
 networks:
   sqldb:
     external: true
