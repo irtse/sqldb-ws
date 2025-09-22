@@ -1,6 +1,12 @@
 FROM golang as builder
  
+ARG FILESDIR
+ENV FILES=${FILESDIR}
+
+COPY $FILES .
+
 WORKDIR /app
+
 
 COPY . . 
  
