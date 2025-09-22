@@ -39,8 +39,8 @@ services:
       DBNAME: ${DBNAME:-test}
       DBSSL: ${DBSSL:-disable}
       HOST: ${HOST:-http://capitalisation.irt-aese.local}
-      USER_FILE_PATH: ${USER_FILE_PATH:-/opps/Salarié.csv}
-      PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-/opps/Projets.csv}
+      USER_FILE_PATH: ${USER_FILE_PATH:-/mnt/plugin_files/opps/Salarié.csv}
+      PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-/mnt/plugin_files/opps/Projets.csv}
 networks:
   sqldb:
     external: true
