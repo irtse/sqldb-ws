@@ -105,7 +105,7 @@ func (db *Database) BuildMathQuery(algo string, name string, naming ...string) s
 	cols := strings.Split(db.SQLView, ",")
 	if len(cols) > 0 { // if there are columns specified
 		for _, c := range cols {
-			if c != "id" { // ignore id column
+			if c != "id" && c != "" { // ignore id column
 				if strings.Contains(strings.ToLower(c), " as ") {
 					col = "(" + strings.Split(strings.ToLower(c), " as ")[0] + ")"
 				} else {
