@@ -34,7 +34,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 	}
 	res, err := db.QueryAssociativeArray(q)
 	if err != nil {
-		fmt.Println(q, len(res))
+		fmt.Println(q, len(res), err)
 	}
 	return res, err
 }
@@ -62,7 +62,11 @@ func (db *Database) MathQuery(algo string, name string, naming ...string) ([]map
 		name = name + " as main "
 		q = db.BuildMathQuery(algo, name, naming...)
 	}
-	return db.QueryAssociativeArray(q)
+	res, err := db.QueryAssociativeArray(q)
+	if err != nil {
+		fmt.Println(q, len(res), err)
+	}
+	return res, err
 }
 
 func (db *Database) SchemaQuery(name string) ([]map[string]interface{}, error) {
@@ -102,9 +106,12 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 						if id, err := strconv.Atoi(fmt.Sprintf("%v", res[0]["max"])); err == nil {
 							record["id"] = id + 1
 						}
-						return db.CreateQuery(name, record, verify)
+						i, err := db.CreateQuery(name, record, verify)
+						if err != nil {
+							fmt.Println("create", query, err)
+						}
+						return i, err
 					} else {
-						fmt.Println("create", query)
 						return i, err
 					}
 				}
@@ -149,7 +156,7 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 		q, err = db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
 	}
 	if err != nil {
-		fmt.Println("create", q)
+		fmt.Println("create", q, err)
 		return err
 	}
 	err = db.Query(q)
@@ -175,7 +182,11 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 		name = name + " as main "
 		q = db.BuildDeleteQuery(name, colName)
 	}
-	return db.Query(q)
+	err := db.Query(q)
+	if err != nil {
+		fmt.Println(q, err)
+	}
+	return err
 }
 
 /*
@@ -202,6 +213,9 @@ func (db *Database) QueryRow(query string) (int64, error) {
 	}
 	id := int64(0)
 	err := db.Conn.QueryRow(query).Scan(&id)
+	if err != nil {
+		fmt.Println(query, err)
+	}
 	return id, err
 }
 
@@ -215,6 +229,7 @@ func (db *Database) Query(query string) error {
 	}
 	rows, err := db.Conn.Query(query)
 	if err != nil {
+		fmt.Println(query, err)
 		return err
 	}
 	return rows.Close()

@@ -1,7 +1,6 @@
 package view_convertor
 
 import (
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
@@ -37,7 +36,6 @@ func (s *ViewConvertor) GetFieldsRules(schName string, values map[string]interfa
 
 	if sch, err := schema.GetSchema(schName); err == nil {
 		for _, rule := range filter.NewFilterService(s.Domain).GetFieldCondition(sch, utils.Record{}) {
-			fmt.Println("RULES", rule)
 			if rule["related_"+ds.SchemaFieldDBField] == nil {
 				continue
 			}

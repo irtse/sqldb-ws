@@ -48,7 +48,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	runtime.GOMAXPROCS(5)
 	params := s.Domain.GetParams().Copy()
 	schemas := []*models.SchemaModel{}
-	fmt.Println("THERE", tableName)
 	if len(results) == 1 && !utils.GetBool(results[0], "is_empty") && !s.Domain.IsShallowed() {
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBViewSchema.Name, map[string]interface{}{
 			ds.ViewDBField: results[0][utils.SpecialIDParam],
@@ -60,15 +59,12 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
-	fmt.Println("THERE 1", tableName)
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
 	}
-	fmt.Println("THERE 2", tableName)
 	for range results {
 		if rec := <-channel; rec != nil {
-			fmt.Println("THERE 3", tableName)
 			res = append(res, rec)
 		}
 	}
@@ -100,11 +96,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 			res[0]["schema"] = newSchema
 		}
-		fmt.Println("THERE 4", tableName)
 		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
 		for range schemas {
 			if rec := <-subChan; rec != nil {
-				fmt.Println("THERE 5", tableName)
 				for _, i := range utils.ToList(rec["items"]) {
 					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
 				}

@@ -130,7 +130,6 @@ func ImportProjectAxis() {
 		}
 		if len(record) > 0 {
 			record["name"] = utils.ToString(record["name"]) + " (" + utils.ToString(record["code"]) + ")"
-			fmt.Println("name", record["name"])
 			// depend to
 			var parentID *int64
 			if axisName != "" {

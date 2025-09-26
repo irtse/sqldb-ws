@@ -2,7 +2,6 @@ package schema
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/schema/models"
@@ -200,7 +199,6 @@ func ValidateBySchema(data utils.Record, tableName string, method utils.Method, 
 
 	newData := utils.Record{}
 	for _, field := range schema.Fields {
-		fmt.Println(field.Name, order)
 		if len(order) > 0 && !slices.Contains(order, field.Name) {
 			continue
 		}
