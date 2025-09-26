@@ -28,7 +28,10 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 	delete(record, ds.DestTableDBField)
 
 	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
-	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, record, false); err == nil && len(res) > 0 {
+	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+		ds.UserDBField:                s.Domain.GetUserID(),
+		"delegated_" + ds.UserDBField: record["delegated_"+ds.UserDBField],
+	}, false); err == nil && len(res) > 0 {
 		return map[string]interface{}{}, errors.New("can't add a delegated to an already delegated user"), false
 	}
 
@@ -51,9 +54,13 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 		}
 		s.Domain.GetDb().DeleteQueryWithRestriction(ds.DBShare.Name, share, false)
 		res["state"] = "completed"
+		s.Domain.GetDb().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			"binded_" + ds.TaskDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				ds.UserDBField: res[ds.UserDBField],
+			}, false, utils.SpecialIDParam),
+		}, false)
 		results[i] = task.SetClosureStatus(res)
 	}
-	s.SpecializedUpdateRow(results, map[string]interface{}{})
 }
 
 func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
@@ -95,7 +102,7 @@ func (s *DelegationService) Write(results []map[string]interface{}, record map[s
 							"delete_access":            false,
 						}
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
-						s.Domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name).RootRaw(), newTask)
+						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 					}()
 				}
 			}
