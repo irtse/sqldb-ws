@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
@@ -242,9 +243,9 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 	if sch, err := sch.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
-		if ok, err := s.GetFieldInfo(sch, record); !ok {
+		/*if ok, err := s.GetFieldInfo(sch, record); !ok && err != nil {
 			return record, err, false
-		}
+		}*/
 		currentTime := time.Now()
 		if sch.HasField("start_date") && sch.HasField("end_date") {
 			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' < start_date OR "
@@ -253,7 +254,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		}
 
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
-			fmt.Println("THERE")
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
 			for _, field := range sch.Fields {
@@ -269,7 +269,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							record[field.Name] = i
 						}
 					}
-
 				}
 
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) && record[field.Name] != nil {
@@ -331,6 +330,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		}
 	}
 	fmt.Println("VERIFIED", record)
+	debug.PrintStack()
 	return record, nil, true
 }
 
