@@ -2,8 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
-	"runtime/debug"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
@@ -257,7 +255,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
 			for _, field := range sch.Fields {
-				fmt.Println(field.Name)
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.LINKADD.String())) && record[field.Name] != nil {
 					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
 						continue
@@ -272,7 +269,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				}
 
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) && record[field.Name] != nil {
-					fmt.Println("MANY DETECTED", field.Name)
 					if s.ManyToMany[field.Name] == nil {
 						s.ManyToMany[field.Name] = []map[string]interface{}{}
 					}
@@ -281,7 +277,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 					delete(record, field.Name)
 				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
-					fmt.Println("ONE TO DETECTED", field.Name)
 					if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 						if s.OneToMany[ff.Name] == nil {
 							s.OneToMany[ff.Name] = []map[string]interface{}{}
@@ -329,8 +324,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 			}
 		}
 	}
-	fmt.Println("VERIFIED", record)
-	debug.PrintStack()
 	return record, nil, true
 }
 

@@ -1,6 +1,7 @@
 package task_service
 
 import (
+	"fmt"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -178,6 +179,7 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 }
 
 func CreateDelegated(record utils.Record, request utils.Record, id int64, domain utils.DomainITF) {
+	fmt.Println("CreateDelegated", record)
 	currentTime := time.Now()
 	sqlFilter := []string{
 		"('" + currentTime.Format("2000-01-01") + "' < start_date OR '" + currentTime.Format("2000-01-01") + "' > end_date)",
