@@ -200,7 +200,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 			ks2 := ds.UserDBField
 			newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
-			domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name), newRec, func(s string) (string, bool) { return "", true })
+			domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name), newRec)
 			share := map[string]interface{}{
 				ks1:                  delegated[k1],
 				ks2:                  delegated[k2],
