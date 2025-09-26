@@ -91,6 +91,9 @@ func ImportProjectAxis() {
 					record[realLabel] = data[i]
 				}
 			}
+			if i == 0 {
+				record["code"] = data[i]
+			}
 			if strings.ToLower(header) == "libellé axe" && data[i] != "" {
 				axisName = data[i]
 			}
