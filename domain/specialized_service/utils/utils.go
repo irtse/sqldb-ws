@@ -244,9 +244,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		if sch.HasField("start_date") && sch.HasField("end_date") {
 			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' < start_date OR "
 			sqlFilter += "'" + currentTime.Format("2000-01-01") + "' > end_date"
-			db := s.Domain.GetDb()
-			db.ClearQueryFilter().SQLRestriction = sqlFilter
-			db.DeleteQueryWithRestriction(tablename, map[string]interface{}{}, false)
+			s.Domain.DeleteSuperCall(utils.AllParams(tablename), sqlFilter)
 		}
 
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
