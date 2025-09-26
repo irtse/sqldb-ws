@@ -70,8 +70,6 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	}
 	if id, _ := domainParams.Get(utils.SpecialIDParam); id != "" {
 		SQLrestriction = append(SQLrestriction, "id="+id)
-	} else if id, _ := f.Domain.GetParams().Get(utils.SpecialIDParam); id != "" {
-		SQLrestriction = append(SQLrestriction, "id="+id)
 	}
 	if s, ok := domainParams.Get(utils.RootFilterNewState); ok && s != "" {
 		state = s
