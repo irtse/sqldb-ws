@@ -253,9 +253,11 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		}
 
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
+			fmt.Println("THERE")
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
 			for _, field := range sch.Fields {
+				fmt.Println(field.Name)
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.LINKADD.String())) && record[field.Name] != nil {
 					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
 						continue
@@ -268,7 +270,9 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						}
 					}
 
-				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) && record[field.Name] != nil {
+				}
+
+				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) && record[field.Name] != nil {
 					fmt.Println("MANY DETECTED", field.Name)
 					if s.ManyToMany[field.Name] == nil {
 						s.ManyToMany[field.Name] = []map[string]interface{}{}

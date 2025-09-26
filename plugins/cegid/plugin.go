@@ -28,10 +28,10 @@ func Run() {
 }
 
 func ImportProjectAxis() {
-	mapped := map[string]string{
-		"Code Axe":     "code",
-		"Libellé Axe":  "name",
-		"Code Domaine": "domain_code",
+	mapped := map[int]string{
+		4: "code",
+		5: "name",
+		6: "domain_code",
 	}
 	d := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
 	filepath := os.Getenv("PROJECT_FILE_PATH")
@@ -44,8 +44,8 @@ func ImportProjectAxis() {
 	inside := []string{}
 	for _, data := range datas {
 		record := map[string]interface{}{}
-		for i, header := range headers {
-			if realLabel, ok := mapped[header]; ok && realLabel != "" && data[i] != "" {
+		for i, _ := range headers {
+			if realLabel, ok := mapped[i]; ok && realLabel != "" && data[i] != "" {
 				record[realLabel] = data[i]
 			}
 		}
@@ -71,18 +71,18 @@ func ImportProjectAxis() {
 			}
 		}
 	}
-	mapped = map[string]string{
-		"Projet":            "code",
-		"Tâche Projet":      "project_task",
-		"Abrégé Projet":     "name",
-		"Etat Ligne Projet": "state",
+	mapped = map[int]string{
+		0:  "code",
+		2:  "project_task",
+		3:  "name",
+		10: "state",
 	}
 	for _, data := range datas {
 		axisName := ""
 		respPrj := int64(-1)
 		record := map[string]interface{}{}
-		for i, header := range headers {
-			if realLabel, ok := mapped[header]; ok && realLabel != "" && data[i] != "" {
+		for i, _ := range headers {
+			if realLabel, ok := mapped[i]; ok && realLabel != "" && data[i] != "" {
 				if strings.ToLower(data[i]) == "non" {
 					record[realLabel] = false
 				} else if strings.ToLower(data[i]) == "oui" {
@@ -94,31 +94,31 @@ func ImportProjectAxis() {
 			if i == 0 {
 				record["code"] = data[i]
 			}
-			if strings.ToLower(header) == "libellé axe" && data[i] != "" {
+			if i == 5 && data[i] != "" {
 				axisName = data[i]
 			}
-			if strings.ToLower(header) == "date fin de projet" && data[i] != "" {
+			if i == 8 && data[i] != "" {
 				s := strings.Split(data[i], "/")
 				for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 					s[i], s[j] = s[j], s[i]
 				}
 				record["start_date"] = strings.Join(s, "-")
 			}
-			if strings.ToLower(header) == "date fin de projet" && data[i] != "" {
+			if i == 9 && data[i] != "" {
 				s := strings.Split(data[i], "/")
 				for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 					s[i], s[j] = s[j], s[i]
 				}
 				record["end_date"] = strings.Join(s, "-")
 			}
-			if strings.ToLower(header) == "code axe" && data[i] != "" {
+			if i == 4 && data[i] != "" {
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.Axis.Name, map[string]interface{}{
 					"code": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
 					record[ds.RootID(models.Axis.Name)] = res[0][utils.SpecialIDParam]
 				}
 			}
-			if strings.ToLower(header) == "email chef de projet" && data[i] != "" {
+			if i == 12 && data[i] != "" {
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"email": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
@@ -194,11 +194,11 @@ func ImportProjectAxis() {
 }
 
 func ImportUserHierachy() {
-	mapped := map[string]string{
-		"Salarié Présent ?": "active",
-		"Login Utilisateur": "name",
-		"Email Utilisateur": "email",
-		"Matricule Salarié": "code",
+	mapped := map[int]string{
+		10: "active",
+		0:  "name",
+		5:  "email",
+		1:  "code",
 	}
 	d := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
 	filepath := os.Getenv("USER_FILE_PATH")
@@ -217,8 +217,8 @@ func ImportUserHierachy() {
 	for _, data := range datas {
 		cocName := ""
 		record := map[string]interface{}{}
-		for i, header := range headers {
-			if realLabel, ok := mapped[header]; ok && realLabel != "" && data[i] != "" {
+		for i, _ := range headers {
+			if realLabel, ok := mapped[i]; ok && realLabel != "" && data[i] != "" {
 				if strings.ToLower(data[i]) == "non" {
 					record[realLabel] = false
 				} else if strings.ToLower(data[i]) == "oui" {
@@ -229,7 +229,7 @@ func ImportUserHierachy() {
 					record[realLabel] = data[i]
 				}
 			} else {
-				if strings.Contains(strings.ToLower(header), "compétence") && data[i] != "" {
+				if i == 6 && data[i] != "" {
 					cocName = data[i]
 					if !slices.Contains([]string{"CIAC", "CIAA", "CIAS", "CSEC", "CSOM", "CSIS", "CMCP", "CMMP", "CMSA", "CEHT", "CEHF"}, strings.ToUpper(cocName)) {
 						cocName = "autre centre de compétence"
@@ -294,15 +294,15 @@ func ImportUserHierachy() {
 	for _, data := range datas {
 		userID := ""
 		hierarchyID := ""
-		for i, header := range headers {
-			if strings.ToLower(header) == "email utilisateur" && data[i] != "" {
+		for i, _ := range headers {
+			if i == 5 && data[i] != "" {
 				if res, err := d.Db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"email": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
 					userID = utils.GetString(res[0], utils.SpecialIDParam)
 				}
 			}
-			if strings.ToLower(header) == "matricule responsable" && data[i] != "" {
+			if i == 1 && data[i] != "" {
 				if res, err := d.Db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"code": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
