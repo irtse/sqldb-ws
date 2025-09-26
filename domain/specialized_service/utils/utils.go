@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
@@ -268,6 +269,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 
 				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) && record[field.Name] != nil {
+					fmt.Println("MANY DETECTED", field.Name)
 					if s.ManyToMany[field.Name] == nil {
 						s.ManyToMany[field.Name] = []map[string]interface{}{}
 					}
@@ -276,6 +278,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 					delete(record, field.Name)
 				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
+					fmt.Println("ONE TO DETECTED", field.Name)
 					if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 						if s.OneToMany[ff.Name] == nil {
 							s.OneToMany[ff.Name] = []map[string]interface{}{}
@@ -323,6 +326,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 			}
 		}
 	}
+	fmt.Println("VERIFIED", record)
 	return record, nil, true
 }
 

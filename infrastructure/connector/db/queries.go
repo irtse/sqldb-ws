@@ -33,9 +33,6 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
 	res, err := db.QueryAssociativeArray(q)
-	if err != nil {
-		fmt.Println(q, len(res), err)
-	}
 	return res, err
 }
 
@@ -63,9 +60,6 @@ func (db *Database) MathQuery(algo string, name string, naming ...string) ([]map
 		q = db.BuildMathQuery(algo, name, naming...)
 	}
 	res, err := db.QueryAssociativeArray(q)
-	if err != nil {
-		fmt.Println(q, len(res), err)
-	}
 	return res, err
 }
 
@@ -107,9 +101,6 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 							record["id"] = id + 1
 						}
 						i, err := db.CreateQuery(name, record, verify)
-						if err != nil {
-							fmt.Println("create", query, err)
-						}
 						return i, err
 					} else {
 						return i, err
@@ -156,7 +147,6 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 		q, err = db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
 	}
 	if err != nil {
-		fmt.Println("create", q, err)
 		return err
 	}
 	err = db.Query(q)
@@ -183,9 +173,6 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 		q = db.BuildDeleteQuery(name, colName)
 	}
 	err := db.Query(q)
-	if err != nil {
-		fmt.Println(q, err)
-	}
 	return err
 }
 
@@ -213,9 +200,6 @@ func (db *Database) QueryRow(query string) (int64, error) {
 	}
 	id := int64(0)
 	err := db.Conn.QueryRow(query).Scan(&id)
-	if err != nil {
-		fmt.Println(query, err)
-	}
 	return id, err
 }
 
@@ -229,7 +213,6 @@ func (db *Database) Query(query string) error {
 	}
 	rows, err := db.Conn.Query(query)
 	if err != nil {
-		fmt.Println(query, err)
 		return err
 	}
 	return rows.Close()
