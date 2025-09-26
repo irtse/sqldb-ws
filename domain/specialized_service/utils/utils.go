@@ -29,6 +29,10 @@ func (s *AbstractSpecializedService) Entity() utils.SpecializedServiceInfo {
 	return nil
 }
 
+func (s *AbstractSpecializedService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+}
+
 func (s *AbstractSpecializedService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
 	t := view_convertor.NewViewConvertor(s.Domain).TransformToView(results, tableName, true, s.Domain.GetParams().Copy())
 	if scheme, err := sch.GetSchema(tableName); err == nil {
