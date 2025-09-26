@@ -66,15 +66,6 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	if f.Domain.IsSuperCall() {
 		return strings.Join(SQLrestriction, " AND "), strings.Join(SQLview, ","), strings.Join(SQLOrder, ","), SQLLimit
 	}
-	if id, _ := f.Domain.GetParams().Get(utils.SpecialIDParam); id != "" && f.Domain.GetTable() != ds.DBView.Name {
-		fmt.Println("PARAMS", id)
-		SQLrestriction = append(SQLrestriction, "id="+id)
-	} else if id, _ := domainParams.Get(utils.SpecialIDParam); id != "" {
-		fmt.Println("PARAMS 2", id)
-		SQLrestriction = append(SQLrestriction, "id="+id)
-	} else if f.Domain.GetMethod() != utils.DELETE {
-		SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
-	}
 	if s, ok := domainParams.Get(utils.RootFilterNewState); ok && s != "" {
 		state = s
 	}
@@ -85,6 +76,16 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	if state != "" {
 		SQLrestriction = f.LifeCycleRestriction(tableName, SQLrestriction, state)
 	}
+	if id, _ := f.Domain.GetParams().Get(utils.SpecialIDParam); id != "" && f.Domain.GetTable() != ds.DBView.Name {
+		fmt.Println("PARAMS", id)
+		SQLrestriction = append(SQLrestriction, "id="+id)
+	} else if id, _ := domainParams.Get(utils.SpecialIDParam); id != "" {
+		fmt.Println("PARAMS 2", id)
+		SQLrestriction = append(SQLrestriction, "id="+id)
+	} else if f.Domain.GetMethod() != utils.DELETE {
+		SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
+	}
+	fmt.Println(SQLrestriction)
 	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
 }
 
