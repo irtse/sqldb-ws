@@ -14,7 +14,7 @@ services:
     volumes:
       - ./files:/mnt/files
       - ./html:/opt/html
-      - ${PLUGIN_FILES}:/mnt/plugin_files
+      - ${PLUGIN_FILES:-/dev/null}:/mnt/plugin_files
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.sqldb.entrypoints=web"

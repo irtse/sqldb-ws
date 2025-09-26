@@ -33,7 +33,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
 	res, err := db.QueryAssociativeArray(q)
-	if strings.Contains(name, "article") || strings.Contains(name, "delegation") {
+	if err != nil {
 		fmt.Println(q, len(res))
 	}
 	return res, err
@@ -104,6 +104,7 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 						}
 						return db.CreateQuery(name, record, verify)
 					} else {
+						fmt.Println("create", query)
 						return i, err
 					}
 				}
@@ -148,6 +149,7 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 		q, err = db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
 	}
 	if err != nil {
+		fmt.Println("create", q)
 		return err
 	}
 	err = db.Query(q)
