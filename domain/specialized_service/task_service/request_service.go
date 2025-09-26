@@ -140,7 +140,7 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 			p.SimpleDelete(utils.RootRowsParam)
 			rec := p.Anonymized()
 			rec["link_id"] = schema.ID
-			s.Domain.CreateSuperCall(utils.AllParams(ds.DBNotification.Name).RootRaw(), rec)
+			s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBNotification.Name, rec, func(s string) (string, bool) { return s, true })
 		}
 		if utils.Compare(rec["is_close"], true) {
 			p := utils.AllParams(ds.DBTask.Name)

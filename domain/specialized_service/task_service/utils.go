@@ -200,7 +200,11 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 			ks2 := ds.UserDBField
 			newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
-			domain.CreateSuperCall(utils.AllParams(ds.DBTask.Name), newRec)
+			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+				utils.SpecialIDParam: newRec[ds.RequestDBField],
+			}, false); err == nil && len(res) > 0 {
+				CreateDelegated(newRec, res[0], utils.GetInt(newRec, utils.SpecialIDParam), domain)
+			}
 			share := map[string]interface{}{
 				ks1:                  delegated[k1],
 				ks2:                  delegated[k2],
