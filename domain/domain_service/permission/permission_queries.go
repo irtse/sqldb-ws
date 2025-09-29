@@ -17,7 +17,7 @@ func (p *PermDomainService) IsShared(schema sm.SchemaModel, destID string, key s
 	if destID == "" {
 		return false
 	}
-	arr := []string{
+	arr := []interface{}{
 		connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			ds.UserDBField: p.db.BuildSelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 				"name":  connector.Quote(p.User),

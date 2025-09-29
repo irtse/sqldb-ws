@@ -214,7 +214,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 				"delete_access":      delegated["delete_access"],
 			}
 
-			arr := []string{
+			arr := []interface{}{
 				connector.FormatSQLRestrictionWhereByMap("", share, false),
 			}
 			arr = append(arr, "('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)")
@@ -228,7 +228,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 				delete(share, "end_date")
 				share[ds.SchemaDBField] = request[ds.SchemaDBField]
 				share[ds.DestTableDBField] = request[ds.DestTableDBField]
-				arr := []string{
+				arr := []interface{}{
 					connector.FormatSQLRestrictionWhereByMap("", share, false),
 				}
 				arr = append(arr, "('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)")

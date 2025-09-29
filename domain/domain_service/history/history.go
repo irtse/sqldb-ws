@@ -111,7 +111,7 @@ func GetCreatedAccessData(schemaID string, domain utils.DomainITF) []string {
 	if domain.GetMethod() == utils.DELETE {
 		key = "delete_access"
 	}
-	arr := []string{
+	arr := []interface{}{
 		connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			key:                        true,
 			ds.SchemaDBField:           schemaID,

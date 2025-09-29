@@ -69,7 +69,7 @@ func VerifyLoop(domain utils.DomainITF, schemas ...sm.SchemaModel) {
 			domain.DeleteSuperCall(utils.AllParams(sch.Name), sqlFilter)
 		}
 		sqlFilter := "'" + currentTime.Format("2000-01-01") + "' > start_date"
-		if res, err := domain.GetDb().SelectQueryWithRestriction(sch.Name, []string{sqlFilter}, false); err == nil && len(res) > 0 {
+		if res, err := domain.GetDb().SelectQueryWithRestriction(sch.Name, []interface{}{sqlFilter}, false); err == nil && len(res) > 0 {
 			for _, r := range res {
 				SpecializedService(sch.Name).Trigger(r)
 			}

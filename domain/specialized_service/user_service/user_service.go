@@ -32,7 +32,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "enable_share") && s.Domain.GetUserID() != "" {
 		splitted := strings.Split(strings.ReplaceAll(scope, "enable_share_", ""), "_")
 		if len(splitted) > 1 {
-			arr := []string{
+			arr := []interface{}{
 				connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
 					ds.SchemaDBField:    utils.ToInt64(splitted[0]),
@@ -48,7 +48,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 	} else if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "disable_share") && s.Domain.GetUserID() != "" {
 		splitted := strings.Split(strings.ReplaceAll(scope, "disable_share", ""), "_")
 		if len(splitted) > 1 {
-			arr := []string{
+			arr := []interface{}{
 				connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 					ds.UserDBField:      s.Domain.GetUserID(),
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
