@@ -7,7 +7,6 @@ import (
 	"sqldb-ws/domain/domain_service/triggers"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
-	sch "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/schema/models"
 	sm "sqldb-ws/domain/schema/models"
@@ -15,7 +14,6 @@ import (
 	"sqldb-ws/infrastructure/service"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type AbstractSpecializedService struct {
@@ -29,13 +27,15 @@ func (s *AbstractSpecializedService) Entity() utils.SpecializedServiceInfo {
 	return nil
 }
 
+func (s *AbstractSpecializedService) Trigger(record utils.Record) {}
+
 func (s *AbstractSpecializedService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
 	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
 }
 
 func (s *AbstractSpecializedService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
 	t := view_convertor.NewViewConvertor(s.Domain).TransformToView(results, tableName, true, s.Domain.GetParams().Copy())
-	if scheme, err := sch.GetSchema(tableName); err == nil {
+	if scheme, err := schema.GetSchema(tableName); err == nil {
 		if s.Domain.GetMethod() == utils.CREATE && len(results) == 1 && utils.GetBool(results[0], "is_draft") {
 			for _, tt := range t {
 				tt["inner_redirection"] = utils.BuildPath(scheme.ID, utils.GetString(results[0], "id"))
@@ -57,7 +57,7 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 					"is_close":          false,
 				}, false, utils.SpecialIDParam),
 			}, false); err == nil && len(rr) > 0 {
-				if ss, err := sch.GetSchema(ds.DBTask.Name); err == nil {
+				if ss, err := schema.GetSchema(ds.DBTask.Name); err == nil {
 					for _, tt := range t {
 						tt["inner_redirection"] = utils.BuildPath(ss.ID, utils.GetString(rr[0], utils.SpecialIDParam))
 					}
@@ -69,7 +69,7 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 }
 
 func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]interface{}, tablename string) {
-	if sch, err := sch.GetSchema(tablename); err == nil {
+	if sch, err := schema.GetSchema(tablename); err == nil {
 		for schemaName, mm := range s.ManyToMany {
 			field, err := sch.GetField(schemaName)
 			if err != nil {
@@ -115,7 +115,7 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 }
 
 func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]interface{}, record map[string]interface{}) {
-	sche, err := sch.GetSchema(s.Domain.GetTable())
+	sche, err := schema.GetSchema(s.Domain.GetTable())
 	if err == nil {
 		for schemaName, mm := range s.ManyToMany {
 			field, err := sche.GetField(schemaName)
@@ -233,23 +233,17 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		return record, nil, true
 	}
 	if s.Domain.GetMethod() != utils.DELETE {
-		rec, err := sch.ValidateBySchema(record, tablename, s.Domain.GetMethod(), s.Domain, s.Domain.VerifyAuth)
+		rec, err := schema.ValidateBySchema(record, tablename, s.Domain.GetMethod(), s.Domain, s.Domain.VerifyAuth)
 		if err != nil {
 			return rec, err, err == nil
 		}
 	}
-	if sch, err := sch.GetSchema(tablename); err != nil {
+	if sch, err := schema.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
 		/*if ok, err := s.GetFieldInfo(sch, record); !ok && err != nil {
 			return record, err, false
 		}*/
-		currentTime := time.Now()
-		if sch.HasField("start_date") && sch.HasField("end_date") {
-			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' > end_date"
-			go s.Domain.DeleteSuperCall(utils.AllParams(tablename), sqlFilter)
-		}
-
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
@@ -335,7 +329,7 @@ type SpecializedService struct{ AbstractSpecializedService }
 
 func (s *SpecializedService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
 	t := view_convertor.NewViewConvertor(s.Domain).TransformToView(results, tableName, true, s.Domain.GetParams().Copy())
-	if scheme, err := sch.GetSchema(tableName); err == nil {
+	if scheme, err := schema.GetSchema(tableName); err == nil {
 		if s.Domain.GetMethod() == utils.CREATE && len(results) == 1 && utils.GetBool(results[0], "is_draft") {
 			for _, tt := range t {
 				tt["inner_redirection"] = utils.BuildPath(scheme.ID, utils.GetString(results[0], "id"))
@@ -356,7 +350,7 @@ func (s *SpecializedService) TransformToGenericView(results utils.Results, table
 					"is_close":          false,
 				}, false, utils.SpecialIDParam),
 			}, false); err == nil && len(rr) > 0 {
-				if ss, err := sch.GetSchema(ds.DBTask.Name); err == nil {
+				if ss, err := schema.GetSchema(ds.DBTask.Name); err == nil {
 					for _, tt := range t {
 						tt["inner_redirection"] = utils.BuildPath(ss.ID, utils.GetString(rr[0], utils.SpecialIDParam))
 					}
@@ -403,7 +397,7 @@ func (s *SpecializedService) SpecializedDeleteRow(results []map[string]interface
 
 func CheckAutoLoad(tablename string, record utils.Record, domain utils.DomainITF) (utils.Record, error, bool) {
 	if domain.GetMethod() != utils.DELETE {
-		rec, err := sch.ValidateBySchema(record, tablename, domain.GetMethod(), domain, domain.VerifyAuth)
+		rec, err := schema.ValidateBySchema(record, tablename, domain.GetMethod(), domain, domain.VerifyAuth)
 		return rec, err, err == nil
 	}
 	return record, nil, false

@@ -29,7 +29,7 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 
 	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
 	if utils.GetString(record, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
-		return map[string]interface{}{}, errors.New("can't add a delegated to yourself"), false
+		return map[string]interface{}{}, errors.New("can't add a delegation to yourself"), false
 	}
 	if _, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
 		return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
@@ -39,8 +39,84 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 }
 
 func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
-	s.Write([]map[string]interface{}{record}, record)
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
+}
+
+func (s *DelegationService) Trigger(rr utils.Record) {
+	if utils.GetBool(rr, "all_tasks") {
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			"is_close": false,
+			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					ds.UserDBField: s.Domain.GetUserID(),
+				}, false, ds.EntityDBField),
+				ds.UserDBField: s.Domain.GetUserID(),
+			}, true, "id"),
+		}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				go func() {
+					newTask := utils.Record{}
+					for k, v := range r {
+						newTask[k] = v
+					}
+					newTask[ds.UserDBField] = rr["delegated_"+ds.UserDBField]
+					newTask[ds.EntityDBField] = nil
+					newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
+					delete(newTask, utils.SpecialIDParam)
+					share := map[string]interface{}{
+						"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
+						ds.UserDBField:             rr[ds.UserDBField],
+						"start_date":               rr["start_date"],
+						"end_date":                 rr["end_date"],
+						ds.SchemaDBField:           r[ds.SchemaDBField],
+						ds.DelegationDBField:       rr[utils.SpecialIDParam],
+						ds.DestTableDBField:        r[ds.DestTableDBField],
+						"update_access":            false,
+						"delete_access":            false,
+					}
+					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+					}
+					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, newTask, false); err == nil && len(res) == 0 {
+						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
+					}
+				}()
+			}
+		}
+	} else if taskID := utils.GetInt(rr, ds.TaskDBField); taskID >= 0 {
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			"is_close":           false,
+			utils.SpecialIDParam: taskID,
+		}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				newTask := utils.Record{}
+				for k, v := range r {
+					newTask[k] = v
+				}
+				newTask[ds.UserDBField] = rr["delegated_"+ds.UserDBField]
+				newTask[ds.EntityDBField] = nil
+				newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
+				delete(newTask, utils.SpecialIDParam)
+				share := map[string]interface{}{
+					"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
+					ds.UserDBField:             rr[ds.UserDBField],
+					"start_date":               rr["start_date"],
+					"end_date":                 rr["end_date"],
+					ds.SchemaDBField:           r[ds.SchemaDBField],
+					ds.DelegationDBField:       rr[utils.SpecialIDParam],
+					ds.DestTableDBField:        r[ds.DestTableDBField],
+					"update_access":            false,
+					"delete_access":            false,
+				}
+				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+					s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+				}
+				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, newTask, false); err == nil && len(res) == 0 {
+					s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
+				}
+			}
+		}
+	}
 }
 
 func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
@@ -60,69 +136,5 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 }
 
 func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
-	s.Write(results, record)
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
-}
-
-func (s *DelegationService) Write(results []map[string]interface{}, record map[string]interface{}) {
-	for _, rr := range results {
-		if utils.GetBool(rr, "all_tasks") {
-			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-				"is_close": false,
-				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-						ds.UserDBField: s.Domain.GetUserID(),
-					}, false, ds.EntityDBField),
-					ds.UserDBField: s.Domain.GetUserID(),
-				}, true, "id"),
-			}, false); err == nil && len(res) > 0 {
-				for _, r := range res {
-					go func() {
-						newTask := utils.Record{}
-						for k, v := range r {
-							newTask[k] = v
-						}
-						newTask[ds.UserDBField] = rr["delegated_"+ds.UserDBField]
-						newTask[ds.EntityDBField] = nil
-						newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
-						delete(newTask, utils.SpecialIDParam)
-						share := map[string]interface{}{
-							"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
-							ds.UserDBField:             rr[ds.UserDBField],
-							"start_date":               rr["start_date"],
-							"end_date":                 rr["end_date"],
-							ds.SchemaDBField:           r[ds.SchemaDBField],
-							ds.DelegationDBField:       rr[utils.SpecialIDParam],
-							ds.DestTableDBField:        r[ds.DestTableDBField],
-							"update_access":            false,
-							"delete_access":            false,
-						}
-						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
-						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
-					}()
-				}
-			}
-		} else if taskID := utils.GetInt(rr, ds.TaskDBField); taskID >= 0 {
-			if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-				"is_close":           false,
-				utils.SpecialIDParam: taskID,
-			}, false); err == nil && len(res) > 0 {
-				for _, r := range res {
-					newTask := utils.Record{}
-					for k, v := range r {
-						newTask[k] = v
-					}
-					newTask[ds.UserDBField] = rr["delegated_"+ds.UserDBField]
-					newTask[ds.EntityDBField] = nil
-					newTask["binded_"+ds.TaskDBField] = r[utils.SpecialIDParam]
-					delete(newTask, utils.SpecialIDParam)
-					if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-						utils.SpecialIDParam: newTask[ds.RequestDBField],
-					}, false); err == nil && len(res) > 0 {
-						task.CreateDelegated(newTask, res[0], utils.GetInt(newTask, utils.SpecialIDParam), s.Domain)
-					}
-				}
-			}
-		}
-	}
 }

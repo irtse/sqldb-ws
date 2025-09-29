@@ -6,6 +6,7 @@ import (
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
+	"time"
 )
 
 func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
@@ -110,11 +111,16 @@ func GetCreatedAccessData(schemaID string, domain utils.DomainITF) []string {
 	if domain.GetMethod() == utils.DELETE {
 		key = "delete_access"
 	}
-	if shares, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-		key:                        true,
-		ds.SchemaDBField:           schemaID,
-		"shared_" + ds.UserDBField: domain.GetUserID(),
-	}, false); err == nil && len(shares) > 0 {
+	arr := []string{
+		connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+			key:                        true,
+			ds.SchemaDBField:           schemaID,
+			"shared_" + ds.UserDBField: domain.GetUserID(),
+		}, false),
+	}
+	currentTime := time.Now()
+	arr = append(arr, "('"+currentTime.Format("2000-01-01")+"' >= start_date AND '"+currentTime.Format("2000-01-01")+"' < end_date)")
+	if shares, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(shares) > 0 {
 		for _, share := range shares {
 			if !slices.Contains(ids, utils.ToString(share[utils.RootDestTableIDParam])) && utils.ToString(share[utils.RootDestTableIDParam]) != "" {
 				ids = append(ids, utils.ToString(share[utils.RootDestTableIDParam]))

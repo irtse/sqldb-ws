@@ -10,6 +10,7 @@ import (
 	domain "sqldb-ws/domain"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	specialized "sqldb-ws/domain/specialized_service"
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	_ "sqldb-ws/routers"
@@ -60,8 +61,16 @@ func main() {
 			}
 		}
 	}
+	VerifyData()
 	GetResponse()
 	beego.Run()
+}
+
+func VerifyData() {
+	for true {
+		go specialized.VerifyLoop(domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil))
+		time.Sleep(24 * time.Hour)
+	}
 }
 
 func GetResponse() {

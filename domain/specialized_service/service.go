@@ -1,6 +1,7 @@
 package service
 
 import (
+	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/specialized_service/email_service"
 	favorite "sqldb-ws/domain/specialized_service/favorite_service"
 	schema "sqldb-ws/domain/specialized_service/schema_service"
@@ -8,6 +9,8 @@ import (
 	user "sqldb-ws/domain/specialized_service/user_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
+
+	"time"
 )
 
 // export all specialized services available per domain
@@ -51,4 +54,25 @@ func (s *CustomService) VerifyDataIntegrity(record map[string]interface{}, table
 		return record, err, false
 	}
 
+}
+
+// MISSING SOMETHING IMPORTANT: Loop + when delegated if start delayed.
+// i need a loop that check every day if delegation is startin or comin to expiry.
+// it concerns btw everything containing start_date and end_date.
+// we can have simultaneous starting... forkin
+
+func VerifyLoop(domain utils.DomainITF) {
+	for _, sch := range sm.SchemaRegistry {
+		currentTime := time.Now()
+		if sch.HasField("start_date") && sch.HasField("end_date") {
+			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' > end_date"
+			domain.DeleteSuperCall(utils.AllParams(sch.Name), sqlFilter)
+		}
+		sqlFilter := "'" + currentTime.Format("2000-01-01") + "' > start_date"
+		if res, err := domain.GetDb().SelectQueryWithRestriction(sch.Name, []string{sqlFilter}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				SpecializedService(sch.Name).Trigger(r)
+			}
+		}
+	}
 }

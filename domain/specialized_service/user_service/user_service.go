@@ -7,6 +7,7 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
+	"time"
 )
 
 type UserService struct {
@@ -31,23 +32,33 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "enable_share") && s.Domain.GetUserID() != "" {
 		splitted := strings.Split(strings.ReplaceAll(scope, "enable_share_", ""), "_")
 		if len(splitted) > 1 {
-			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
-				"!" + utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+			arr := []string{
+				connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
 					ds.SchemaDBField:    utils.ToInt64(splitted[0]),
 					ds.UserDBField:      s.Domain.GetUserID(),
-				}, false, "shared_"+ds.UserDBField),
+				}, false),
+			}
+			currentTime := time.Now()
+			arr = append(arr, "('"+currentTime.Format("2000-01-01")+"' >= start_date AND '"+currentTime.Format("2000-01-01")+"' < end_date)")
+			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+				"!" + utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, arr, false, "shared_"+ds.UserDBField),
 			}, true))
 		}
 	} else if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "disable_share") && s.Domain.GetUserID() != "" {
 		splitted := strings.Split(strings.ReplaceAll(scope, "disable_share", ""), "_")
 		if len(splitted) > 1 {
-			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
-				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+			arr := []string{
+				connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 					ds.UserDBField:      s.Domain.GetUserID(),
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
 					ds.SchemaDBField:    utils.ToInt64(splitted[0]),
-				}, false, "shared_"+ds.UserDBField),
+				}, false),
+			}
+			currentTime := time.Now()
+			arr = append(arr, "('"+currentTime.Format("2000-01-01")+"' >= start_date AND '"+currentTime.Format("2000-01-01")+"' < end_date)")
+			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, arr, false, "shared_"+ds.UserDBField),
 			}, true))
 		}
 	}

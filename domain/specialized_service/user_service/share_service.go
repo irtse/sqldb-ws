@@ -21,25 +21,6 @@ func NewShareService() utils.SpecializedServiceITF {
 }
 
 func (s *ShareService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
-	if sch, err := schema.GetSchemaByID(utils.GetInt(record, ds.SchemaDBField)); err == nil && sch.HasField(ds.DestTableDBField) {
-		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-			utils.SpecialIDParam: record[ds.DestTableDBField],
-		}, false); err == nil {
-			for _, r := range res {
-				share := map[string]interface{}{
-					"shared_" + ds.UserDBField: record["shared_"+ds.UserDBField],
-					ds.UserDBField:             record[ds.UserDBField],
-					"start_date":               record["start_date"],
-					"end_date":                 record["end_date"],
-					ds.SchemaDBField:           r[ds.SchemaDBField],
-					ds.DestTableDBField:        r[ds.DestTableDBField],
-					"update_access":            record["update_access"],
-					"delete_access":            record["delete_access"],
-				}
-				s.Domain.CreateSuperCall(utils.AllParams(ds.DBShare.Name).RootRaw(), share)
-			}
-		}
-	}
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }
 func (s *ShareService) Entity() utils.SpecializedServiceInfo { return ds.DBShare }
@@ -47,7 +28,7 @@ func (s *ShareService) Entity() utils.SpecializedServiceInfo { return ds.DBShare
 func (s *ShareService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
 	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
 	if utils.GetString(record, "shared_"+ds.UserDBField) == s.Domain.GetUserID() {
-		return map[string]interface{}{}, errors.New("can't add a shared to yourself"), false
+		return map[string]interface{}{}, errors.New("can't add a sharing to yourself"), false
 	}
 	sch, err := schema.GetSchema(tablename)
 	if err != nil {

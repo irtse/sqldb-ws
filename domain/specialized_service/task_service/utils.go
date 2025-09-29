@@ -180,7 +180,7 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 func CreateDelegated(record utils.Record, request utils.Record, id int64, domain utils.DomainITF) {
 	currentTime := time.Now()
 	sqlFilter := []string{
-		"('" + currentTime.Format("2000-01-01") + "' < start_date OR '" + currentTime.Format("2000-01-01") + "' > end_date)",
+		"('" + currentTime.Format("2000-01-01") + "' >= start_date AND '" + currentTime.Format("2000-01-01") + "' < end_date)",
 	}
 	sqlFilter = append(sqlFilter, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"all_tasks": true,
@@ -214,7 +214,11 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 				"delete_access":      delegated["delete_access"],
 			}
 
-			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+			arr := []string{
+				connector.FormatSQLRestrictionWhereByMap("", share, false),
+			}
+			arr = append(arr, "('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)")
+			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 				share["start_date"] = delegated["start_date"]
 				share["end_date"] = delegated["end_date"]
 				domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
@@ -224,7 +228,11 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 				delete(share, "end_date")
 				share[ds.SchemaDBField] = request[ds.SchemaDBField]
 				share[ds.DestTableDBField] = request[ds.DestTableDBField]
-				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+				arr := []string{
+					connector.FormatSQLRestrictionWhereByMap("", share, false),
+				}
+				arr = append(arr, "('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)")
+				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 					share["start_date"] = delegated["start_date"]
 					share["end_date"] = delegated["end_date"]
 					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })

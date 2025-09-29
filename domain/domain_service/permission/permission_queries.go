@@ -10,21 +10,27 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
+	"time"
 )
 
 func (p *PermDomainService) IsShared(schema sm.SchemaModel, destID string, key string, val bool) bool {
 	if destID == "" {
 		return false
 	}
-	res, err := p.db.SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-		ds.UserDBField: p.db.BuildSelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-			"name":  connector.Quote(p.User),
-			"email": connector.Quote(p.User),
-		}, true, "id"),
-		ds.SchemaDBField:    schema.ID,
-		ds.DestTableDBField: destID,
-		key:                 val,
-	}, false)
+	arr := []string{
+		connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+			ds.UserDBField: p.db.BuildSelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+				"name":  connector.Quote(p.User),
+				"email": connector.Quote(p.User),
+			}, true, "id"),
+			ds.SchemaDBField:    schema.ID,
+			ds.DestTableDBField: destID,
+			key:                 val,
+		}, false),
+	}
+	currentTime := time.Now()
+	arr = append(arr, "('"+currentTime.Format("2000-01-01")+"' >= start_date AND '"+currentTime.Format("2000-01-01")+"' < end_date)")
+	res, err := p.db.SelectQueryWithRestriction(ds.DBShare.Name, arr, false)
 	return err == nil && len(res) > 0
 }
 
