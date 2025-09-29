@@ -71,12 +71,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	fmt.Println("THERE 0", len(res))
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
-		go func() {
-			for _, schema := range schemas {
-				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
-			}
-		}()
-
+		for _, schema := range schemas {
+			go s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
+		}
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
