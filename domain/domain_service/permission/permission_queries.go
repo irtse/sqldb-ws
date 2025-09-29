@@ -29,7 +29,7 @@ func (p *PermDomainService) IsShared(schema sm.SchemaModel, destID string, key s
 		}, false),
 	}
 	currentTime := time.Now()
-	arr = append(arr, "('"+currentTime.Format("2000-01-01")+"' >= start_date AND '"+currentTime.Format("2000-01-01")+"' < end_date)")
+	arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND '"+currentTime.Format("2006-01-02")+"' < end_date)")
 	res, err := p.db.SelectQueryWithRestriction(ds.DBShare.Name, arr, false)
 	return err == nil && len(res) > 0
 }

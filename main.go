@@ -72,8 +72,15 @@ func VerifyData() {
 	for _, sch := range sm.SchemaRegistry {
 		registries = append(registries, sch)
 	}
+	d := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
 	for true {
-		go specialized.VerifyLoop(domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil), registries...)
+		go func() {
+			if d.Db == nil || d.Db.Conn == nil {
+				d.Db = connector.Open(d.Db)
+			}
+			defer d.Db.Close()
+			specialized.VerifyLoop(d, registries...)
+		}()
 		time.Sleep(24 * time.Hour)
 	}
 }

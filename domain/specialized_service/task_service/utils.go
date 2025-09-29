@@ -180,7 +180,7 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 func CreateDelegated(record utils.Record, request utils.Record, id int64, domain utils.DomainITF) {
 	currentTime := time.Now()
 	sqlFilter := []string{
-		"('" + currentTime.Format("2000-01-01") + "' >= start_date AND '" + currentTime.Format("2000-01-01") + "' < end_date)",
+		"('" + currentTime.Format("2006-01-02") + "' >= start_date AND '" + currentTime.Format("2006-01-02") + "' < end_date)",
 	}
 	sqlFilter = append(sqlFilter, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"all_tasks": true,
