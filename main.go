@@ -74,13 +74,7 @@ func VerifyData() {
 	}
 	d := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
 	for true {
-		go func() {
-			if d.Db == nil || d.Db.Conn == nil {
-				d.Db = connector.Open(d.Db)
-			}
-			defer d.Db.Close()
-			specialized.VerifyLoop(d, registries...)
-		}()
+		go specialized.VerifyLoop(d, registries...)
 		time.Sleep(24 * time.Hour)
 	}
 }
