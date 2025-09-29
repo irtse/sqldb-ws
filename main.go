@@ -10,6 +10,7 @@ import (
 	domain "sqldb-ws/domain"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	sm "sqldb-ws/domain/schema/models"
 	specialized "sqldb-ws/domain/specialized_service"
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
@@ -67,8 +68,12 @@ func main() {
 }
 
 func VerifyData() {
+	registries := []sm.SchemaModel{}
+	for _, sch := range sm.SchemaRegistry {
+		registries = append(registries, sch)
+	}
 	for true {
-		go specialized.VerifyLoop(domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil))
+		go specialized.VerifyLoop(domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil), registries...)
 		time.Sleep(24 * time.Hour)
 	}
 }

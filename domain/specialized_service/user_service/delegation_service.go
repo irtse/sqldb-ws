@@ -6,6 +6,7 @@ import (
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
+	"time"
 )
 
 type DelegationService struct {
@@ -39,10 +40,22 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 }
 
 func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
+	// Define the layout for parsing
+	layout := "2006-01-02" // Go's reference time format
+
+	// Parse the date string into a time.Time
+	endTime, err := time.Parse(layout, utils.GetString(record, "end_date"))
+	startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
+	if err == nil && err2 == nil {
+		now := time.Now()
+		if endTime.After(now) && (startTime.Before(now)) {
+			s.Trigger(record)
+		}
+	}
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }
 
-func (s *DelegationService) Trigger(rr utils.Record) {
+func (s *DelegationService) Trigger(rr map[string]interface{}) {
 	if utils.GetBool(rr, "all_tasks") {
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			"is_close": false,
@@ -136,5 +149,19 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 }
 
 func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
+	for _, record := range results {
+		// Define the layout for parsing
+		layout := "2006-01-02" // Go's reference time format
+
+		// Parse the date string into a time.Time
+		endTime, err := time.Parse(layout, utils.GetString(record, "end_date"))
+		startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
+		if err == nil && err2 == nil {
+			now := time.Now()
+			if endTime.After(now) && (startTime.Before(now)) {
+				s.Trigger(record)
+			}
+		}
+	}
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
 }

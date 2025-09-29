@@ -9,6 +9,7 @@ type SpecializedServiceITF interface {
 	SetDomain(d DomainITF) SpecializedServiceITF
 	Entity() SpecializedServiceInfo
 	TransformToGenericView(results Results, tableName string, dest_id ...string) Results
+	Trigger(record map[string]interface{})
 	infrastructure.InfraSpecializedServiceItf
 }
 type SpecializedServiceInfo interface{ GetName() string }

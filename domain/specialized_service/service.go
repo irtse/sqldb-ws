@@ -61,8 +61,8 @@ func (s *CustomService) VerifyDataIntegrity(record map[string]interface{}, table
 // it concerns btw everything containing start_date and end_date.
 // we can have simultaneous starting... forkin
 
-func VerifyLoop(domain utils.DomainITF) {
-	for _, sch := range sm.SchemaRegistry {
+func VerifyLoop(domain utils.DomainITF, schemas ...sm.SchemaModel) {
+	for _, sch := range schemas {
 		currentTime := time.Now()
 		if sch.HasField("start_date") && sch.HasField("end_date") {
 			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' > end_date"
