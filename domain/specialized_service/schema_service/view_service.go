@@ -68,6 +68,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			res = append(res, rec)
 		}
 	}
+	fmt.Println("THERE 0", len(res))
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
 		for _, schema := range schemas {
@@ -99,6 +100,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
 		for range schemas {
 			if rec := <-subChan; rec != nil {
+				fmt.Println("THERE 2", len(rec))
 				for _, i := range utils.ToList(rec["items"]) {
 					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
 				}
