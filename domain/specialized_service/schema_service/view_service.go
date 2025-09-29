@@ -71,9 +71,12 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	fmt.Println("THERE 0", len(res))
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
-		for _, schema := range schemas {
-			go s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
-		}
+		go func() {
+			for _, schema := range schemas {
+				s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
+			}
+		}()
+
 		for _, schema := range schemas {
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
@@ -100,7 +103,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
 		for range schemas {
 			if rec := <-subChan; rec != nil {
-				fmt.Println("THERE 2", len(rec))
 				for _, i := range utils.ToList(rec["items"]) {
 					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
 				}
