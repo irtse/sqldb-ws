@@ -246,8 +246,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		}*/
 		currentTime := time.Now()
 		if sch.HasField("start_date") && sch.HasField("end_date") {
-			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' < start_date AND "
-			sqlFilter += "'" + currentTime.Format("2000-01-01") + "' > end_date"
+			sqlFilter := "'" + currentTime.Format("2000-01-01") + "' > end_date"
 			go s.Domain.DeleteSuperCall(utils.AllParams(tablename), sqlFilter)
 		}
 

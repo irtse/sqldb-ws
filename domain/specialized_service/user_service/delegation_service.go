@@ -28,13 +28,9 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 	delete(record, ds.DestTableDBField)
 
 	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
-	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
-		ds.UserDBField:                s.Domain.GetUserID(),
-		"delegated_" + ds.UserDBField: record["delegated_"+ds.UserDBField],
-	}, false); err == nil && len(res) > 0 {
-		return map[string]interface{}{}, errors.New("can't add a delegated to an already delegated user"), false
+	if utils.GetString(record, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
+		return map[string]interface{}{}, errors.New("can't add a delegated to yourself"), false
 	}
-
 	if _, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
 		return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 	} else {

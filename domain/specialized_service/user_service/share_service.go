@@ -46,13 +46,8 @@ func (s *ShareService) Entity() utils.SpecializedServiceInfo { return ds.DBShare
 
 func (s *ShareService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
 	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
-	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-		ds.SchemaDBField:           record[ds.SchemaDBField],
-		ds.DestTableDBField:        record[ds.DestTableDBField],
-		ds.UserDBField:             record[ds.UserDBField],
-		"shared_" + ds.UserDBField: record["shared_"+ds.UserDBField],
-	}, false); err == nil && len(res) > 0 {
-		return map[string]interface{}{}, errors.New("can't add a shared to an already shared user"), false
+	if utils.GetString(record, "shared_"+ds.UserDBField) == s.Domain.GetUserID() {
+		return map[string]interface{}{}, errors.New("can't add a shared to yourself"), false
 	}
 	sch, err := schema.GetSchema(tablename)
 	if err != nil {
