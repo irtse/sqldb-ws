@@ -175,8 +175,7 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 		name = name + " as main "
 		q = db.BuildDeleteQuery(name, colName)
 	}
-	err := db.Query(q)
-	return err
+	return db.Query(q)
 }
 
 /*

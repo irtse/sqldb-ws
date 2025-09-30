@@ -89,7 +89,6 @@ func GetUserDN(l *ldap.Conn, baseDN string, sAMAccountName string) (string, erro
 func CheckUserCredentials(l *ldap.Conn, baseDN string, sAMAccountName string, password string) bool {
 	userDN, err := GetUserDN(l, baseDN, sAMAccountName)
 	if err != nil {
-		fmt.Println(err)
 		return false
 	}
 
@@ -144,7 +143,6 @@ func CheckLdap(user string, password string) bool {
 	}
 	conn, err := ConnectToLDAPServer(address, username, pwd)
 	if err != nil {
-		fmt.Println(err)
 		return false
 	}
 	defer conn.Close()
