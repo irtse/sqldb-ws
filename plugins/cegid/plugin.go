@@ -131,7 +131,6 @@ func ImportProjectAxis() {
 			if strings.Contains(strings.ToLower(utils.ToString(record["name"])), "eden") {
 				fmt.Println("RECORD FOUND", record)
 			}
-			fmt.Println(record["code"])
 			// depend to
 			var parentID *int64
 			if axisName != "" {
