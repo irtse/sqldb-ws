@@ -119,7 +119,7 @@ func GetCreatedAccessData(schemaID string, domain utils.DomainITF) []string {
 		}, false),
 	}
 	currentTime := time.Now()
-	arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND '"+currentTime.Format("2006-01-02")+"' < end_date)")
+	arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND ('"+currentTime.Format("2006-01-02")+"' < end_date OR end_date IS NULL))")
 	if shares, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(shares) > 0 {
 		for _, share := range shares {
 			if !slices.Contains(ids, utils.ToString(share[utils.RootDestTableIDParam])) && utils.ToString(share[utils.RootDestTableIDParam]) != "" {

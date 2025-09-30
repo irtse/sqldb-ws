@@ -217,7 +217,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 			arr := []interface{}{
 				connector.FormatSQLRestrictionWhereByMap("", share, false),
 			}
-			arr = append(arr, "('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)")
+			arr = append(arr, "(('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
 			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 				share["start_date"] = delegated["start_date"]
 				share["end_date"] = delegated["end_date"]
@@ -231,7 +231,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 				arr := []interface{}{
 					connector.FormatSQLRestrictionWhereByMap("", share, false),
 				}
-				arr = append(arr, "('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)")
+				arr = append(arr, "(()'"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date) OR end_date IS NULL)")
 				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 					share["start_date"] = delegated["start_date"]
 					share["end_date"] = delegated["end_date"]

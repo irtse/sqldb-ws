@@ -40,7 +40,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 				}, false),
 			}
 			currentTime := time.Now()
-			arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND '"+currentTime.Format("2006-01-02")+"' < end_date)")
+			arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND ('"+currentTime.Format("2006-01-02")+"' < end_date  OR end_date IS NULL))")
 			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 				"!" + utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, arr, false, "shared_"+ds.UserDBField),
 			}, true))
@@ -56,7 +56,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 				}, false),
 			}
 			currentTime := time.Now()
-			arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND '"+currentTime.Format("2006-01-02")+"' < end_date)")
+			arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND ('"+currentTime.Format("2006-01-02")+"' < end_date  OR end_date IS NULL))")
 			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, arr, false, "shared_"+ds.UserDBField),
 			}, true))
