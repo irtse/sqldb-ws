@@ -20,7 +20,7 @@ func (s *HistoryService) Entity() utils.SpecializedServiceInfo { return ds.DBDat
 
 func (s *HistoryService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) (res utils.Results) {
 	for _, d := range results {
-		if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 			utils.SpecialIDParam: d[ds.UserDBField],
 		}, false); err == nil && len(res) > 0 {
 			fmt.Println(utils.GetString(res[0], "name"))
