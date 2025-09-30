@@ -267,6 +267,7 @@ func (s *ViewConvertor) getMetaData(l int, record utils.Record, schema *sm.Schem
 		"access_date": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: record[utils.SpecialIDParam],
 			ds.SchemaDBField:    schema.ID,
+			"update":            true,
 		}, false, "MAX(access_date)"),
 		ds.DestTableDBField: record[utils.SpecialIDParam],
 		ds.SchemaDBField:    schema.ID,
@@ -283,6 +284,7 @@ func (s *ViewConvertor) getMetaData(l int, record utils.Record, schema *sm.Schem
 		"access_date": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: record[utils.SpecialIDParam],
 			ds.SchemaDBField:    schema.ID,
+			"write":             true,
 		}, false, "MAX(access_date)"),
 		ds.DestTableDBField: record[utils.SpecialIDParam],
 		ds.SchemaDBField:    schema.ID,
