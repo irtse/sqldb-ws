@@ -99,6 +99,7 @@ func ImportProjectAxis() {
 			}
 			if i == 8 && data[i] != "" {
 				record["start_date"], _ = time.Parse("02/01/2006", fmt.Sprintf("%v", data[i]))
+				fmt.Println(record["start_date"], fmt.Sprintf("%v", data[i]))
 			}
 			if i == 9 && data[i] != "" {
 				record["end_date"], _ = time.Parse("02/01/2006", fmt.Sprintf("%v", data[i]))
