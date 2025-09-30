@@ -613,6 +613,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 			}
 		}
 	}
+	fmt.Println("READONLY", slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)))
 	if sch, err := scheme.GetSchema(tableName); err == nil {
 		m := map[string]interface{}{
 			"is_close":     false,
@@ -646,7 +647,9 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 			}
 			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, m, false); err != nil || len(res) == 0 {
 				m["is_close"] = true
+				fmt.Println("READONLY REQ LOOP", m)
 				if rr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, m, false); err != nil || len(rr) > 0 {
+					fmt.Println("READONLY REQ LOOP THERE", m)
 					return true
 				}
 				// REWORK THE PART OF PARAMS LATER
@@ -666,6 +669,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 						}
 					}
 				}
+				fmt.Println("READONLY REQ LOOP THERE 2", m)
 				return true
 			} else if slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)) {
 				return false

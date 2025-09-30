@@ -33,7 +33,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
 	res, err := db.QueryAssociativeArray(q)
-	if strings.Contains(name, "delegation") {
+	if strings.Contains(name, "share") {
 		fmt.Println(q, err)
 	}
 	return res, err
