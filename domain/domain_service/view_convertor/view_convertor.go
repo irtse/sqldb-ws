@@ -286,7 +286,7 @@ func (s *ViewConvertor) getMetaData(l int, record utils.Record, schema *sm.Schem
 		}, false, "MAX(access_date)"),
 		ds.DestTableDBField: record[utils.SpecialIDParam],
 		ds.SchemaDBField:    schema.ID,
-		"update":            true,
+		"write":             true,
 	}, false); err == nil && len(res) > 0 {
 		creationDate = utils.GetString(res[0], "access_date")
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
