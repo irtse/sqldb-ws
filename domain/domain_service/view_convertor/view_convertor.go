@@ -262,7 +262,7 @@ func (s *ViewConvertor) getMetaData(l int, record utils.Record, schema *sm.Schem
 	updateUser := ""
 	updateDate := ""
 	creationDate := ""
-
+	fmt.Println(schema.ID, record[utils.SpecialIDParam])
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 		"access_date": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: record[utils.SpecialIDParam],
