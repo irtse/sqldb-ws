@@ -186,6 +186,8 @@ func ImportProjectAxis() {
 						fmt.Println("RECORD CODE NOT FOUND CREATE WITH PARENT", record)
 					}
 					d.GetDb().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
+				} else if strings.Contains(strings.ToLower(utils.ToString(record["name"])), "eden") {
+					fmt.Println("RECORD CODE NOT FOUND CREATE err", err)
 				}
 			} else {
 				res, err := d.GetDb().CreateQuery(ds.DBEntity.Name, map[string]interface{}{
@@ -197,6 +199,8 @@ func ImportProjectAxis() {
 						fmt.Println("RECORD CODE NOT FOUND CREATE", record)
 					}
 					d.GetDb().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
+				} else if strings.Contains(strings.ToLower(utils.ToString(record["name"])), "eden") {
+					fmt.Println("RECORD CODE NOT FOUND CREATE err", err)
 				}
 			}
 		}
