@@ -62,8 +62,8 @@ func main() {
 			}
 		}
 	}
-	VerifyData()
-	GetResponse()
+	go VerifyData()
+	go GetResponse()
 	beego.Run()
 }
 
@@ -73,12 +73,10 @@ func VerifyData() {
 		registries = append(registries, sch)
 	}
 	d := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
-	go func() {
-		for true {
-			go specialized.VerifyLoop(d, registries...)
-			time.Sleep(24 * time.Hour)
-		}
-	}()
+	for true {
+		go specialized.VerifyLoop(d, registries...)
+		time.Sleep(24 * time.Hour)
+	}
 }
 
 func GetResponse() {
@@ -87,42 +85,40 @@ func GetResponse() {
 		fmt.Println("No response URL to reach...")
 		return
 	}
-	go func() {
-		for true {
-			resp, err := http.Get(url)
-			if err != nil {
-				fmt.Println("Error:", err)
-				continue
-			}
-			defer resp.Body.Close() // always close the response body
-
-			// Read response body
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				continue
-			}
-			var b map[string]interface{}
-			json.Unmarshal(body, &b)
-			datas := b["data"].(map[string]interface{})
-			go func() {
-				for code, data := range datas {
-					d := domain.Domain(true, "", nil)
-					if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
-						"code": connector.Quote(code),
-					}, false); err == nil && len(res) > 0 {
-						emailRelated := res[0]
-						d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
-							"code": code,
-						}).RootRaw(), map[string]interface{}{
-							"got_response":        data,
-							ds.EmailSendedDBField: emailRelated[utils.SpecialIDParam],
-						})
-					}
-				}
-			}()
-			time.Sleep(1 * time.Hour)
+	for true {
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Println("Error:", err)
+			continue
 		}
-	}()
+		defer resp.Body.Close() // always close the response body
+
+		// Read response body
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			continue
+		}
+		var b map[string]interface{}
+		json.Unmarshal(body, &b)
+		datas := b["data"].(map[string]interface{})
+		go func() {
+			for code, data := range datas {
+				d := domain.Domain(true, "", nil)
+				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
+					"code": connector.Quote(code),
+				}, false); err == nil && len(res) > 0 {
+					emailRelated := res[0]
+					d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
+						"code": code,
+					}).RootRaw(), map[string]interface{}{
+						"got_response":        data,
+						ds.EmailSendedDBField: emailRelated[utils.SpecialIDParam],
+					})
+				}
+			}
+		}()
+		time.Sleep(1 * time.Hour)
+	}
 }
 
 var DEFAULTCONF = map[string]string{
