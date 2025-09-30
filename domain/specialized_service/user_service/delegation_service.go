@@ -2,6 +2,7 @@ package user_service
 
 import (
 	"errors"
+	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -47,6 +48,7 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 	// Parse the date string into a time.Time
 	endTime, err := time.Parse(layout, utils.GetString(record, "end_date"))
 	startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
+	fmt.Println(endTime, startTime, time.Now(), endTime.After(time.Now()), startTime.Before(time.Now()))
 	if err == nil && err2 == nil {
 		now := time.Now()
 		if endTime.After(now) && (startTime.Before(now)) {
@@ -57,6 +59,7 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 }
 
 func (s *DelegationService) Trigger(rr map[string]interface{}) {
+	fmt.Println("TRIGGER", rr)
 	if utils.GetBool(rr, "all_tasks") {
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			"is_close": false,
