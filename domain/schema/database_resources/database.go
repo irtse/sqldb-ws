@@ -711,7 +711,7 @@ var PERMISSIONEXCEPTION = []string{
 	DBDashboard.Name, DBView.Name, DBTask.Name, DBShare.Name,
 	DBDelegation.Name, DBRequest.Name, DBWorkflow.Name,
 	DBEntity.Name, DBSchema.Name,
-	DBSchemaField.Name, DBComment.Name,
+	DBSchemaField.Name, DBComment.Name, DBDataAccess.Name,
 } // override permission checkup
 
 var ROOTTABLES = []models.SchemaModel{DBSchemaField, DBUser, DBWorkflow, DBView, DBRequest, DBSchema, DBPermission, DBFilter, DBFilterField, DBEntity,
