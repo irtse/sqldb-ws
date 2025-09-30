@@ -94,7 +94,10 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 						share["end_date"] = rr["end_datey"]
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 					}
-					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, newTask, false); err == nil && len(res) == 0 {
+					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+						"binded_" + ds.TaskDBField: newTask["binded_"+ds.TaskDBField],
+						ds.UserDBField:             newTask[ds.UserDBField],
+					}, false); err == nil && len(res) == 0 {
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 					}
 				}()
@@ -117,8 +120,8 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 				share := map[string]interface{}{
 					"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
 					ds.UserDBField:             rr[ds.UserDBField],
-					"start_date":               rr["start_date"],
-					"end_date":                 rr["end_date"],
+					"start_date":               connector.Quote(utils.GetString(rr, "start_date")),
+					"end_date":                 connector.Quote(utils.GetString(rr, "end_date")),
 					ds.SchemaDBField:           r[ds.SchemaDBField],
 					ds.DelegationDBField:       rr[utils.SpecialIDParam],
 					ds.DestTableDBField:        r[ds.DestTableDBField],
@@ -126,9 +129,14 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 					"delete_access":            false,
 				}
 				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+					share["start_date"] = rr["start_date"]
+					share["end_date"] = rr["end_datey"]
 					s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 				}
-				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, newTask, false); err == nil && len(res) == 0 {
+				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					"binded_" + ds.TaskDBField: newTask["binded_"+ds.TaskDBField],
+					ds.UserDBField:             newTask[ds.UserDBField],
+				}, false); err == nil && len(res) == 0 {
 					s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 				}
 			}
