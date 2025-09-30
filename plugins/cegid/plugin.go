@@ -100,13 +100,13 @@ func ImportProjectAxis() {
 			if i == 8 && data[i] != "" {
 				t, err := time.Parse("02/01/2006", fmt.Sprintf("%v", data[i]))
 				if err == nil {
-					record["start_date"] = t.Format("2006-01-02")
+					record["prj_start_date"] = t.Format("2006-01-02")
 				}
 			}
 			if i == 9 && data[i] != "" {
 				t, err := time.Parse("02/01/2006", fmt.Sprintf("%v", data[i]))
 				if err == nil {
-					record["end_date"] = t.Format("2006-01-02")
+					record["prj_end_date"] = t.Format("2006-01-02")
 				}
 			}
 			if i == 4 && data[i] != "" {
