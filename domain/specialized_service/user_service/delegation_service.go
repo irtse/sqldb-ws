@@ -48,10 +48,10 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 	// Parse the date string into a time.Time
 	endTime, err := time.Parse(layout, utils.GetString(record, "end_date"))
 	startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
-	fmt.Println(endTime, startTime, time.Now(), endTime.After(time.Now()), startTime.Before(time.Now()))
+	fmt.Println(endTime, startTime, time.Now(), (endTime.After(time.Now()) || endTime.IsZero()), startTime.Before(time.Now()))
 	if err == nil && err2 == nil {
 		now := time.Now()
-		if endTime.After(now) && (startTime.Before(now)) {
+		if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
 			s.Trigger(record)
 		}
 	}
@@ -164,7 +164,7 @@ func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{
 		startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
 		if err == nil && err2 == nil {
 			now := time.Now()
-			if endTime.After(now) && (startTime.Before(now)) {
+			if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
 				s.Trigger(record)
 			}
 		}
