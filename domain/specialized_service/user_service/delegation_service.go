@@ -44,13 +44,13 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
 	// Define the layout for parsing
 	layout := "2006-01-02" // Go's reference time format
-
 	// Parse the date string into a time.Time
 	endTime, err := time.Parse(layout, utils.GetString(record, "end_date"))
 	startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
-	fmt.Println(endTime, startTime, time.Now(), (endTime.After(time.Now()) || endTime.IsZero()), startTime.Before(time.Now()))
+	fmt.Println(endTime, startTime, time.Now(), (endTime.After(time.Now()) || endTime.IsZero()), startTime.Before(time.Now()), err2, err)
 	if err == nil && err2 == nil {
 		now := time.Now()
+		fmt.Println("THERE")
 		if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
 			s.Trigger(record)
 		}
