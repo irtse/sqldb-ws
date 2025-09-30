@@ -98,10 +98,10 @@ func ImportProjectAxis() {
 				axisName = data[i]
 			}
 			if i == 8 && data[i] != "" {
-				record["start_date"], _ = time.Parse("2006/02/01", fmt.Sprintf("%v", data[i]))
+				record["start_date"], _ = time.Parse("01/02/2006", fmt.Sprintf("%v", data[i]))
 			}
 			if i == 9 && data[i] != "" {
-				record["end_date"], _ = time.Parse("2006/02/01", fmt.Sprintf("%v", data[i]))
+				record["end_date"], _ = time.Parse("01/02/2006", fmt.Sprintf("%v", data[i]))
 			}
 			if i == 4 && data[i] != "" {
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.Axis.Name, map[string]interface{}{
