@@ -45,15 +45,13 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 	// Define the layout for parsing
 	layout := "2006-01-02" // Go's reference time format
 	// Parse the date string into a time.Time
-	endTime, err := time.Parse(layout, utils.GetString(record, "end_date"))
-	startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
-	fmt.Println(endTime, startTime, time.Now(), (endTime.After(time.Now()) || endTime.IsZero()), startTime.Before(time.Now()), err2, err)
-	if err == nil && err2 == nil {
-		now := time.Now()
-		fmt.Println("THERE")
-		if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
-			s.Trigger(record)
-		}
+	endTime, _ := time.Parse(layout, utils.GetString(record, "end_date"))
+	startTime, _ := time.Parse(layout, utils.GetString(record, "start_date"))
+	fmt.Println(endTime, startTime, time.Now(), (endTime.After(time.Now()) || endTime.IsZero()), startTime.Before(time.Now()))
+	now := time.Now()
+	fmt.Println("THERE")
+	if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
+		s.Trigger(record)
 	}
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }
@@ -160,13 +158,11 @@ func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{
 		layout := "2006-01-02" // Go's reference time format
 
 		// Parse the date string into a time.Time
-		endTime, err := time.Parse(layout, utils.GetString(record, "end_date"))
-		startTime, err2 := time.Parse(layout, utils.GetString(record, "start_date"))
-		if err == nil && err2 == nil {
-			now := time.Now()
-			if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
-				s.Trigger(record)
-			}
+		endTime, _ := time.Parse(layout, utils.GetString(record, "end_date"))
+		startTime, _ := time.Parse(layout, utils.GetString(record, "start_date"))
+		now := time.Now()
+		if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
+			s.Trigger(record)
 		}
 	}
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
