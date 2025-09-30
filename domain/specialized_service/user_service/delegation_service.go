@@ -82,12 +82,14 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 						"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
 						ds.UserDBField:             rr[ds.UserDBField],
 						"start_date":               connector.Quote(utils.GetString(rr, "start_date")),
-						"end_date":                 connector.Quote(utils.GetString(rr, "end_date")),
 						ds.SchemaDBField:           r[ds.SchemaDBField],
 						ds.DelegationDBField:       rr[utils.SpecialIDParam],
 						ds.DestTableDBField:        r[ds.DestTableDBField],
 						"update_access":            false,
 						"delete_access":            false,
+					}
+					if utils.GetString(rr, "end_date") != "" {
+						share["end_date"] = connector.Quote(utils.GetString(rr, "end_date"))
 					}
 					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
 						share["start_date"] = rr["start_date"]
@@ -121,12 +123,14 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 					"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
 					ds.UserDBField:             rr[ds.UserDBField],
 					"start_date":               connector.Quote(utils.GetString(rr, "start_date")),
-					"end_date":                 connector.Quote(utils.GetString(rr, "end_date")),
 					ds.SchemaDBField:           r[ds.SchemaDBField],
 					ds.DelegationDBField:       rr[utils.SpecialIDParam],
 					ds.DestTableDBField:        r[ds.DestTableDBField],
 					"update_access":            false,
 					"delete_access":            false,
+				}
+				if utils.GetString(rr, "end_date") != "" {
+					share["end_date"] = connector.Quote(utils.GetString(rr, "end_date"))
 				}
 				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
 					share["start_date"] = rr["start_date"]
