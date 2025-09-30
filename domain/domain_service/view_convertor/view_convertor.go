@@ -205,7 +205,7 @@ func (d *ViewConvertor) ConvertRecordToView(index int, view *sm.ViewModel, chann
 	var datapath, historyPath, commentPath, synthesisPath string = "", "", "", ""
 	if !isEmpty {
 		synthesisPath = d.getSynthesis(record, schema)
-		historyPath = utils.BuildPath(ds.DBDataAccess.Name, utils.ReservedParam, utils.RootOrderParam+"=access_date", utils.RootDirParam+"=asc", utils.RootDestTableIDParam+"="+record.GetString(utils.SpecialIDParam), ds.RootID(ds.DBSchema.Name)+"="+utils.ToString(schema.ID))
+		historyPath = utils.BuildPath(ds.DBDataAccess.Name, utils.ReservedParam, utils.RootOrderParam+"=access_date", utils.RootDirParam+"=desc", utils.RootDestTableIDParam+"="+record.GetString(utils.SpecialIDParam), ds.RootID(ds.DBSchema.Name)+"="+utils.ToString(schema.ID))
 		if record[ds.DestTableDBField] != nil && record[ds.SchemaDBField] != nil {
 			commentPath = utils.BuildPath(ds.DBComment.Name, utils.ReservedParam, utils.RootDestTableIDParam+"="+record.GetString(ds.DestTableDBField), ds.RootID(ds.DBSchema.Name)+"="+record.GetString(ds.SchemaDBField))
 		} else {
