@@ -6,6 +6,7 @@ import (
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
+	connector "sqldb-ws/infrastructure/connector/db"
 	"time"
 )
 
@@ -68,7 +69,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 		}, false); err == nil && len(res) > 0 {
 			for _, r := range res {
 				go func() {
-					newTask := utils.Record{}
+					newTask := map[string]interface{}{}
 					for k, v := range r {
 						newTask[k] = v
 					}
@@ -79,8 +80,8 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 					share := map[string]interface{}{
 						"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
 						ds.UserDBField:             rr[ds.UserDBField],
-						"start_date":               rr["start_date"],
-						"end_date":                 rr["end_date"],
+						"start_date":               connector.Quote(utils.GetString(rr, "start_date")),
+						"end_date":                 connector.Quote(utils.GetString(rr, "end_date")),
 						ds.SchemaDBField:           r[ds.SchemaDBField],
 						ds.DelegationDBField:       rr[utils.SpecialIDParam],
 						ds.DestTableDBField:        r[ds.DestTableDBField],
@@ -88,6 +89,8 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 						"delete_access":            false,
 					}
 					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+						share["start_date"] = rr["start_date"]
+						share["end_date"] = rr["end_datey"]
 						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 					}
 					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, newTask, false); err == nil && len(res) == 0 {
