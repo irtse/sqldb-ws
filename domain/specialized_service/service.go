@@ -22,6 +22,7 @@ var SERVICES = []func() utils.SpecializedServiceITF{
 	task.NewTaskService,
 	task.NewRequestService,
 	favorite.NewFilterService,
+	favorite.NewHistoryService,
 	//&favorite.DashboardService{},
 	user.NewDelegationService,
 	user.NewShareService,
