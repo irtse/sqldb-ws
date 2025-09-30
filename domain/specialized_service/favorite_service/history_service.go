@@ -1,6 +1,7 @@
 package favorite_service
 
 import (
+	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
@@ -22,6 +23,7 @@ func (s *HistoryService) TransformToGenericView(results utils.Results, tableName
 		if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 			utils.SpecialIDParam: d[ds.UserDBField],
 		}, false); err == nil && len(res) > 0 {
+			fmt.Println(utils.GetString(res[0], "name"))
 			d["user"] = utils.GetString(res[0], "name")
 		}
 	}
