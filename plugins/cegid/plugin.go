@@ -145,7 +145,7 @@ func ImportProjectAxis() {
 				"code": connector.Quote(utils.GetString(record, "code")),
 			}, false); err == nil && len(res) > 0 {
 				if strings.Contains(strings.ToLower(utils.ToString(record["name"])), "eden") {
-					fmt.Println("RECORD CODE NOT FOUND", record)
+					fmt.Println("OTHER RECORD CODE NOT FOUND", record)
 				}
 				record[utils.SpecialIDParam] = res[0][utils.SpecialIDParam]
 				d.GetDb().UpdateQuery(models.Project.Name, record, map[string]interface{}{
@@ -173,6 +173,7 @@ func ImportProjectAxis() {
 					d.GetDb().DeleteQueryWithRestriction(ds.DBEntityUser.Name, m2, false)
 					d.GetDb().CreateQuery(ds.DBEntityUser.Name, m2, func(s string) (string, bool) { return "", true })
 				}
+				continue
 			}
 			if parentID != nil {
 				res, err := d.GetDb().CreateQuery(ds.DBEntity.Name, map[string]interface{}{
