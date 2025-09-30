@@ -120,7 +120,7 @@ func (v *ViewConvertor) ProcessResultsConcurrently(results utils.Results, schema
 				utils.GetInt(record, ds.DestTableDBField))...,
 			)
 		}
-		go v.ConvertRecordToView(index, view, channel, record, schema, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
+		go v.ConvertRecordToView(len(results), index, view, channel, record, schema, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
 	}
 	for range results {
 		rec := <-channel
@@ -196,7 +196,7 @@ func (v *ViewConvertor) createShallowedViewItem(record utils.Record, tableName s
 	return view
 }
 
-func (d *ViewConvertor) ConvertRecordToView(index int, view *sm.ViewModel, channel chan sm.ViewItemModel,
+func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel, channel chan sm.ViewItemModel,
 	record utils.Record, schema *sm.SchemaModel, isEmpty bool, isWorkflow bool, params utils.Params,
 	createdIds []string) {
 
@@ -249,7 +249,57 @@ func (d *ViewConvertor) ConvertRecordToView(index int, view *sm.ViewModel, chann
 		Workflow:      d.EnrichWithWorkFlowView(record, schema.Name, isWorkflow),
 		Draft:         utils.GetBool(record, "is_draft"),
 		Synthesis:     synthesisPath,
+		MetaData:      d.getMetaData(l, record, schema),
 		New:           history.GetNew(utils.GetString(record, utils.SpecialIDParam), schema.ID, d.Domain),
+	}
+}
+
+func (s *ViewConvertor) getMetaData(l int, record utils.Record, schema *sm.SchemaModel) *sm.MetaData {
+	if l > 1 {
+		return nil
+	}
+	creationUser := ""
+	updateUser := ""
+	updateDate := ""
+	creationDate := ""
+
+	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
+		"access_date": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
+			ds.DestTableDBField: record[utils.SpecialIDParam],
+			ds.SchemaDBField:    schema.ID,
+		}, false, "MAX(access_date)"),
+		ds.DestTableDBField: record[utils.SpecialIDParam],
+		ds.SchemaDBField:    schema.ID,
+		"update":            true,
+	}, false); err == nil && len(res) > 0 {
+		updateDate = utils.GetString(res[0], "access_date")
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+			utils.SpecialIDParam: res[0][ds.UserDBField],
+		}, false); err == nil && len(res) > 0 {
+			updateUser = utils.GetString(res[0], "name")
+		}
+	}
+	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
+		"access_date": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
+			ds.DestTableDBField: record[utils.SpecialIDParam],
+			ds.SchemaDBField:    schema.ID,
+		}, false, "MAX(access_date)"),
+		ds.DestTableDBField: record[utils.SpecialIDParam],
+		ds.SchemaDBField:    schema.ID,
+		"update":            true,
+	}, false); err == nil && len(res) > 0 {
+		creationDate = utils.GetString(res[0], "access_date")
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+			utils.SpecialIDParam: res[0][ds.UserDBField],
+		}, false); err == nil && len(res) > 0 {
+			creationUser = utils.GetString(res[0], "name")
+		}
+	}
+	return &sm.MetaData{
+		UpdatedUser: updateUser,
+		CreatedUser: creationUser,
+		UpdatedDate: updateDate,
+		CreatedDate: creationDate,
 	}
 }
 

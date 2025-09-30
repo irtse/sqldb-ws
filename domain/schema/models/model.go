@@ -325,6 +325,13 @@ func (v ViewModel) ToRecord() utils.Record {
 	return r
 }
 
+type MetaData struct {
+	CreatedUser string `json:"created_user"`
+	UpdatedUser string `json:"updated_user"`
+	CreatedDate string `json:"created_date"`
+	UpdatedDate string `json:"updated_date"`
+}
+
 type ViewItemModel struct {
 	IsEmpty       bool                     `json:"-"`
 	Sort          int64                    `json:"-"`
@@ -343,6 +350,7 @@ type ViewItemModel struct {
 	Draft         bool                     `json:"is_draft"`
 	Synthesis     string                   `json:"synthesis_path"`
 	New           bool                     `json:"new"`
+	MetaData      *MetaData                `json:"metadata"`
 }
 
 type SharingModel struct {
