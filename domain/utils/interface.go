@@ -30,6 +30,7 @@ type DomainITF interface {
 	GetUniqueRedirection() string
 	GetDomainID() string
 	GetDb() *conn.Database
+	SetDb(db *conn.Database)
 	GetMethod() Method
 	GetTable() string
 	GetUserID() string

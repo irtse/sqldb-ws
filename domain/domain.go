@@ -83,6 +83,10 @@ func (d *SpecializedDomain) IsOwn(checkPerm bool, force bool, method utils.Metho
 
 func (d *SpecializedDomain) GetDb() *conn.Database { return d.Db }
 
+func (d *SpecializedDomain) SetDb(db *conn.Database) {
+	d.Db = db
+}
+
 func (d *SpecializedDomain) CreateSuperCall(params utils.Params, record utils.Record, args ...interface{}) (utils.Results, error) {
 	return d.SuperCall(params, record, utils.CREATE, false, args...) // how to...
 }

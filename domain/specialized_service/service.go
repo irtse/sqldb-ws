@@ -9,6 +9,7 @@ import (
 	user "sqldb-ws/domain/specialized_service/user_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
+	connector "sqldb-ws/infrastructure/connector/db"
 
 	"time"
 )
@@ -63,13 +64,16 @@ func (s *CustomService) VerifyDataIntegrity(record map[string]interface{}, table
 // we can have simultaneous starting... forkin
 
 func VerifyLoop(domain utils.DomainITF, schemas ...sm.SchemaModel) {
+	if domain.GetDb() == nil || domain.GetDb().Conn == nil {
+		domain.SetDb(connector.Open(domain.GetDb()))
+	}
 	for _, sch := range schemas {
 		currentTime := time.Now()
 		if sch.HasField("start_date") && sch.HasField("end_date") {
 			sqlFilter := "('" + currentTime.Format("2006-01-02") + "' > end_date)"
 			domain.DeleteSuperCall(utils.AllParams(sch.Name), sqlFilter)
 			sqlFilter = "'" + currentTime.Format("2006-01-02") + "' > start_date"
-			if res, err := domain.SuperCall(utils.AllParams(sch.Name).RootRaw(), utils.Record{}, utils.SELECT, false, sqlFilter); err == nil && len(res) > 0 {
+			if res, err := domain.GetDb().SelectQueryWithRestriction(sch.Name, sqlFilter, false); err == nil && len(res) > 0 {
 				for _, r := range res {
 					SpecializedService(sch.Name).Trigger(r)
 				}
