@@ -63,9 +63,9 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 			"is_close": false,
 			utils.SpecialIDParam: db.ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				ds.EntityDBField: db.ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.UserDBField: s.Domain.GetUserID(),
+					ds.UserDBField: rr[ds.UserDBField],
 				}, false, ds.EntityDBField),
-				ds.UserDBField: s.Domain.GetUserID(),
+				ds.UserDBField: rr[ds.UserDBField],
 			}, true, "id"),
 		}, false); err == nil && len(res) > 0 {
 			for _, r := range res {
