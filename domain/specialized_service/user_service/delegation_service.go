@@ -92,7 +92,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 						share["end_date"] = connector.Quote(utils.GetString(rr, "end_date"))
 					}
 					if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-						ds.DelegationDBField: r[utils.SpecialIDParam],
+						ds.DelegationDBField: rr[utils.SpecialIDParam],
 					}, false); err == nil && len(res) == 0 {
 						share["start_date"] = rr["start_date"]
 						share["end_date"] = rr["end_datey"]
@@ -138,7 +138,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 					share["start_date"] = rr["start_date"]
 					share["end_date"] = rr["end_datey"]
 					db.ClearQueryFilter().CreateQuery(ds.DBShare.Name, map[string]interface{}{
-						ds.DelegationDBField: r[utils.SpecialIDParam],
+						ds.DelegationDBField: rr[utils.SpecialIDParam],
 					}, func(s string) (string, bool) { return "", true })
 				}
 				if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
