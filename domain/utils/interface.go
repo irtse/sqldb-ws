@@ -9,7 +9,7 @@ type SpecializedServiceITF interface {
 	SetDomain(d DomainITF) SpecializedServiceITF
 	Entity() SpecializedServiceInfo
 	TransformToGenericView(results Results, tableName string, dest_id ...string) Results
-	Trigger(record map[string]interface{})
+	Trigger(record map[string]interface{}, db *conn.Database)
 	infrastructure.InfraSpecializedServiceItf
 }
 type SpecializedServiceInfo interface{ GetName() string }

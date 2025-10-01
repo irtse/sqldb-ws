@@ -51,18 +51,18 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 	now := time.Now()
 	fmt.Println("THERE")
 	if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
-		s.Trigger(record)
+		s.Trigger(record, s.Domain.GetDb())
 	}
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }
 
-func (s *DelegationService) Trigger(rr map[string]interface{}) {
+func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Database) {
 	fmt.Println("TRIGGER", rr)
 	if utils.GetBool(rr, "all_tasks") {
-		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+		if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			"is_close": false,
-			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-				ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			utils.SpecialIDParam: db.ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				ds.EntityDBField: db.ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 					ds.UserDBField: s.Domain.GetUserID(),
 				}, false, ds.EntityDBField),
 				ds.UserDBField: s.Domain.GetUserID(),
@@ -91,22 +91,22 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 					if utils.GetString(rr, "end_date") != "" {
 						share["end_date"] = connector.Quote(utils.GetString(rr, "end_date"))
 					}
-					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+					if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
 						share["start_date"] = rr["start_date"]
 						share["end_date"] = rr["end_datey"]
-						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+						db.ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 					}
-					if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					if res, err := db.SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 						"binded_dbtask": newTask["binded_dbtask"],
 						ds.UserDBField:  newTask[ds.UserDBField],
 					}, false); err == nil && len(res) == 0 {
-						s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
+						db.ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 					}
 				}()
 			}
 		}
 	} else if taskID := utils.GetInt(rr, ds.TaskDBField); taskID >= 0 {
-		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+		if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			"is_close":           false,
 			utils.SpecialIDParam: taskID,
 		}, false); err == nil && len(res) > 0 {
@@ -132,16 +132,16 @@ func (s *DelegationService) Trigger(rr map[string]interface{}) {
 				if utils.GetString(rr, "end_date") != "" {
 					share["end_date"] = connector.Quote(utils.GetString(rr, "end_date"))
 				}
-				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
+				if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, share, false); err == nil && len(res) == 0 {
 					share["start_date"] = rr["start_date"]
 					share["end_date"] = rr["end_datey"]
-					s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+					db.ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 				}
-				if res, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 					"binded_dbtask": newTask["binded_dbtask"],
 					ds.UserDBField:  newTask[ds.UserDBField],
 				}, false); err == nil && len(res) == 0 {
-					s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
+					db.ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 				}
 			}
 		}
@@ -183,7 +183,7 @@ func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{
 		startTime, _ := time.Parse(layout, utils.GetString(record, "start_date"))
 		now := time.Now()
 		if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
-			s.Trigger(record)
+			s.Trigger(record, s.Domain.GetDb())
 		}
 	}
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)

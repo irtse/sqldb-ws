@@ -11,6 +11,7 @@ import (
 	"sqldb-ws/domain/schema/models"
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
+	connector "sqldb-ws/infrastructure/connector/db"
 	"sqldb-ws/infrastructure/service"
 	"strconv"
 	"strings"
@@ -27,7 +28,7 @@ func (s *AbstractSpecializedService) Entity() utils.SpecializedServiceInfo {
 	return nil
 }
 
-func (s *AbstractSpecializedService) Trigger(record map[string]interface{}) {}
+func (s *AbstractSpecializedService) Trigger(record map[string]interface{}, db *connector.Database) {}
 
 func (s *AbstractSpecializedService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
 	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
