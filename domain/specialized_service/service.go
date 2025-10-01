@@ -73,7 +73,9 @@ func VerifyLoop(domain utils.DomainITF, schemas ...sm.SchemaModel) {
 			db := connector.Open(domain.GetDb())
 			if res, err := db.SelectQueryWithRestriction(sch.Name, sqlFilter, false); err == nil && len(res) > 0 {
 				for _, r := range res {
-					SpecializedService(sch.Name).Trigger(r)
+					s := SpecializedService(sch.Name)
+					s.SetDomain(domain)
+					s.Trigger(r)
 				}
 			}
 			db.Close()
