@@ -64,20 +64,19 @@ func (s *CustomService) VerifyDataIntegrity(record map[string]interface{}, table
 // we can have simultaneous starting... forkin
 
 func VerifyLoop(domain utils.DomainITF, schemas ...sm.SchemaModel) {
-	if domain.GetDb() == nil || domain.GetDb().Conn == nil {
-		domain.SetDb(connector.Open(domain.GetDb()))
-	}
 	for _, sch := range schemas {
 		currentTime := time.Now()
 		if sch.HasField("start_date") && sch.HasField("end_date") {
 			sqlFilter := "('" + currentTime.Format("2006-01-02") + "' > end_date)"
 			domain.DeleteSuperCall(utils.AllParams(sch.Name), sqlFilter)
 			sqlFilter = "'" + currentTime.Format("2006-01-02") + "' > start_date"
-			if res, err := domain.GetDb().SelectQueryWithRestriction(sch.Name, sqlFilter, false); err == nil && len(res) > 0 {
+			db := connector.Open(domain.GetDb())
+			if res, err := db.SelectQueryWithRestriction(sch.Name, sqlFilter, false); err == nil && len(res) > 0 {
 				for _, r := range res {
 					SpecializedService(sch.Name).Trigger(r)
 				}
 			}
+			db.Close()
 		}
 	}
 }
