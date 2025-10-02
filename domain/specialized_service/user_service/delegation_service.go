@@ -155,7 +155,7 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 		share := map[string]interface{}{
 			ds.DelegationDBField: res[utils.SpecialIDParam],
 		}
-		err := s.Domain.GetDb().DeleteQueryWithRestriction(ds.DBShare.Name, share, false)
+		err := s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBShare.Name, share, false)
 		fmt.Println("DELETE", err)
 		res["state"] = "completed"
 		arr := []interface{}{
