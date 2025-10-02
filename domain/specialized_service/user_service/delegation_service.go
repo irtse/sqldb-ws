@@ -153,9 +153,10 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 	fmt.Println("DELETE", results)
 	for i, res := range results {
 		share := map[string]interface{}{
-			"binded_to_delegation": res[utils.SpecialIDParam],
+			ds.DelegationDBField: res[utils.SpecialIDParam],
 		}
-		s.Domain.GetDb().DeleteQueryWithRestriction(ds.DBShare.Name, share, false)
+		err := s.Domain.GetDb().DeleteQueryWithRestriction(ds.DBShare.Name, share, false)
+		fmt.Println("DELETE", err)
 		res["state"] = "completed"
 		arr := []interface{}{
 			connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
@@ -171,6 +172,8 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 				}, false, utils.SpecialIDParam),
 			}, false)
 			results[i] = task.SetClosureStatus(res)
+		} else {
+			fmt.Println(rr, err)
 		}
 	}
 }
