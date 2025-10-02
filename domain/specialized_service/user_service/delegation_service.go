@@ -47,9 +47,7 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 	// Parse the date string into a time.Time
 	endTime, _ := time.Parse(layout, utils.GetString(record, "end_date"))
 	startTime, _ := time.Parse(layout, utils.GetString(record, "start_date"))
-	fmt.Println(endTime, startTime, time.Now(), (endTime.After(time.Now()) || endTime.IsZero()), startTime.Before(time.Now()))
 	now := time.Now()
-	fmt.Println("THERE")
 	if (endTime.After(now) || endTime.IsZero()) && (startTime.Before(now)) {
 		s.Trigger(record, s.Domain.GetDb())
 	}
@@ -57,7 +55,6 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 }
 
 func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Database) {
-	fmt.Println("TRIGGER", rr)
 	if utils.GetBool(rr, "all_tasks") {
 		if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			"is_close": false,
@@ -153,6 +150,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 }
 
 func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
+	fmt.Println("DELETE", results)
 	for i, res := range results {
 		share := map[string]interface{}{
 			"binded_to_delegation": res[utils.SpecialIDParam],
