@@ -155,8 +155,7 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 		share := map[string]interface{}{
 			ds.DelegationDBField: res[utils.SpecialIDParam],
 		}
-		err := s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBShare.Name, share, false)
-		fmt.Println("DELETE", err)
+		s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBShare.Name, share, false)
 		res["state"] = "completed"
 		arr := []interface{}{
 			connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
@@ -166,14 +165,13 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 		currentTime := time.Now()
 		arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND ('"+currentTime.Format("2006-01-02")+"' < end_date OR end_date IS NULL))")
 		if rr, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBDelegation.Name, arr, false); err == nil && len(rr) == 0 {
-			s.Domain.GetDb().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			err := s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				"binded_dbtask": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 					ds.UserDBField: res["delegated_"+ds.UserDBField],
 				}, false, utils.SpecialIDParam),
 			}, false)
+			fmt.Println("DELETE", err)
 			results[i] = task.SetClosureStatus(res)
-		} else {
-			fmt.Println(rr, err)
 		}
 	}
 }
