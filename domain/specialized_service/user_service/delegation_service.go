@@ -167,10 +167,10 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 		if rr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, arr, false); err == nil && len(rr) == 0 {
 			err := s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				"binded_dbtask": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.UserDBField: res[ds.UserDBField],
+					ds.UserDBField: s.Domain.GetUserID(),
 				}, false, utils.SpecialIDParam),
 			}, false)
-			fmt.Println("DELETE", err, res[ds.UserDBField])
+			fmt.Println("DELETE", err, res[ds.UserDBField], s.Domain.GetUserID())
 			results[i] = task.SetClosureStatus(res)
 		}
 	}

@@ -19,10 +19,6 @@ func (db *Database) DeleteQueryWithRestriction(name string, restrictions map[str
 		name = name + " as main "
 		q = db.BuildDeleteQueryWithRestriction(name, restrictions, isOr)
 	}
-	if name == "dbtask" {
-		fmt.Println(q)
-	}
-
 	return db.Query(q)
 }
 
