@@ -63,6 +63,7 @@ func (db *Database) MathQuery(algo string, name string, naming ...string) ([]map
 		q = db.BuildMathQuery(algo, name, naming...)
 	}
 	res, err := db.QueryAssociativeArray(q)
+	fmt.Println(res, err, q)
 	return res, err
 }
 

@@ -185,6 +185,38 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 		}
 	}
 }
+
+func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
+	for _, sch := range models.SchemaRegistry {
+		for _, r := range results {
+			if tableName != sch.Name {
+				continue
+			}
+			if sch.HasField(ds.SchemaDBField) && sch.HasField(ds.DestTableDBField) {
+				if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+					ds.SchemaDBField:    sch.ID,
+					ds.DestTableDBField: utils.GetInt(r, utils.SpecialIDParam),
+				}, false); err == nil {
+					for _, rrr := range res {
+						s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+					}
+				}
+			}
+			for _, f := range sch.Fields {
+				if utils.ToString(f.GetLink()) == sch.ID {
+					if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+						f.Name: r[utils.SpecialIDParam],
+					}, false); err == nil {
+						for _, rrr := range res {
+							s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string, fieldName string, id string) {
 	if !sch.HasField(fieldName) {
 		return
@@ -242,9 +274,9 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 	if sch, err := schema.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
-		/*if ok, err := s.GetFieldInfo(sch, record); !ok && err != nil {
-			return record, err, false
-		}*/
+		if ok, err := s.GetFieldInfo(sch, record); !ok || err != nil {
+			// return record, err, false
+		}
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
@@ -363,37 +395,6 @@ func (s *SpecializedService) TransformToGenericView(results utils.Results, table
 }
 func (s *SpecializedService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
 	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
-}
-
-func (s *SpecializedService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
-	for _, sch := range models.SchemaRegistry {
-		for _, r := range results {
-			if tableName != sch.Name {
-				continue
-			}
-			if sch.HasField(ds.SchemaDBField) && sch.HasField(ds.DestTableDBField) {
-				if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-					ds.SchemaDBField:    sch.ID,
-					ds.DestTableDBField: utils.GetInt(r, utils.SpecialIDParam),
-				}, false); err == nil {
-					for _, rrr := range res {
-						s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
-					}
-				}
-			}
-			for _, f := range sch.Fields {
-				if utils.ToString(f.GetLink()) == sch.ID {
-					if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-						f.Name: r[utils.SpecialIDParam],
-					}, false); err == nil {
-						for _, rrr := range res {
-							s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
-						}
-					}
-				}
-			}
-		}
-	}
 }
 
 func CheckAutoLoad(tablename string, record utils.Record, domain utils.DomainITF) (utils.Record, error, bool) {
