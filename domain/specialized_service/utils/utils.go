@@ -279,7 +279,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 	if sch, err := schema.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
-		if ok, err := s.GetFieldInfo(sch, record); !ok || err != nil {
+		if ok, err := filter.NewFilterService(s.Domain).GetFieldVerification(sch, record); !ok || err != nil {
 			return record, err, false
 		}
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany

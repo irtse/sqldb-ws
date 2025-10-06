@@ -1,6 +1,8 @@
 package filter
 
 import (
+	"errors"
+	"fmt"
 	"slices"
 	"sort"
 	"sqldb-ws/domain/schema"
@@ -182,19 +184,21 @@ func (t *FilterService) GetFieldCondition(fromSchema sm.SchemaModel, record util
 		ds.SchemaFieldDBField: fields,
 	}, false); err == nil && len(res) > 0 {
 		for _, cond := range res {
-			if cond["from_"+ds.SchemaDBField] != nil && cond["from_"+ds.SchemaFieldDBField] != nil {
+			if cond["from_"+ds.SchemaDBField] != nil {
 				if sche, err := sch.GetSchemaByID(utils.GetInt(cond, "from_"+ds.SchemaDBField)); err == nil {
-					if field, err := sche.GetFieldByID(utils.GetInt(cond, "from_"+ds.SchemaFieldDBField)); err == nil {
-						if p, ok := t.Domain.GetParams().Get(field.Name); ok {
-							if p == "" && utils.GetBool(cond, "not_null") {
-								return []map[string]interface{}{}
-							} else if p != utils.GetString(cond, "value") && utils.GetString(cond, "value") != "" {
-								return []map[string]interface{}{}
+					if cond["from_"+ds.SchemaFieldDBField] != nil {
+						if field, err := sche.GetFieldByID(utils.GetInt(cond, "from_"+ds.SchemaFieldDBField)); err == nil {
+							if p, ok := t.Domain.GetParams().Get(field.Name); ok {
+								if p == "" && utils.GetBool(cond, "not_null") {
+									return []map[string]interface{}{}
+								} else if p != utils.GetString(cond, "value") && utils.GetString(cond, "value") != "" {
+									return []map[string]interface{}{}
+								}
+								for _, f := range fields {
+									value[f] = p
+								}
+								continue
 							}
-							for _, f := range fields {
-								value[f] = p
-							}
-							continue
 						}
 					}
 				}
@@ -215,9 +219,6 @@ func (t *FilterService) GetFieldCondition(fromSchema sm.SchemaModel, record util
 		for _, r := range rr {
 			if r["value"] == nil || r["value"] == "" {
 				r["value"] = value[utils.ToString(r[ds.SchemaFieldDBField])]
-				if r["value"] == nil || r["value"] == "" {
-					continue
-				}
 			}
 			rules = append(rules, r)
 		}
@@ -235,7 +236,7 @@ func (t *FilterService) fromITF(val interface{}) interface{} {
 	}
 }
 
-func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64) string {
+func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64) (map[string]map[string]string, string) {
 	if key == "" {
 		key = "id"
 	}
@@ -245,6 +246,7 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 	}, false); err == nil && len(res) > 0 {
 		rules = res
 	}
+	m := map[string]map[string]string{}
 	if len(rules) > 0 {
 		sql := ""
 		for _, r := range rules {
@@ -282,7 +284,12 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 						sql += " AND "
 					}
 				}
-				sql += key + " " + operator + " " + "(SELECT " + fromF + " FROM " + fromSchema.Name + " WHERE " + t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField)) + ")"
+				if m[key] == nil {
+					m[key] = map[string]string{}
+				}
+				_, ff := t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
+				m[key][operator] = "(SELECT " + fromF + " FROM " + fromSchema.Name + " WHERE " + ff + ")"
+				sql += key + " " + operator + " " + m[key][operator]
 				continue
 			}
 			if len(sql) > 0 {
@@ -292,9 +299,13 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 					sql += " AND "
 				}
 			}
-			sql += key + " " + operator + " " + t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
+			if m[key] == nil {
+				m[key] = map[string]string{}
+			}
+			_, m[key][operator] = t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
+			sql += key + " " + operator + " " + m[key][operator]
 		}
-		return "(" + sql + ")"
+		return m, "(" + sql + ")"
 	} else {
 		val := rule["value"]
 		if fromSchema != nil && fromField != nil {
@@ -306,14 +317,21 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 			}
 		}
 		if key == "id" || fromSchema == nil {
-			return key + " " + operator + " " + utils.ToString(t.fromITF(val))
-		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(
-			key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
+			if m[key] == nil {
+				m[key] = map[string]string{}
+			}
+			m[key][operator] = utils.ToString(t.fromITF(val))
+			return m, key + " " + operator + " " + m[key][operator]
+		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
 			kk := utils.SpecialIDParam
-			return kk + " " + op + " " + "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
+			if m[kk] == nil {
+				m[kk] = map[string]string{}
+			}
+			m[kk][op] = "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
+			return m, kk + " " + op + " " + m[kk][op]
 		}
 	}
-	return ""
+	return m, ""
 }
 
 func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, error) {
@@ -338,7 +356,7 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 				ff = &f
 			}
 		}
-		if ss := utils.ToString(t.GetFieldSQL(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField))); ss != "" {
+		if _, ss := t.GetFieldSQL(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField)); ss != "" {
 			if len(sql) > 0 {
 				if utils.GetString(rule, "separator") != "" {
 					sql += " " + strings.ToUpper(utils.ToString(rule["separator"])) + " "
@@ -350,4 +368,68 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 		}
 	}
 	return sql, nil
+}
+
+func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}) (bool, error) {
+	m, _ := t.GetFieldSQL(key, operator, fromSchema, fromField, rule, dest)
+	for k, mm := range m {
+		for op, mmm := range mm {
+			if field, err := fromSchema.GetField(k); err == nil {
+				if len(mmm) > 1 && fmt.Sprintf("%v", mmm[0]) == "(" && fmt.Sprintf("%v", mmm[len(mmm)-1]) == ")" {
+					if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
+						if record[k] == nil || len(res) == 0 {
+							if utils.GetBool(rule, "not_null") {
+								return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
+							}
+						} else {
+							arr := []string{}
+							for _, r := range res {
+								arr = append(arr, utils.GetString(r, k))
+							}
+							return sm.CompareList(op, field.Type, fmt.Sprintf("%v", record[k]), arr)
+						}
+					}
+				} else {
+					if record[k] == nil {
+						if utils.GetBool(rule, "not_null") {
+							return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
+						}
+					} else if ok, err := sm.Compare(op, field.Type, fmt.Sprintf("%v", record[k]), mmm); err != nil || !ok {
+						return false, errors.New("can't validate this field affection based on rules")
+					}
+				}
+			} else {
+				return false, errors.New("can't validate this field affection based on rules : " + err.Error())
+			}
+		}
+	}
+	return true, nil
+}
+
+func (t *FilterService) GetFieldVerification(fromSchema sm.SchemaModel, record map[string]interface{}) (bool, error) {
+	for _, rule := range t.GetFieldCondition(fromSchema, utils.Record{}) { // SIMPLE WAY...
+		fieldName := ""
+		var fs *sm.SchemaModel
+		var ff *sm.FieldModel
+		if f, err := schema.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField)); err == nil {
+			fieldName = f.Name
+			if ss, err := schema.GetSchemaByID(utils.ToInt64(f.SchemaID)); err == nil {
+				fs = &ss
+			}
+		}
+		if rule["from_"+ds.SchemaDBField] != nil {
+			if s, err := schema.GetSchemaByID(utils.GetInt(rule, "from_"+ds.SchemaDBField)); err == nil {
+				fs = &s
+			}
+		}
+		if rule["from_"+ds.SchemaFieldDBField] != nil {
+			if f, err := schema.GetFieldByID(utils.GetInt(rule, "from_"+ds.SchemaFieldDBField)); err == nil {
+				ff = &f
+			}
+		}
+		if ok, err := t.GetFieldVerify(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField), record); err != nil || !ok {
+			return false, err
+		}
+	}
+	return true, nil
 }

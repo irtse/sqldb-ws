@@ -1,8 +1,13 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+	"slices"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var CacheMutex = sync.Mutex{}
@@ -124,6 +129,118 @@ func DataTypeList() []string {
 		"MANYTOMANY_ADD",
 		"ONETOMANY_ADD",
 	}
+}
+
+func CompareList(operator string, typ string, val string, val2 []string) (bool, error) {
+	if len(val2) == 1 {
+		return Compare(operator, typ, val, val2[0])
+	} else {
+		found := false
+		if strings.ToUpper(typ) != "IN" {
+			found = true
+		}
+		for _, v := range val2 {
+			ok, _ := Compare(operator, typ, val, v)
+			if strings.ToUpper(typ) == "IN" && ok {
+				found = true
+			} else if strings.ToUpper(typ) == "NOT IN" && ok {
+				found = false
+			} else if !ok {
+				found = false
+			}
+		}
+		if found {
+			return true, nil
+		}
+		return false, errors.New("list comparison failed " + operator)
+	}
+}
+
+func Compare(operator string, typ string, val string, val2 string) (bool, error) {
+	if ok, a, b := IsDateComparable(typ, val, val2); ok {
+		switch operator {
+		case "LIKE":
+			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), nil
+		case ">":
+			return a.After(b), nil
+		case "<":
+			return a.Before(b), nil
+		case ">=":
+			return a.After(b) || a == b, nil
+		case "<=":
+			return a.Before(b) || a == b, nil
+		case "=", "==", "IN":
+			return a == b, nil
+		case "!=", "<>", "NOT IN":
+			return a != b, nil
+		}
+	}
+
+	if ok, a, b := IsFloatComparable(typ, val, val2); ok {
+		switch operator {
+		case "LIKE":
+			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), nil
+		case ">":
+			return a > b, nil
+		case "<":
+			return a < b, nil
+		case ">=":
+			return a >= b, nil
+		case "<=":
+			return a <= b, nil
+		case "=", "==", "IN":
+			return a == b, nil
+		case "!=", "<>", "NOT IN":
+			return a != b, nil
+		}
+	}
+
+	if (strings.ToLower(fmt.Sprintf("%v", val)) == "true" || strings.ToLower(fmt.Sprintf("%v", val)) == "false") && (strings.ToLower(fmt.Sprintf("%v", val2)) == "true" || strings.ToLower(fmt.Sprintf("%v", val2)) == "false") {
+		switch operator {
+		case "=", "==", "IN":
+			return strings.ToLower(fmt.Sprintf("%v", val)) == strings.ToLower(fmt.Sprintf("%v", val2)), nil
+		case "!=", "<>", "NOT IN":
+			return strings.ToLower(fmt.Sprintf("%v", val)) != strings.ToLower(fmt.Sprintf("%v", val2)), nil
+		}
+	}
+
+	if ok, a, b := IsStringComparable(typ, val, val2); ok {
+		switch operator {
+		case "LIKE":
+			return strings.Contains(a, b), nil
+		case "=", "==", "IN":
+			return a == b, nil
+		case "!=", "<>", "NOT IN":
+			return a != b, nil
+		}
+	}
+	return false, fmt.Errorf("unknown comparator: %s", operator)
+}
+
+func IsDateComparable(typ string, val string, val2 string) (bool, time.Time, time.Time) {
+	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
+		time1, err := time.Parse(time.RFC3339, val)
+		time2, err2 := time.Parse(time.RFC3339, val2)
+		return err == nil && err2 == nil, time1, time2
+	}
+	return false, time.Now(), time.Now()
+}
+
+func IsStringComparable(typ string, val string, val2 string) (bool, string, string) {
+	if slices.Contains([]string{"VARCHAR(32)", "VARCHAR(64)", "VARCHAR(128)", "VARCHAR(255)",
+		"TEXT", "VARCHAR(6)", "URL", "UPLOAD", "UPLOAD_MULTIPLE", "HTML"}, strings.ToUpper(typ)) || strings.Contains(typ, "ENUM") {
+		return true, val, val2
+	}
+	return false, "", ""
+}
+
+func IsFloatComparable(typ string, val string, val2 string) (bool, float64, float64) {
+	if slices.Contains([]string{"SMALLINT", "INTEGER", "BIGINT", "DOUBLE PRECISION", "DECIMAL", "LINK_ADD"}, strings.ToUpper(typ)) {
+		f, err := strconv.ParseFloat(val, 64)
+		f2, err2 := strconv.ParseFloat(val2, 64)
+		return err == nil && err2 == nil, f, f2
+	}
+	return false, 0, 0
 }
 
 func (s DataType) String() string { return strings.ToLower(DataTypeList()[s-1]) }
