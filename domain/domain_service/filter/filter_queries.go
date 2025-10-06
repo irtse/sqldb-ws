@@ -313,8 +313,7 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(
 			key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
 			kk := utils.SpecialIDParam
-			fmt.Println(typ, link, k, v, op)
-			return "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
+			return kk + " " + op + " " + "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
 		}
 	}
 	return ""
