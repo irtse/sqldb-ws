@@ -404,6 +404,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 				}
 			} else {
 				if record[k] == nil {
+					fmt.Println("TOP 12", k, record[k], rule)
 					if utils.GetBool(rule, "not_null") {
 						fmt.Println("TOP 3", k, record[k], rule)
 						return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
