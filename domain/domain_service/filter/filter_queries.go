@@ -375,38 +375,41 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 	fmt.Println("TOP", m)
 	for k, mm := range m {
 		for op, mmm := range mm {
-			if field, err := fromSchema.GetField(k); err == nil {
-				if len(mmm) > 1 && fmt.Sprintf("%v", mmm[0]) == "(" && fmt.Sprintf("%v", mmm[len(mmm)-1]) == ")" {
-					if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
-						if record[k] == nil || len(res) == 0 {
-							if utils.GetBool(rule, "not_null") {
-								fmt.Println("TOP2", k, record[k], len(res))
-								return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
-							}
-						} else {
-							arr := []string{}
-							for _, r := range res {
-								arr = append(arr, utils.GetString(r, k))
-							}
-							a, err := sm.CompareList(op, field.Type, fmt.Sprintf("%v", record[k]), arr)
-							fmt.Println("TOP 1", k, record[k], arr, a, err)
-							return a, err
-						}
-					}
+			typ := "integer"
+			if k != utils.SpecialIDParam {
+				if field, err := fromSchema.GetField(k); err == nil {
+					typ = field.Type
 				} else {
-					if record[k] == nil {
+					k = utils.SpecialIDParam
+				}
+			}
+			if len(mmm) > 1 && fmt.Sprintf("%v", mmm[0]) == "(" && fmt.Sprintf("%v", mmm[len(mmm)-1]) == ")" {
+				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
+					if record[k] == nil || len(res) == 0 {
 						if utils.GetBool(rule, "not_null") {
-							fmt.Println("TOP 3", k, record[k], rule)
+							fmt.Println("TOP2", k, record[k], len(res))
 							return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
 						}
-					} else if ok, err := sm.Compare(op, field.Type, fmt.Sprintf("%v", record[k]), mmm); err != nil || !ok {
-						fmt.Println("TOP 4", k, record[k], rule, k, ok, err)
-						return false, errors.New("can't validate this field affection based on rules")
+					} else {
+						arr := []string{}
+						for _, r := range res {
+							arr = append(arr, utils.GetString(r, k))
+						}
+						a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr)
+						fmt.Println("TOP 1", k, record[k], arr, a, err)
+						return a, err
 					}
 				}
 			} else {
-				fmt.Println("TOP 5", k, record[k], rule, k, err)
-				return false, errors.New("can't validate this field affection based on rules : " + err.Error())
+				if record[k] == nil {
+					if utils.GetBool(rule, "not_null") {
+						fmt.Println("TOP 3", k, record[k], rule)
+						return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
+					}
+				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm); err != nil || !ok {
+					fmt.Println("TOP 4", k, record[k], rule, k, ok, err)
+					return false, errors.New("can't validate this field affection based on rules")
+				}
 			}
 		}
 	}
