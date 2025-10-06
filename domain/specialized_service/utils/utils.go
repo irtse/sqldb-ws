@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
@@ -251,6 +252,10 @@ func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
 func (t *AbstractSpecializedService) GetFieldInfo(fromSchema sm.SchemaModel, record utils.Record) (bool, error) {
 	filterService := filter.NewFilterService(t.Domain)
 	if s, err := filterService.GetFieldRestriction(fromSchema); err == nil {
+		fmt.Println("GetFieldInfo", s)
+		if s == "" {
+			return true, nil
+		}
 		t.Domain.GetDb().ClearQueryFilter().SetSQLRestriction(s)
 		if res, err := t.Domain.GetDb().MathQuery("COUNT", fromSchema.Name); err == nil && len(res) > 0 {
 			return utils.ToInt64(res[0]["results"]) > 0, nil
@@ -275,7 +280,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		return record, errors.New("no schema found"), false
 	} else {
 		if ok, err := s.GetFieldInfo(sch, record); !ok || err != nil {
-			// return record, err, false
+			return record, err, false
 		}
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
 			s.ManyToMany = map[string][]map[string]interface{}{}

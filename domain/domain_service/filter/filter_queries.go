@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 	"sqldb-ws/domain/schema"
@@ -209,7 +208,6 @@ func (t *FilterService) GetFieldCondition(fromSchema sm.SchemaModel, record util
 			}
 		}
 	}
-	fmt.Println("DBFieldCondition", fromSchema.Name)
 	if rr, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFieldRule.Name, map[string]interface{}{
 		ds.SchemaFieldDBField: fields,
 		"starting_rule":       true,
@@ -224,7 +222,6 @@ func (t *FilterService) GetFieldCondition(fromSchema sm.SchemaModel, record util
 			rules = append(rules, r)
 		}
 	}
-	fmt.Println("DBFieldRule", rules)
 	return rules
 }
 
