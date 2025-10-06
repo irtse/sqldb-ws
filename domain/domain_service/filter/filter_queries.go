@@ -384,7 +384,9 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 				}
 			}
 			if len(mmm) > 1 && fmt.Sprintf("%v", mmm[0]) == "(" && fmt.Sprintf("%v", mmm[len(mmm)-1]) == ")" {
+				fmt.Println("TOP 10", k, record[k], mmm[1:len(mmm)-1])
 				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
+					fmt.Println("TOP 11", k, record[k], len(res))
 					if record[k] == nil || len(res) == 0 {
 						if utils.GetBool(rule, "not_null") {
 							fmt.Println("TOP2", k, record[k], len(res))
