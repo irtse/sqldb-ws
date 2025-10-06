@@ -401,6 +401,9 @@ func FormatForSQL(datatype string, value interface{}) string {
 						decodedValue = decodedValue[:10]
 					}
 				}
+				if strings.Contains(fmt.Sprintf("%v", value), "()") {
+					return strings.Replace(SQLInjectionProtector(decodedValue), "'", "''", -1)
+				}
 				return Quote(strings.Replace(SQLInjectionProtector(decodedValue), "'", "''", -1))
 			}
 		}
