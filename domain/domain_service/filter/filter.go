@@ -59,9 +59,12 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	SQLLimit = domainParams.GetLimit(SQLLimit)
 	SQLview = f.viewbyFields(schema, domainParams)
 
-	if sql, err := f.GetFieldRestriction(schema); err == nil && sql != "" {
-		SQLrestriction = append(SQLrestriction, sql)
+	if f.Domain.IsShallowed() {
+		if sql, err := f.GetFieldRestriction(schema); err == nil && sql != "" {
+			SQLrestriction = append(SQLrestriction, sql)
+		}
 	}
+
 	if f.Domain.IsSuperCall() {
 		return strings.Join(SQLrestriction, " AND "), strings.Join(SQLview, ","), strings.Join(SQLOrder, ","), SQLLimit
 	}

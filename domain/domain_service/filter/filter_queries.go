@@ -352,6 +352,5 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 			sql += ss
 		}
 	}
-	fmt.Println("GetFieldRestriction", fromSchema.Name, sql)
 	return sql, nil
 }
