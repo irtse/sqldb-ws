@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"math/rand/v2"
 	"slices"
 	"strconv"
 	"strings"
@@ -220,6 +221,9 @@ func Compare(operator string, typ string, val string, val2 string) (bool, error)
 func IsDateComparable(typ string, val string, val2 string) (bool, time.Time, time.Time) {
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := time.Parse(time.RFC3339, val)
+		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
+			return err == nil, time1, time.Now()
+		}
 		time2, err2 := time.Parse(time.RFC3339, val2)
 		return err == nil && err2 == nil, time1, time2
 	}
@@ -231,12 +235,17 @@ func IsStringComparable(typ string, val string, val2 string) (bool, string, stri
 		"TEXT", "VARCHAR(6)", "URL", "UPLOAD", "UPLOAD_MULTIPLE", "HTML"}, strings.ToUpper(typ)) || strings.Contains(typ, "ENUM") {
 		return true, val, val2
 	}
+	// HERE IT IS A POSSIBILITY OF EVAL... UPPER LOWER ETC
 	return false, "", ""
 }
 
 func IsFloatComparable(typ string, val string, val2 string) (bool, float64, float64) {
 	if slices.Contains([]string{"SMALLINT", "INTEGER", "BIGINT", "DOUBLE PRECISION", "DECIMAL", "LINK_ADD"}, strings.ToUpper(typ)) {
 		f, err := strconv.ParseFloat(val, 64)
+		if strings.Contains(strings.ToUpper(val2), "RAND") {
+			return err == nil, f, rand.Float64()
+		}
+		// HERE IT IS A POSSIBILITY OF EVAL... SUM MAX ETC.
 		f2, err2 := strconv.ParseFloat(val2, 64)
 		return err == nil && err2 == nil, f, f2
 	}
