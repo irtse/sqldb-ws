@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"slices"
+	"sqldb-ws/domain/utils"
 	"strconv"
 	"strings"
 	"sync"
@@ -132,16 +133,24 @@ func DataTypeList() []string {
 	}
 }
 
-func CompareList(operator string, typ string, val string, val2 []string) (bool, error) {
+func CompareList(operator string, typ string, val string, val2 []string, record utils.Record) (bool, error) {
 	if len(val2) == 1 {
-		return Compare(operator, typ, val, val2[0])
+		v := val2[0]
+		if record[v] != nil {
+			v = fmt.Sprintf("%v", record[fmt.Sprintf("%v", v)])
+		}
+		return Compare(operator, typ, val, v, record)
 	} else {
 		found := false
 		if strings.ToUpper(typ) != "IN" {
 			found = true
 		}
 		for _, v := range val2 {
-			ok, _ := Compare(operator, typ, val, v)
+			vv := v
+			if record[vv] != nil {
+				vv = fmt.Sprintf("%v", record[fmt.Sprintf("%v", vv)])
+			}
+			ok, _ := Compare(operator, typ, val, vv, record)
 			if strings.ToUpper(typ) == "IN" && ok {
 				found = true
 			} else if strings.ToUpper(typ) == "NOT IN" && ok {
@@ -157,7 +166,7 @@ func CompareList(operator string, typ string, val string, val2 []string) (bool, 
 	}
 }
 
-func Compare(operator string, typ string, val string, val2 string) (bool, error) {
+func Compare(operator string, typ string, val string, val2 string, record utils.Record) (bool, error) {
 	if ok, a, b := IsDateComparable(typ, val, val2); ok {
 		switch operator {
 		case "LIKE":

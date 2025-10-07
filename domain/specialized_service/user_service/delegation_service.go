@@ -66,6 +66,9 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 			}, true, "id"),
 		}, false); err == nil && len(res) > 0 {
 			for _, r := range res {
+				if rr["delegated_"+ds.UserDBField] == s.Domain.GetUserID() {
+					continue
+				}
 				go func() {
 					newTask := map[string]interface{}{}
 					for k, v := range r {
@@ -102,6 +105,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 						db.ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 					}
 				}()
+
 			}
 		}
 	} else if taskID := utils.GetInt(rr, ds.TaskDBField); taskID >= 0 {
@@ -138,6 +142,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 						ds.DelegationDBField: rr[utils.SpecialIDParam],
 					}, func(s string) (string, bool) { return "", true })
 				}
+
 				if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 					"binded_dbtask": newTask["binded_dbtask"],
 					ds.UserDBField:  newTask[ds.UserDBField],
@@ -147,10 +152,18 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 			}
 		}
 	}
+	if rr["delegated_"+ds.UserDBField] != s.Domain.GetUserID() {
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+			ds.UserDBField: rr["delegated_"+ds.UserDBField],
+		}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				s.Trigger(r, db)
+			}
+		}
+	}
 }
 
 func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
-	fmt.Println("DELETE", results)
 	for i, res := range results {
 		share := map[string]interface{}{
 			ds.DelegationDBField: res[utils.SpecialIDParam],

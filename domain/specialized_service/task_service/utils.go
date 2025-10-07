@@ -185,8 +185,9 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 	sqlFilter = append(sqlFilter, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"all_tasks": true,
 		utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
-			ds.UserDBField: record[ds.UserDBField],
-		}, true, utils.SpecialIDParam),
+			ds.UserDBField:                      record[ds.UserDBField],
+			"!" + "delegated_" + ds.UserDBField: domain.GetUserID(),
+		}, false, utils.SpecialIDParam),
 	}, false))
 	if dels, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
 		ds.DBDelegation.Name, utils.ToListAnonymized(sqlFilter), false); err == nil && len(dels) > 0 {

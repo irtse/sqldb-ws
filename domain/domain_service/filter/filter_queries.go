@@ -385,7 +385,6 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 
 func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}) (bool, error) {
 	m, _ := t.GetFieldSQL(key, operator, fromSchema, fromSchema, fromField, rule, dest)
-	fmt.Println("TOP", m)
 	for k, mm := range m {
 		for op, mmm := range mm {
 			typ := "integer"
@@ -397,12 +396,9 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 				}
 			}
 			if len(mmm) > 1 && fmt.Sprintf("%v", mmm[0]) == "(" && fmt.Sprintf("%v", mmm[len(mmm)-1]) == ")" {
-				fmt.Println("TOP 10", k, record[k], mmm[1:len(mmm)-1])
 				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
-					fmt.Println("TOP 11", k, record[k], len(res))
 					if record[k] == nil || len(res) == 0 {
 						if utils.GetBool(rule, "not_null") {
-							fmt.Println("TOP2", k, record[k], len(res))
 							return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
 						}
 					} else {
@@ -410,20 +406,16 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 						for _, r := range res {
 							arr = append(arr, utils.GetString(r, k))
 						}
-						a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr)
-						fmt.Println("TOP 1", k, record[k], arr, a, err)
+						a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record)
 						return a, err
 					}
 				}
 			} else {
 				if record[k] == nil {
-					fmt.Println("TOP 12", k, record[k], rule)
 					if utils.GetBool(rule, "not_null") {
-						fmt.Println("TOP 3", k, record[k], rule)
 						return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
 					}
-				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm); err != nil || !ok {
-					fmt.Println("TOP 4", k, record[k], rule, k, ok, err)
+				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); err != nil || !ok {
 					return false, errors.New("can't validate this field affection based on rules")
 				}
 			}
