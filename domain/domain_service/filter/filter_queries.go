@@ -303,7 +303,6 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 				m[key] = map[string]string{}
 			}
 			_, m[key][operator] = t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fromSchema, fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
-			fmt.Println("UPTHERE 2", m[key][operator], key, operator, fromSchema.Name)
 			sql += key + " " + operator + " " + m[key][operator]
 		}
 		return m, "(" + sql + ")"
@@ -330,7 +329,6 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 					m[kk] = map[string]string{}
 				}
 				m[kk][opp] = sql
-				fmt.Println("UPTHERE", m[kk][opp], kk, opp, fromSchema.Name)
 				return m, "(" + kk + " " + opp + " " + m[kk][opp] + ")"
 			} else {
 				kk := utils.SpecialIDParam
@@ -339,7 +337,6 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 				}
 				_, _, _, sql := connector.MakeSqlItem("", typ, link, k, v, op)
 				m[kk][op] = "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + sql + ")"
-				fmt.Println("UPTHERE3", m[kk][op], kk, op, fromSchema.Name)
 				return m, "(" + k + " " + op + " " + m[kk][op] + ")"
 			}
 		}
@@ -400,6 +397,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
 					if record[k] == nil || len(res) == 0 {
 						if utils.GetBool(rule, "not_null") && !avoidVerif {
+							fmt.Println("THERE OUT 1", values)
 							return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
 						}
 					} else {
@@ -413,6 +411,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 							values = append(values, fmt.Sprintf("%v", a))
 						}
 						if (err != nil || !a) && !avoidVerif {
+							fmt.Println("THERE OUT", values)
 							return false, values, err
 						}
 					}
@@ -420,9 +419,11 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 			} else {
 				if record[k] == nil {
 					if utils.GetBool(rule, "not_null") && !avoidVerif {
+						fmt.Println("THERE OUT 2", mmm)
 						return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
 					}
 				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); (err != nil || !ok) && !avoidVerif {
+					fmt.Println("THERE OUT 3", mmm)
 					return false, []string{}, errors.New("can't validate this field assignment based on rules")
 				} else {
 					fmt.Println("THERE 2", mmm)
