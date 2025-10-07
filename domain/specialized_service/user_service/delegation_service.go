@@ -3,7 +3,6 @@ package user_service
 import (
 	"errors"
 	"fmt"
-	"runtime/debug"
 	ds "sqldb-ws/domain/schema/database_resources"
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -56,11 +55,6 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 }
 
 func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Database) {
-	fmt.Println(rr["delegated_"+ds.UserDBField], s.Domain.GetUserID(), utils.GetString(rr, "delegated_"+ds.UserDBField) == s.Domain.GetUserID())
-	debug.PrintStack()
-	if utils.GetString(rr, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
-		return
-	}
 	if utils.GetBool(rr, "all_tasks") {
 		if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			"is_close": false,
@@ -102,8 +96,10 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 						db.ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 					}
 					if res, err := db.SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-						"binded_dbtask": newTask["binded_dbtask"],
-						ds.UserDBField:  newTask[ds.UserDBField],
+						ds.DestTableDBField: newTask[ds.DestTableDBField],
+						ds.SchemaDBField:    newTask[ds.SchemaDBField],
+						ds.RequestDBField:   newTask[ds.RequestDBField],
+						ds.UserDBField:      newTask[ds.UserDBField],
 					}, false); err == nil && len(res) == 0 {
 						db.ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 					}
@@ -146,15 +142,17 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 				}
 
 				if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					"binded_dbtask": newTask["binded_dbtask"],
-					ds.UserDBField:  newTask[ds.UserDBField],
+					ds.DestTableDBField: newTask[ds.DestTableDBField],
+					ds.SchemaDBField:    newTask[ds.SchemaDBField],
+					ds.RequestDBField:   newTask[ds.RequestDBField],
+					ds.UserDBField:      newTask[ds.UserDBField],
 				}, false); err == nil && len(res) == 0 {
 					db.ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 				}
 			}
 		}
 	}
-	if s.Domain.GetUserID() != "" {
+	if s.Domain.GetUserID() != "" && utils.GetString(rr, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
 			ds.UserDBField: rr["delegated_"+ds.UserDBField],
 		}, false); err == nil && len(res) > 0 {
