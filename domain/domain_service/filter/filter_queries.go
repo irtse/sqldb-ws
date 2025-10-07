@@ -398,8 +398,10 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
 					if record[k] == nil || len(res) == 0 {
 						if utils.GetBool(rule, "not_null") && !avoidVerif {
-							fmt.Println("THERE OUT 1", values)
 							return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
+						}
+						for _, r := range res {
+							values = append(values, utils.GetString(r, k))
 						}
 					} else {
 						arr := []string{}
@@ -408,11 +410,9 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 						}
 						a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record)
 						for _, a := range arr {
-							fmt.Println("THERE", a)
 							values = append(values, fmt.Sprintf("%v", a))
 						}
 						if (err != nil || !a) && !avoidVerif {
-							fmt.Println("THERE OUT", values)
 							return false, values, err
 						}
 					}
@@ -420,14 +420,12 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 			} else {
 				if record[k] == nil {
 					if utils.GetBool(rule, "not_null") && !avoidVerif {
-						fmt.Println("THERE OUT 2", mmm)
 						return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
 					}
+					values = append(values, fmt.Sprintf("%v", mmm))
 				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); (err != nil || !ok) && !avoidVerif {
-					fmt.Println("THERE OUT 3", mmm)
 					return false, []string{}, errors.New("can't validate this field assignment based on rules")
 				} else {
-					fmt.Println("THERE 2", mmm)
 					values = append(values, fmt.Sprintf("%v", mmm))
 				}
 			}
