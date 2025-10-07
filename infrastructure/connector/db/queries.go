@@ -32,12 +32,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	res, err := db.QueryAssociativeArray(q)
-	if strings.Contains(name, "share") {
-		fmt.Println(q, err)
-		debug.PrintStack()
-	}
-	return res, err
+	return db.QueryAssociativeArray(q)
 }
 
 func (db *Database) SimpleMathQuery(algo string, name string, restrictions interface{}, isOr bool) ([]map[string]interface{}, error) {
