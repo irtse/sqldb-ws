@@ -383,7 +383,6 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}, avoidVerif bool) (bool, []string, error) {
 	values := []string{}
 	m, _ := t.GetFieldSQL(key, operator, fromSchema, fromSchema, fromField, rule, dest)
-	fmt.Println("SQL", m)
 	for k, mm := range m {
 		for op, mmm := range mm {
 			typ := "integer"
