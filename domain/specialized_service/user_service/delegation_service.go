@@ -3,6 +3,7 @@ package user_service
 import (
 	"errors"
 	"fmt"
+	"runtime/debug"
 	ds "sqldb-ws/domain/schema/database_resources"
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -55,7 +56,8 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 }
 
 func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Database) {
-	fmt.Println(rr["delegated_"+ds.UserDBField], s.Domain.GetUserID())
+	fmt.Println(rr["delegated_"+ds.UserDBField], s.Domain.GetUserID(), rr["delegated_"+ds.UserDBField] == s.Domain.GetUserID())
+	debug.PrintStack()
 	if rr["delegated_"+ds.UserDBField] == s.Domain.GetUserID() {
 		return
 	}
@@ -106,7 +108,6 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 						db.ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) { return s, true })
 					}
 				}()
-
 			}
 		}
 	} else if taskID := utils.GetInt(rr, ds.TaskDBField); taskID >= 0 {
