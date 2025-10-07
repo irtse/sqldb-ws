@@ -224,7 +224,7 @@ func IsDateComparable(typ string, val string, val2 string) (bool, time.Time, tim
 		fmt.Println("IsDateComparable TIME TRIGGER")
 		time1, err := time.Parse(time.RFC3339, val)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
-			fmt.Println("IsDateComparable TIME TRIGGER 2", err == nil, time1, time.Now())
+			fmt.Println("IsDateComparable TIME TRIGGER 2", err, err == nil, time1, time.Now())
 			return err == nil, time1, time.Now()
 		}
 		time2, err2 := time.Parse(time.RFC3339, val2)
