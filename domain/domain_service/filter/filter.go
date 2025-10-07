@@ -118,7 +118,8 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 				if len(newSTR) > 0 {
 					newSTR += " OR "
 				}
-				newSTR += connector.MakeSqlItem("", typ, foreign, key, or, "=")
+				_, _, _, s := connector.MakeSqlItem("", typ, foreign, key, or, "=")
+				newSTR += s
 			}
 			if newSTR != "" {
 				alterRestr = append(alterRestr, "("+newSTR+")")

@@ -125,7 +125,7 @@ func FormatSQLRestrictionWhereInjection(injection string, getTypeAndLink func(st
 			if len(strings.Trim(orRestr, " ")) > 0 {
 				orRestr += " OR "
 			}
-			orRestr = MakeSqlItem(orRestr, typ, link, keyVal[0], keyVal[1], operator)
+			_, _, _, orRestr = MakeSqlItem(orRestr, typ, link, keyVal[0], keyVal[1], operator)
 		}
 		if len(orRestr) > 0 {
 			if len(strings.Trim(alterRestr, " ")) > 0 {
@@ -173,31 +173,35 @@ func Compare(or string) ([]string, string) {
 	return keyVal, operator
 }
 
-func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, or string, operator string) string {
+func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, or string, operator string) (string, string, string, string) {
 	sql := or
 	sql = FormatForSQL(typ, sql)
 	if sql == "" {
-		return alterRestr
+		return "", "", "", alterRestr
 	}
 	if strings.Contains(sql, "NULL") {
 		operator = "IS "
 	}
 	if strings.Contains(or, "SELECT") {
 		alterRestr += key + " " + operator + " " + sql
-		return alterRestr
+		return key, operator, sql, alterRestr
 	}
 	if foreignName != "" {
 		if strings.Contains(sql, "%") {
 			alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE LOWER(name::text) LIKE LOWER(" + sql + ") OR LOWER(id::text) LIKE LOWER(" + sql + "))"
+			return key, "IN", "(SELECT id FROM " + foreignName + " WHERE LOWER(name::text) LIKE LOWER(" + sql + ") OR LOWER(id::text) LIKE LOWER(" + sql + "))", alterRestr
 		} else {
 			if strings.Contains(sql, "'") {
 				if strings.Contains(sql, "NULL") {
 					alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE name IS " + sql + ")"
+					return key, "IN", "(SELECT id FROM " + foreignName + " WHERE name IS " + sql + ")", alterRestr
 				} else {
 					alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE LOWER(name) = LOWER(" + sql + "))"
+					return key, "IN", "(SELECT id FROM " + foreignName + " WHERE LOWER(name) = LOWER(" + sql + "))", alterRestr
 				}
 			} else {
 				alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE id " + operator + " " + sql + ")"
+				return key, "IN", "(SELECT id FROM " + foreignName + " WHERE id " + operator + " " + sql + ")", alterRestr
 			}
 		}
 	} else if strings.Contains(sql, "%") && !strings.Contains(typ, "many") {
@@ -206,14 +210,17 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			no = "NOT LIKE"
 		}
 		alterRestr += "LOWER(" + key + "::text) " + no + " LOWER(" + sql + ")"
+		return "LOWER(" + key + "::text)", no, "LOWER(" + sql + ")", alterRestr
 	} else {
 		if strings.Contains(sql, "'") && !strings.Contains(typ, "enum") && !strings.Contains(typ, "many") {
 			alterRestr += "LOWER(" + key + ") " + operator + " LOWER(" + sql + ")"
+			return "LOWER(" + key + ")", operator, "LOWER(" + sql + ")", alterRestr
 		} else {
 			alterRestr += key + " " + operator + " " + sql
+			return key, operator, sql, alterRestr
 		}
 	}
-	return alterRestr
+	return key, operator, sql, alterRestr
 }
 
 func FormatLimit(limited string, offset interface{}) string {

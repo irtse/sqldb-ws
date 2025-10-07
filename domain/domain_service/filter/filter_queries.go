@@ -325,18 +325,20 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 			return m, "(" + key + " " + operator + " " + m[key][operator] + ")"
 		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
 			if basefromSchema != nil && basefromSchema.Name == fromSchema.Name {
-				if m[k] == nil {
-					m[k] = map[string]string{}
+				kk, opp, sql, _ := connector.MakeSqlItem("", typ, link, k, v, op)
+				if m[kk] == nil {
+					m[kk] = map[string]string{}
 				}
-				m[k][op] = connector.MakeSqlItem("", typ, link, k, v, op)
-				fmt.Println("UPTHERE", m[k][op], k, op, fromSchema.Name)
-				return m, "(" + m[k][op] + ")"
+				m[kk][opp] = sql
+				fmt.Println("UPTHERE", m[kk][opp], kk, opp, fromSchema.Name)
+				return m, "(" + kk + " " + opp + " " + m[kk][opp] + ")"
 			} else {
 				kk := utils.SpecialIDParam
 				if m[kk] == nil {
 					m[kk] = map[string]string{}
 				}
-				m[kk][op] = "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
+				_, _, _, sql := connector.MakeSqlItem("", typ, link, k, v, op)
+				m[kk][op] = "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + sql + ")"
 				fmt.Println("UPTHERE3", m[kk][op], kk, op, fromSchema.Name)
 				return m, "(" + k + " " + op + " " + m[kk][op] + ")"
 			}
