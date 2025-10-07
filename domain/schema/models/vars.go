@@ -219,12 +219,9 @@ func Compare(operator string, typ string, val string, val2 string) (bool, error)
 }
 
 func IsDateComparable(typ string, val string, val2 string) (bool, time.Time, time.Time) {
-	fmt.Println("IsDateComparable", typ, val, val2)
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
-		fmt.Println("IsDateComparable TIME TRIGGER")
 		time1, err := time.Parse("2006-01-02T15:04:05.000", val)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
-			fmt.Println("IsDateComparable TIME TRIGGER 2", err, err == nil, time1, time.Now())
 			return err == nil, time1, time.Now()
 		}
 		time2, err2 := time.Parse("2006-01-02T15:04:05.000", val2)
