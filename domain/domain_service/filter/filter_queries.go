@@ -236,7 +236,7 @@ func (t *FilterService) fromITF(val interface{}) interface{} {
 	}
 }
 
-func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64) (map[string]map[string]string, string) {
+func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema *sm.SchemaModel, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64) (map[string]map[string]string, string) {
 	if key == "" {
 		key = "id"
 	}
@@ -287,7 +287,7 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 				if m[key] == nil {
 					m[key] = map[string]string{}
 				}
-				_, ff := t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
+				_, ff := t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fromSchema, fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
 				m[key][operator] = "(SELECT " + fromF + " FROM " + fromSchema.Name + " WHERE " + ff + ")"
 				sql += key + " " + operator + " " + m[key][operator]
 				continue
@@ -302,7 +302,8 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 			if m[key] == nil {
 				m[key] = map[string]string{}
 			}
-			_, m[key][operator] = t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
+			_, m[key][operator] = t.GetFieldSQL(fieldName, utils.GetString(r, "operator"), fromSchema, fs, ff, r, utils.GetInt(r, ds.DestTableDBField))
+			fmt.Println("UPTHERE 2", m[key][operator], key, operator, fromSchema.Name)
 			sql += key + " " + operator + " " + m[key][operator]
 		}
 		return m, "(" + sql + ")"
@@ -321,14 +322,24 @@ func (t *FilterService) GetFieldSQL(key string, operator string, fromSchema *sm.
 				m[key] = map[string]string{}
 			}
 			m[key][operator] = utils.ToString(t.fromITF(val))
-			return m, key + " " + operator + " " + m[key][operator]
+			return m, "(" + key + " " + operator + " " + m[key][operator] + ")"
 		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
-			kk := utils.SpecialIDParam
-			if m[kk] == nil {
-				m[kk] = map[string]string{}
+			if basefromSchema != nil && basefromSchema.Name == fromSchema.Name {
+				if m[k] == nil {
+					m[k] = map[string]string{}
+				}
+				m[k][op] = connector.MakeSqlItem("", typ, link, k, v, op)
+				fmt.Println("UPTHERE", m[k][op], k, op, fromSchema.Name)
+				return m, "(" + m[k][op] + ")"
+			} else {
+				kk := utils.SpecialIDParam
+				if m[kk] == nil {
+					m[kk] = map[string]string{}
+				}
+				m[kk][op] = "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
+				fmt.Println("UPTHERE3", m[kk][op], kk, op, fromSchema.Name)
+				return m, "(" + k + " " + op + " " + m[kk][op] + ")"
 			}
-			m[kk][op] = "(SELECT " + kk + " FROM " + fromSchema.Name + " WHERE " + connector.MakeSqlItem("", typ, link, k, v, op) + ")"
-			return m, kk + " " + op + " " + m[kk][op]
 		}
 	}
 	return m, ""
@@ -356,7 +367,7 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 				ff = &f
 			}
 		}
-		if _, ss := t.GetFieldSQL(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField)); ss != "" {
+		if _, ss := t.GetFieldSQL(fieldName, utils.GetString(rule, "operator"), &fromSchema, fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField)); ss != "" {
 			if len(sql) > 0 {
 				if utils.GetString(rule, "separator") != "" {
 					sql += " " + strings.ToUpper(utils.ToString(rule["separator"])) + " "
@@ -371,7 +382,7 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 }
 
 func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}) (bool, error) {
-	m, _ := t.GetFieldSQL(key, operator, fromSchema, fromField, rule, dest)
+	m, _ := t.GetFieldSQL(key, operator, fromSchema, fromSchema, fromField, rule, dest)
 	fmt.Println("TOP", m)
 	for k, mm := range m {
 		for op, mmm := range mm {
