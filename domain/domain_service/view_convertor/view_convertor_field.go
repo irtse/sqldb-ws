@@ -49,7 +49,7 @@ func (s *ViewConvertor) GetFieldsRules(schName string, values map[string]interfa
 					}
 				}
 			} else {
-				if _, values, err := filter.NewFilterService(s.Domain).GetOneFieldVerification(sch, values, rule); err == nil {
+				if _, values, err := filter.NewFilterService(s.Domain).GetOneFieldVerification(sch, values, rule, true); err == nil {
 					if field, err := sch.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField)); err == nil {
 						rules = append(rules, map[string]interface{}{
 							"trigger":  field.Name,

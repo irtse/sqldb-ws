@@ -383,7 +383,7 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 	return sql, nil
 }
 
-func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}) (bool, []string, error) {
+func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}, avoidVerif bool) (bool, []string, error) {
 	values := []string{}
 	m, _ := t.GetFieldSQL(key, operator, fromSchema, fromSchema, fromField, rule, dest)
 	for k, mm := range m {
@@ -399,8 +399,8 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 			if len(mmm) > 1 && fmt.Sprintf("%v", mmm[0]) == "(" && fmt.Sprintf("%v", mmm[len(mmm)-1]) == ")" {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
 					if record[k] == nil || len(res) == 0 {
-						if utils.GetBool(rule, "not_null") {
-							return false, []string{}, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
+						if utils.GetBool(rule, "not_null") && !avoidVerif {
+							return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
 						}
 					} else {
 						arr := []string{}
@@ -409,22 +409,24 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 						}
 						a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record)
 						for _, a := range arr {
-							values = append(values, fmt.Sprintf("%v", record[k])+" "+op+" ("+a+")")
+							fmt.Println("THERE", a)
+							values = append(values, fmt.Sprintf("%v", a))
 						}
-						if err != nil || !a {
-							return a, values, err
+						if (err != nil || !a) && !avoidVerif {
+							return false, values, err
 						}
 					}
 				}
 			} else {
 				if record[k] == nil {
-					if utils.GetBool(rule, "not_null") {
-						return false, []string{}, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
+					if utils.GetBool(rule, "not_null") && !avoidVerif {
+						return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
 					}
-				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); err != nil || !ok {
-					return false, []string{}, errors.New("can't validate this field affection based on rules")
+				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); (err != nil || !ok) && !avoidVerif {
+					return false, []string{}, errors.New("can't validate this field assignment based on rules")
 				} else {
-					values = append(values, fmt.Sprintf("%v", record[k])+" "+op+" ("+mmm+")")
+					fmt.Println("THERE 2", mmm)
+					values = append(values, fmt.Sprintf("%v", mmm))
 				}
 			}
 		}
@@ -432,7 +434,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 	return true, values, nil
 }
 
-func (t *FilterService) GetOneFieldVerification(fromSchema sm.SchemaModel, record map[string]interface{}, rule map[string]interface{}) (bool, []string, error) {
+func (t *FilterService) GetOneFieldVerification(fromSchema sm.SchemaModel, record map[string]interface{}, rule map[string]interface{}, avoidVerif bool) (bool, []string, error) {
 	v := []string{}
 	fieldName := ""
 	var fs *sm.SchemaModel
@@ -453,7 +455,7 @@ func (t *FilterService) GetOneFieldVerification(fromSchema sm.SchemaModel, recor
 			ff = &f
 		}
 	}
-	if ok, values, err := t.GetFieldVerify(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField), record); err != nil || !ok {
+	if ok, values, err := t.GetFieldVerify(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField), record, avoidVerif); err != nil || !ok {
 		return false, values, err
 	} else {
 		v = append(v, values...)
@@ -464,7 +466,7 @@ func (t *FilterService) GetOneFieldVerification(fromSchema sm.SchemaModel, recor
 
 func (t *FilterService) GetFieldVerification(fromSchema sm.SchemaModel, record map[string]interface{}) (bool, error) {
 	for _, rule := range t.GetFieldCondition(fromSchema, utils.Record{}) { // SIMPLE WAY...
-		if ok, _, err := t.GetOneFieldVerification(fromSchema, record, rule); err != nil || !ok {
+		if ok, _, err := t.GetOneFieldVerification(fromSchema, record, rule, false); err != nil || !ok {
 			return ok, err
 		}
 	}
