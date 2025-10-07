@@ -210,11 +210,11 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			no = "NOT LIKE"
 		}
 		alterRestr += "LOWER(" + key + "::text) " + no + " LOWER(" + sql + ")"
-		return "LOWER(" + key + "::text)", no, "LOWER(" + sql + ")", alterRestr
+		return key, no, sql, alterRestr
 	} else {
 		if strings.Contains(sql, "'") && !strings.Contains(typ, "enum") && !strings.Contains(typ, "many") {
 			alterRestr += "LOWER(" + key + ") " + operator + " LOWER(" + sql + ")"
-			return "LOWER(" + key + ")", operator, "LOWER(" + sql + ")", alterRestr
+			return key, operator, sql, alterRestr
 		} else {
 			alterRestr += key + " " + operator + " " + sql
 			return key, operator, sql, alterRestr
