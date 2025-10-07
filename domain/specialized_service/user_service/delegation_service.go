@@ -56,9 +56,9 @@ func (s *DelegationService) SpecializedCreateRow(record map[string]interface{}, 
 }
 
 func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Database) {
-	fmt.Println(rr["delegated_"+ds.UserDBField], s.Domain.GetUserID(), rr["delegated_"+ds.UserDBField] == s.Domain.GetUserID())
+	fmt.Println(rr["delegated_"+ds.UserDBField], s.Domain.GetUserID(), utils.GetString(rr, "delegated_"+ds.UserDBField) == s.Domain.GetUserID())
 	debug.PrintStack()
-	if rr["delegated_"+ds.UserDBField] == s.Domain.GetUserID() {
+	if utils.GetString(rr, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
 		return
 	}
 	if utils.GetBool(rr, "all_tasks") {
