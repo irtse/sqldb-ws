@@ -169,8 +169,6 @@ func CompareList(operator string, typ string, val string, val2 []string, record 
 func Compare(operator string, typ string, val string, val2 string, record utils.Record) (bool, error) {
 	if ok, a, b := IsDateComparable(typ, val, val2); ok {
 		switch operator {
-		case "LIKE":
-			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), nil
 		case ">":
 			return a.After(b), nil
 		case "<":
@@ -188,8 +186,6 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 
 	if ok, a, b := IsFloatComparable(typ, val, val2); ok {
 		switch operator {
-		case "LIKE":
-			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), nil
 		case ">":
 			return a > b, nil
 		case "<":
@@ -224,6 +220,14 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 			return a != b, nil
 		}
 	}
+	if ok, a, b := IsBoolComparable(typ, val, val2); ok {
+		switch operator {
+		case "=", "==", "IN":
+			return a == b, nil
+		case "!=", "<>", "NOT IN":
+			return a != b, nil
+		}
+	}
 	return false, fmt.Errorf("unknown comparator: %s", operator)
 }
 
@@ -239,6 +243,13 @@ func IsDateComparable(typ string, val string, val2 string) (bool, time.Time, tim
 	return false, time.Now().UTC(), time.Now().UTC()
 }
 
+func IsBoolComparable(typ string, val string, val2 string) (bool, bool, bool) {
+	if slices.Contains([]string{"BOOLEAN"}, strings.ToUpper(typ)) {
+		return true, strings.ToLower(val) == "true", strings.ToLower(val2) == "true"
+	}
+	return false, false, false
+}
+
 func IsStringComparable(typ string, val string, val2 string) (bool, string, string) {
 	if slices.Contains([]string{"VARCHAR(32)", "VARCHAR(64)", "VARCHAR(128)", "VARCHAR(255)",
 		"TEXT", "VARCHAR(6)", "URL", "UPLOAD", "UPLOAD_MULTIPLE", "HTML"}, strings.ToUpper(typ)) || strings.Contains(typ, "ENUM") {
@@ -249,7 +260,7 @@ func IsStringComparable(typ string, val string, val2 string) (bool, string, stri
 }
 
 func IsFloatComparable(typ string, val string, val2 string) (bool, float64, float64) {
-	if slices.Contains([]string{"SMALLINT", "INTEGER", "BIGINT", "DOUBLE PRECISION", "DECIMAL", "LINK_ADD"}, strings.ToUpper(typ)) {
+	if slices.Contains([]string{"SMALLINT", "INTEGER", "BIGINT", "DOUBLE PRECISION", "DECIMAL", "LINK_ADD", "LINK"}, strings.ToUpper(typ)) {
 		f, err := strconv.ParseFloat(val, 64)
 		if strings.Contains(strings.ToUpper(val2), "RAND") {
 			return err == nil, f, rand.Float64()

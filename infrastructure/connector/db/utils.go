@@ -210,17 +210,16 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			no = "NOT LIKE"
 		}
 		alterRestr += "LOWER(" + key + "::text) " + no + " LOWER(" + sql + ")"
-		return key, no, sql, alterRestr
+		return key, no, or, alterRestr
 	} else {
 		if strings.Contains(sql, "'") && !strings.Contains(typ, "enum") && !strings.Contains(typ, "many") {
 			alterRestr += "LOWER(" + key + ") " + operator + " LOWER(" + sql + ")"
-			return key, operator, sql, alterRestr
+			return key, operator, or, alterRestr
 		} else {
 			alterRestr += key + " " + operator + " " + sql
-			return key, operator, sql, alterRestr
+			return key, operator, or, alterRestr
 		}
 	}
-	return key, operator, sql, alterRestr
 }
 
 func FormatLimit(limited string, offset interface{}) string {
