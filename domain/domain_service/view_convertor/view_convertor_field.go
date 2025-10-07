@@ -52,6 +52,8 @@ func (s *ViewConvertor) GetFieldsRules(schName string, values map[string]interfa
 				if _, values, err := filter.NewFilterService(s.Domain).GetOneFieldVerification(sch, values, rule, true); err == nil {
 					if field, err := sch.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField)); err == nil {
 						rules = append(rules, map[string]interface{}{
+							"min":      rule["min"],
+							"max":      rule["max"],
 							"trigger":  field.Name,
 							"value":    values,
 							"operator": rule["operator"],
