@@ -133,7 +133,7 @@ func DataTypeList() []string {
 	}
 }
 
-func CompareList(operator string, typ string, val string, val2 []string, record utils.Record) (bool, error) {
+func CompareList(operator string, typ string, val string, val2 []string, record utils.Record) (bool, []string, []string, error) {
 	if len(val2) == 1 {
 		v := val2[0]
 		if record[v] != nil {
@@ -141,6 +141,8 @@ func CompareList(operator string, typ string, val string, val2 []string, record 
 		}
 		return Compare(operator, typ, val, v, record)
 	} else {
+		as := []string{}
+		bs := []string{}
 		found := false
 		if strings.ToUpper(typ) != "IN" {
 			found = true
@@ -150,7 +152,9 @@ func CompareList(operator string, typ string, val string, val2 []string, record 
 			if record[vv] != nil {
 				vv = fmt.Sprintf("%v", record[fmt.Sprintf("%v", vv)])
 			}
-			ok, _ := Compare(operator, typ, val, vv, record)
+			ok, a, b, _ := Compare(operator, typ, val, vv, record)
+			as = append(as, a...)
+			bs = append(bs, b...)
 			if strings.ToUpper(typ) == "IN" && ok {
 				found = true
 			} else if strings.ToUpper(typ) == "NOT IN" && ok {
@@ -160,83 +164,84 @@ func CompareList(operator string, typ string, val string, val2 []string, record 
 			}
 		}
 		if found {
-			return true, nil
+			return true, as, bs, nil
 		}
-		return false, errors.New("list comparison failed " + operator)
+		return false, as, bs, errors.New("list comparison failed " + operator)
 	}
 }
 
-func Compare(operator string, typ string, val string, val2 string, record utils.Record) (bool, error) {
+func Compare(operator string, typ string, val string, val2 string, record utils.Record) (bool, []string, []string, error) {
+	layout := "2006-01-02T15:04:05.000"
 	if ok, a, b := IsDateComparable(typ, val, val2); ok {
 		switch operator {
 		case "LIKE":
-			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), nil
+			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), []string{a.Format(layout)}, []string{b.Format(layout)}, nil
 		case ">":
-			return a.After(b), nil
+			return a.After(b), []string{a.Format(layout)}, []string{b.Format(layout)}, nil
 		case "<":
-			return a.Before(b), nil
+			return a.Before(b), []string{a.Format(layout)}, []string{b.Format(layout)}, nil
 		case ">=":
-			return a.After(b) || a == b, nil
+			return a.After(b) || a == b, []string{a.Format(layout)}, []string{b.Format(layout)}, nil
 		case "<=":
-			return a.Before(b) || a == b, nil
+			return a.Before(b) || a == b, []string{a.Format(layout)}, []string{b.Format(layout)}, nil
 		case "=", "==", "IN":
-			return a == b, nil
+			return a == b, []string{a.Format(layout)}, []string{b.Format(layout)}, nil
 		case "!=", "<>", "NOT IN":
-			return a != b, nil
+			return a != b, []string{a.Format(layout)}, []string{b.Format(layout)}, nil
 		}
 	}
 
 	if ok, a, b := IsFloatComparable(typ, val, val2); ok {
 		switch operator {
 		case "LIKE":
-			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), nil
+			return strings.Contains(fmt.Sprintf("%v", a), fmt.Sprintf("%v", b)), []string{fmt.Sprintf("%v", a)}, []string{fmt.Sprintf("%v", b)}, nil
 		case ">":
-			return a > b, nil
+			return a > b, []string{fmt.Sprintf("%v", a)}, []string{fmt.Sprintf("%v", b)}, nil
 		case "<":
-			return a < b, nil
+			return a < b, []string{fmt.Sprintf("%v", a)}, []string{fmt.Sprintf("%v", b)}, nil
 		case ">=":
-			return a >= b, nil
+			return a >= b, []string{fmt.Sprintf("%v", a)}, []string{fmt.Sprintf("%v", b)}, nil
 		case "<=":
-			return a <= b, nil
+			return a <= b, []string{fmt.Sprintf("%v", a)}, []string{fmt.Sprintf("%v", b)}, nil
 		case "=", "==", "IN":
-			return a == b, nil
+			return a == b, []string{fmt.Sprintf("%v", a)}, []string{fmt.Sprintf("%v", b)}, nil
 		case "!=", "<>", "NOT IN":
-			return a != b, nil
+			return a != b, []string{fmt.Sprintf("%v", a)}, []string{fmt.Sprintf("%v", b)}, nil
 		}
 	}
 
 	if (strings.ToLower(fmt.Sprintf("%v", val)) == "true" || strings.ToLower(fmt.Sprintf("%v", val)) == "false") && (strings.ToLower(fmt.Sprintf("%v", val2)) == "true" || strings.ToLower(fmt.Sprintf("%v", val2)) == "false") {
 		switch operator {
 		case "=", "==", "IN":
-			return strings.ToLower(fmt.Sprintf("%v", val)) == strings.ToLower(fmt.Sprintf("%v", val2)), nil
+			return strings.ToLower(fmt.Sprintf("%v", val)) == strings.ToLower(fmt.Sprintf("%v", val2)), []string{strings.ToLower(fmt.Sprintf("%v", val))}, []string{strings.ToLower(fmt.Sprintf("%v", val2))}, nil
 		case "!=", "<>", "NOT IN":
-			return strings.ToLower(fmt.Sprintf("%v", val)) != strings.ToLower(fmt.Sprintf("%v", val2)), nil
+			return strings.ToLower(fmt.Sprintf("%v", val)) != strings.ToLower(fmt.Sprintf("%v", val2)), []string{strings.ToLower(fmt.Sprintf("%v", val))}, []string{strings.ToLower(fmt.Sprintf("%v", val2))}, nil
 		}
 	}
 
 	if ok, a, b := IsStringComparable(typ, val, val2); ok {
 		switch operator {
 		case "LIKE":
-			return strings.Contains(a, b), nil
+			return strings.Contains(a, b), []string{a}, []string{b}, nil
 		case "=", "==", "IN":
-			return a == b, nil
+			return a == b, []string{a}, []string{b}, nil
 		case "!=", "<>", "NOT IN":
-			return a != b, nil
+			return a != b, []string{a}, []string{b}, nil
 		}
 	}
-	return false, fmt.Errorf("unknown comparator: %s", operator)
+	return false, []string{}, []string{}, fmt.Errorf("unknown comparator: %s", operator)
 }
 
 func IsDateComparable(typ string, val string, val2 string) (bool, time.Time, time.Time) {
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := time.Parse("2006-01-02T15:04:05.000", val)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
-			return err == nil, time1, time.Now()
+			return err == nil, time1, time.Now().UTC()
 		}
 		time2, err2 := time.Parse("2006-01-02T15:04:05.000", val2)
 		return err == nil && err2 == nil, time1, time2
 	}
-	return false, time.Now(), time.Now()
+	return false, time.Now().UTC(), time.Now().UTC()
 }
 
 func IsStringComparable(typ string, val string, val2 string) (bool, string, string) {

@@ -395,20 +395,15 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 			}
 			if len(mmm) > 1 && fmt.Sprintf("%v", mmm[0]) == "(" && fmt.Sprintf("%v", mmm[len(mmm)-1]) == ")" {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
-					if record[k] == nil || len(res) == 0 {
-						if utils.GetBool(rule, "not_null") && !avoidVerif {
-							return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
-						}
-						for _, r := range res {
-							values = append(values, utils.GetString(r, k))
-						}
+					if (record[k] == nil || len(res) == 0) && utils.GetBool(rule, "not_null") && !avoidVerif {
+						return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
 					} else {
 						arr := []string{}
 						for _, r := range res {
 							arr = append(arr, utils.GetString(r, k))
 						}
-						a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record)
-						for _, a := range arr {
+						a, _, to, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record)
+						for _, a := range to {
 							values = append(values, fmt.Sprintf("%v", a))
 						}
 						if (err != nil || !a) && !avoidVerif {
@@ -417,15 +412,14 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 					}
 				}
 			} else {
-				if record[k] == nil {
-					if utils.GetBool(rule, "not_null") && !avoidVerif {
-						return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
-					}
-					values = append(values, fmt.Sprintf("%v", mmm))
-				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); (err != nil || !ok) && !avoidVerif {
+				if record[k] == nil && utils.GetBool(rule, "not_null") && !avoidVerif {
+					return false, []string{}, errors.New("can't validate this field assignment based on rules : should be not null <" + k + ">")
+				} else if ok, _, to, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); (err != nil || !ok) && !avoidVerif {
 					return false, []string{}, errors.New("can't validate this field assignment based on rules")
 				} else {
-					values = append(values, fmt.Sprintf("%v", mmm))
+					for _, t := range to {
+						values = append(values, fmt.Sprintf("%v", t))
+					}
 				}
 			}
 		}
