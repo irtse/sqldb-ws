@@ -219,6 +219,7 @@ func Compare(operator string, typ string, val string, val2 string) (bool, error)
 }
 
 func IsDateComparable(typ string, val string, val2 string) (bool, time.Time, time.Time) {
+	fmt.Println("IsDateComparable", typ, val, val2)
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := time.Parse(time.RFC3339, val)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
