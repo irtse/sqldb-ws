@@ -35,6 +35,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 	res, err := db.QueryAssociativeArray(q)
 	if strings.Contains(name, "share") {
 		fmt.Println(q, err)
+		debug.PrintStack()
 	}
 	return res, err
 }
