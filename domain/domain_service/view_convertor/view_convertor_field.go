@@ -1,6 +1,7 @@
 package view_convertor
 
 import (
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
@@ -36,21 +37,31 @@ func (s *ViewConvertor) GetFieldsRules(schName string, values map[string]interfa
 
 	if sch, err := schema.GetSchema(schName); err == nil {
 		for _, rule := range filter.NewFilterService(s.Domain).GetFieldCondition(sch, utils.Record{}) {
-			if rule["related_"+ds.SchemaFieldDBField] == nil {
-				continue
-			}
-			if f, err := scheme.GetFieldByID(utils.ToInt64(rule[ds.SchemaFieldDBField])); err == nil {
-				if ff, err := scheme.GetFieldByID(utils.ToInt64(rule["related_"+ds.SchemaFieldDBField])); err == nil {
-					rules = append(rules, map[string]interface{}{
-						"related":  ff.Name,
-						"trigger":  f.Name,
-						"value":    nil,
-						"operator": rule["operator"],
-					})
+			if rule["related_"+ds.SchemaFieldDBField] != nil {
+				if f, err := scheme.GetFieldByID(utils.ToInt64(rule[ds.SchemaFieldDBField])); err == nil {
+					if ff, err := scheme.GetFieldByID(utils.ToInt64(rule["related_"+ds.SchemaFieldDBField])); err == nil {
+						rules = append(rules, map[string]interface{}{
+							"related":  ff.Name,
+							"trigger":  f.Name,
+							"value":    nil,
+							"operator": rule["operator"],
+						})
+					}
+				}
+			} else {
+				if _, values, err := filter.NewFilterService(s.Domain).GetOneFieldVerification(sch, values, rule); err == nil {
+					if field, err := sch.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField)); err == nil {
+						rules = append(rules, map[string]interface{}{
+							"trigger":  field.Name,
+							"value":    values,
+							"operator": rule["operator"],
+						})
+					}
 				}
 			}
 		}
 	}
+	fmt.Println("RULES", rules)
 	return rules
 }
 

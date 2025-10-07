@@ -383,7 +383,8 @@ func (t *FilterService) GetFieldRestriction(fromSchema sm.SchemaModel) (string, 
 	return sql, nil
 }
 
-func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}) (bool, error) {
+func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *sm.SchemaModel, fromField *sm.FieldModel, rule map[string]interface{}, dest int64, record map[string]interface{}) (bool, []string, error) {
+	values := []string{}
 	m, _ := t.GetFieldSQL(key, operator, fromSchema, fromSchema, fromField, rule, dest)
 	for k, mm := range m {
 		for op, mmm := range mm {
@@ -399,7 +400,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 				if res, err := t.Domain.GetDb().ClearQueryFilter().QueryAssociativeArray(mmm[1 : len(mmm)-1]); err == nil {
 					if record[k] == nil || len(res) == 0 {
 						if utils.GetBool(rule, "not_null") {
-							return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
+							return false, []string{}, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
 						}
 					} else {
 						arr := []string{}
@@ -407,46 +408,64 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 							arr = append(arr, utils.GetString(r, k))
 						}
 						a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record)
-						return a, err
+						for _, a := range arr {
+							values = append(values, fmt.Sprintf("%v", record[k])+" "+op+" ("+a+")")
+						}
+						if err != nil || !a {
+							return a, values, err
+						}
 					}
 				}
 			} else {
 				if record[k] == nil {
 					if utils.GetBool(rule, "not_null") {
-						return false, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
+						return false, []string{}, errors.New("can't validate this field affection based on rules : should be not null <" + k + ">")
 					}
 				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); err != nil || !ok {
-					return false, errors.New("can't validate this field affection based on rules")
+					return false, []string{}, errors.New("can't validate this field affection based on rules")
+				} else {
+					values = append(values, fmt.Sprintf("%v", record[k])+" "+op+" ("+mmm+")")
 				}
 			}
 		}
 	}
-	return true, nil
+	return true, values, nil
+}
+
+func (t *FilterService) GetOneFieldVerification(fromSchema sm.SchemaModel, record map[string]interface{}, rule map[string]interface{}) (bool, []string, error) {
+	v := []string{}
+	fieldName := ""
+	var fs *sm.SchemaModel
+	var ff *sm.FieldModel
+	if f, err := schema.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField)); err == nil {
+		fieldName = f.Name
+		if ss, err := schema.GetSchemaByID(utils.ToInt64(f.SchemaID)); err == nil {
+			fs = &ss
+		}
+	}
+	if rule["from_"+ds.SchemaDBField] != nil {
+		if s, err := schema.GetSchemaByID(utils.GetInt(rule, "from_"+ds.SchemaDBField)); err == nil {
+			fs = &s
+		}
+	}
+	if rule["from_"+ds.SchemaFieldDBField] != nil {
+		if f, err := schema.GetFieldByID(utils.GetInt(rule, "from_"+ds.SchemaFieldDBField)); err == nil {
+			ff = &f
+		}
+	}
+	if ok, values, err := t.GetFieldVerify(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField), record); err != nil || !ok {
+		return false, values, err
+	} else {
+		v = append(v, values...)
+	}
+
+	return true, v, nil
 }
 
 func (t *FilterService) GetFieldVerification(fromSchema sm.SchemaModel, record map[string]interface{}) (bool, error) {
 	for _, rule := range t.GetFieldCondition(fromSchema, utils.Record{}) { // SIMPLE WAY...
-		fieldName := ""
-		var fs *sm.SchemaModel
-		var ff *sm.FieldModel
-		if f, err := schema.GetFieldByID(utils.GetInt(rule, ds.SchemaFieldDBField)); err == nil {
-			fieldName = f.Name
-			if ss, err := schema.GetSchemaByID(utils.ToInt64(f.SchemaID)); err == nil {
-				fs = &ss
-			}
-		}
-		if rule["from_"+ds.SchemaDBField] != nil {
-			if s, err := schema.GetSchemaByID(utils.GetInt(rule, "from_"+ds.SchemaDBField)); err == nil {
-				fs = &s
-			}
-		}
-		if rule["from_"+ds.SchemaFieldDBField] != nil {
-			if f, err := schema.GetFieldByID(utils.GetInt(rule, "from_"+ds.SchemaFieldDBField)); err == nil {
-				ff = &f
-			}
-		}
-		if ok, err := t.GetFieldVerify(fieldName, utils.GetString(rule, "operator"), fs, ff, rule, utils.GetInt(rule, ds.DestTableDBField), record); err != nil || !ok {
-			return false, err
+		if ok, _, err := t.GetOneFieldVerification(fromSchema, record, rule); err != nil || !ok {
+			return ok, err
 		}
 	}
 	return true, nil
