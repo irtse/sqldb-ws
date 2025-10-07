@@ -153,11 +153,13 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 			}
 		}
 	}
-	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
-		ds.UserDBField: rr["delegated_"+ds.UserDBField],
-	}, false); err == nil && len(res) > 0 {
-		for _, r := range res {
-			s.Trigger(r, db)
+	if s.Domain.GetUserID() != "" {
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+			ds.UserDBField: rr["delegated_"+ds.UserDBField],
+		}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				s.Trigger(r, db)
+			}
 		}
 	}
 }
