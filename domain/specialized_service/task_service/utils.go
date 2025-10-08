@@ -1,7 +1,6 @@
 package task_service
 
 import (
-	"fmt"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -221,7 +220,6 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			ks2 := ds.UserDBField
 			newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
-			fmt.Println("REQS", newRec, request, initialRec)
 			createTaskAndNotify(newRec, request, initialRec, domain, true)
 			share := map[string]interface{}{
 				ks1:                  delegated[k1],
