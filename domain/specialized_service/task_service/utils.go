@@ -107,7 +107,7 @@ func CreateNewDataFromTask(schema sm.SchemaModel, newTask utils.Record, record u
 	return newTask
 }
 
-func foundRealTask(record map[string]interface{}, domain utils.DomainITF) (map[string]interface{}, bool) {
+func foundRealTask(record map[string]interface{}, domain utils.DomainITF) (map[string]interface{}, string, bool) {
 	if record["binded_dbtask"] != nil {
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			utils.SpecialIDParam: record["binded_dbtask"],
@@ -115,23 +115,15 @@ func foundRealTask(record map[string]interface{}, domain utils.DomainITF) (map[s
 			if res[0]["binded_dbtask"] != nil {
 				return foundRealTask(res[0], domain)
 			}
-			return res[0], true
+			return res[0], utils.GetString(res[0], "binded_dbtask"), true
 		}
 	}
-	return record, false
+	return record, "", false
 }
 
 func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, record map[string]interface{}, domain utils.DomainITF, fromTask bool) {
 	newTask := ConstructNotificationTask(scheme, request, domain)
 	delete(newTask, utils.SpecialIDParam)
-	newR, change := foundRealTask(record, domain)
-	if change {
-		newR["is_close"] = record["is_close"]
-		newR["state"] = record["state"]
-		res, err := domain.UpdateSuperCall(utils.AllParams(ds.DBTask.Name), newR)
-		fmt.Println("CHANGE", res, err)
-		return
-	}
 	if utils.GetString(newTask, ds.SchemaDBField) == utils.GetString(request, ds.SchemaDBField) {
 		newTask[ds.SchemaDBField] = request[ds.SchemaDBField]
 		newTask[ds.DestTableDBField] = request[ds.DestTableDBField]
@@ -290,13 +282,15 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 	id := task[utils.SpecialIDParam]
 	if task["binded_dbtask"] != nil {
 		id := task["binded_dbtask"]
-		domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, m, map[string]interface{}{
-			utils.SpecialIDParam: id,
-		}, true)
+		go domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, id), m, true)
 	}
-	domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, m, map[string]interface{}{
+	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		"binded_dbtask": id,
-	}, false)
+	}, false); err == nil && len(res) > 0 {
+		for _, r := range res {
+			go domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, r[utils.SpecialIDParam]), m, true)
+		}
+	}
 }
 
 func HandleHierarchicalVerification(domain utils.DomainITF, request utils.Record, record map[string]interface{}) map[string]interface{} {
