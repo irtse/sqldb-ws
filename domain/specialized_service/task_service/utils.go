@@ -106,20 +106,6 @@ func CreateNewDataFromTask(schema sm.SchemaModel, newTask utils.Record, record u
 	return newTask
 }
 
-func foundRealTask(record map[string]interface{}, domain utils.DomainITF) (map[string]interface{}, string, bool) {
-	if record["binded_dbtask"] != nil {
-		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-			utils.SpecialIDParam: record["binded_dbtask"],
-		}, false); err == nil && len(res) > 0 {
-			if res[0]["binded_dbtask"] != nil {
-				return foundRealTask(res[0], domain)
-			}
-			return res[0], utils.GetString(res[0], "binded_dbtask"), true
-		}
-	}
-	return record, "", false
-}
-
 func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, record map[string]interface{}, domain utils.DomainITF, fromTask bool) {
 	newTask := ConstructNotificationTask(scheme, request, domain)
 	delete(newTask, utils.SpecialIDParam)
@@ -213,6 +199,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			utils.SpecialIDParam: record["binded_dbtask"],
 		}, false); err == nil && len(res) > 0 {
+			fmt.Println("IS BINDED 2", res)
 			newRec := record.Copy()
 			newRec["binded_dbtask"] = id
 			newRec[ds.UserDBField] = res[0][ds.UserDBField]
