@@ -32,7 +32,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if name == "article" {
+	if strings.Contains(name, "article") || (strings.Contains(name, "user") && strings.Contains(q, "LIKE")) {
 		fmt.Println(q)
 	}
 	return db.QueryAssociativeArray(q)
