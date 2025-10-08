@@ -140,14 +140,22 @@ func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, r
 }
 
 func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, domain utils.DomainITF, isTask bool) {
-	i, err := domain.GetDb().CreateQuery(ds.DBTask.Name, task, func(s string) (string, bool) {
-		return "", true
-	})
-	if err != nil {
-		return
+	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+		ds.DestTableDBField: task[ds.DestTableDBField],
+		ds.SchemaDBField:    task[ds.SchemaDBField],
+		ds.RequestDBField:   task[ds.RequestDBField],
+		"name":              task["name"],
+		ds.UserDBField:      task[ds.UserDBField],
+	}, false); err == nil && len(res) == 0 {
+		i, err := domain.GetDb().CreateQuery(ds.DBTask.Name, task, func(s string) (string, bool) {
+			return "", true
+		})
+		if err != nil {
+			return
+		}
+		CreateDelegated(task, request, i, domain)
+		notify(task, i, domain)
 	}
-	CreateDelegated(task, request, i, domain)
-	notify(task, i, domain)
 }
 
 func notify(task utils.Record, i int64, domain utils.DomainITF) {
@@ -193,6 +201,17 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 
 func CreateDelegated(record utils.Record, request utils.Record, id int64, domain utils.DomainITF) {
 	currentTime := time.Now()
+	if record["binded_dbtask"] != nil {
+		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			utils.SpecialIDParam: record["binded_dbtask"],
+		}, false); err == nil && len(res) > 0 {
+			newRec := record.Copy()
+			newRec["binded_dbtask"] = id
+			newRec[ds.UserDBField] = res[0][ds.UserDBField]
+			delete(newRec, utils.SpecialIDParam)
+			createTaskAndNotify(newRec, request, domain, true)
+		}
+	}
 	sqlFilter := []string{
 		"('" + currentTime.Format("2006-01-02") + "' >= start_date AND '" + currentTime.Format("2006-01-02") + "' < end_date)",
 	}
@@ -215,11 +234,6 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 			ks2 := ds.UserDBField
 			newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
-			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				utils.SpecialIDParam: newRec[ds.RequestDBField],
-			}, false); err == nil && len(res) > 0 {
-				CreateDelegated(newRec, res[0], utils.GetInt(newRec, utils.SpecialIDParam), domain)
-			}
 			share := map[string]interface{}{
 				ks1:                  delegated[k1],
 				ks2:                  delegated[k2],
@@ -253,6 +267,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 				}
 			}
+			createTaskAndNotify(newRec, request, domain, true)
 		}
 	}
 }
@@ -285,8 +300,11 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 		}, false); err == nil && len(res) > 0 {
 			m["binded_dbtask"] = id
 			for _, r := range res {
-				r, err := domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, r[utils.SpecialIDParam]), m, true)
+				err := domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, m, map[string]interface{}{
+					utils.SpecialIDParam: r[utils.SpecialIDParam],
+				}, false)
 				fmt.Println("UPPER BINDED", r, err)
+				go UpdateDelegated(r, request, domain)
 			}
 		}
 	}
@@ -296,8 +314,10 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 	}, false); err == nil && len(res) > 0 {
 		m["binded_dbtask"] = id
 		for _, r := range res {
-			r, err := domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, r[utils.SpecialIDParam]), m, true)
-			fmt.Println("BINDED", r, err)
+			domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, m, map[string]interface{}{
+				utils.SpecialIDParam: r[utils.SpecialIDParam],
+			}, false)
+			go UpdateDelegated(r, request, domain)
 		}
 	}
 }

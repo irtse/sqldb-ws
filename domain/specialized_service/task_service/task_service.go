@@ -198,7 +198,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			newRecRequest["current_index"] = -1
 		}
 		rrr, err := s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBRequest.Name, newRecRequest[utils.SpecialIDParam]).RootRaw(), newRecRequest)
-		fmt.Println("REQ", rrr, err)
+		fmt.Println("REQ", rrr, err, newRecRequest)
 		for _, scheme := range schemes {
 			if current_index != newRecRequest.GetFloat("current_index") && current_index != (newRecRequest.GetFloat("current_index")-1) && !CheckStateIsEnded(requests[0]["state"]) {
 				HandleHierarchicalVerification(s.Domain, newRecRequest, res)
