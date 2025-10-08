@@ -434,6 +434,9 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 }
 
 func (t *FilterService) GetOneFieldVerification(fromSchema sm.SchemaModel, record map[string]interface{}, rule map[string]interface{}, avoidVerif bool) (bool, []string, error) {
+	if !utils.GetBool(rule, "verify") {
+		return true, []string{}, nil
+	}
 	v := []string{}
 	fieldName := ""
 	var fs *sm.SchemaModel

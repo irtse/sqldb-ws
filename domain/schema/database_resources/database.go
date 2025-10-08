@@ -278,6 +278,8 @@ var DBFieldRule = models.SchemaModel{
 		{Name: "value", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 0},
 		{Name: "min", Type: models.BOOLEAN.String(), Default: false, Readonly: false, Index: 0},
 		{Name: "max", Type: models.BOOLEAN.String(), Default: false, Readonly: false, Index: 0},
+		{Name: "verify", Type: models.BOOLEAN.String(), Default: false, Readonly: false, Index: 0},
+
 		{Name: "starting_rule", Type: models.BOOLEAN.String(), Required: true, Readonly: false, Index: 0},
 		{Name: "operator", Type: models.ENUMOPERATOR.String(), Required: false, Index: 1},
 		{Name: "separator", Type: models.ENUMSEPARATOR.String(), Required: false, Index: 2},
