@@ -423,7 +423,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 					}
 					values = append(values, fmt.Sprintf("%v", mmm))
 				} else if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmm, record); (err != nil || !ok) && !avoidVerif {
-					return false, []string{}, errors.New("can't validate this field assignment based on rules")
+					return false, []string{}, errors.New("can't validate this field assignment based on rules <" + k + "> " + mmm + " " + fmt.Sprintf("%v", record[k]))
 				} else {
 					values = append(values, fmt.Sprintf("%v", mmm))
 				}
