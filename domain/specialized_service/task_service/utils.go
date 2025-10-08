@@ -2,7 +2,6 @@ package task_service
 
 import (
 	"fmt"
-	"runtime/debug"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -193,8 +192,6 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 }
 
 func CreateDelegated(record utils.Record, request utils.Record, id int64, domain utils.DomainITF) {
-	fmt.Println("CreateDelegated")
-	debug.PrintStack()
 	currentTime := time.Now()
 	sqlFilter := []string{
 		"('" + currentTime.Format("2006-01-02") + "' >= start_date AND '" + currentTime.Format("2006-01-02") + "' < end_date)",
@@ -280,17 +277,19 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 		m["is_close"] = task["is_close"]
 	}
 	id := task[utils.SpecialIDParam]
-	m["binded_dbtask"] = id
 	if task["binded_dbtask"] != nil {
 		id := task["binded_dbtask"]
-		go domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, id), m, true)
+		r, err := domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, id), m, true)
+		fmt.Println("UPPER BINDED", r, err)
 	}
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		"binded_dbtask": id,
+		"is_close":      false,
 	}, false); err == nil && len(res) > 0 {
-
+		m["binded_dbtask"] = id
 		for _, r := range res {
-			go domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, r[utils.SpecialIDParam]), m, true)
+			r, err := domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, r[utils.SpecialIDParam]), m, true)
+			fmt.Println("BINDED", r, err)
 		}
 	}
 }
