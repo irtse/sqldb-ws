@@ -32,7 +32,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(name, "article") || (strings.Contains(name, "tasl") && strings.Contains(q, "binded")) {
+	if strings.Contains(name, "article") || (strings.Contains(name, "task") && strings.Contains(q, "binded")) {
 		fmt.Println(q)
 	}
 	return db.QueryAssociativeArray(q)
@@ -151,6 +151,9 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 	}
 	if err != nil {
 		return err
+	}
+	if strings.Contains(name, "request") {
+		fmt.Println(name, q, record, restriction)
 	}
 	err = db.Query(q)
 	if err != nil && strings.Contains(err.Error(), "unique") {
