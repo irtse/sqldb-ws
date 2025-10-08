@@ -198,7 +198,9 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 				if len(subAlt) > 0 {
 					subAlt += " AND "
 				}
-				subAlt += "(LOWER(name::text) LIKE LOWER(" + s + ") OR LOWER(id::text) LIKE LOWER(" + s + "))"
+				s = strings.ReplaceAll(s, "'%", "")
+				s = strings.ReplaceAll(s, "%'", "")
+				subAlt += "(LOWER(name::text) LIKE LOWER('%" + s + "%') OR LOWER(id::text) LIKE LOWER('%" + s + "%'))"
 			}
 			alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE " + subAlt + ")"
 			fmt.Println("LIKE 2 -> ", alterRestr)
@@ -231,7 +233,9 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			if len(alterRestr) > 0 {
 				alterRestr += " AND "
 			}
-			alterRestr += "LOWER(" + key + "::text) " + no + " LOWER(" + s + ")"
+			s = strings.ReplaceAll(s, "'%", "")
+			s = strings.ReplaceAll(s, "%'", "")
+			alterRestr += "LOWER(" + key + "::text) " + no + " LOWER('%" + s + "%')"
 		}
 		fmt.Println("LIKE -> ", alterRestr)
 		return key, no, or, alterRestr
