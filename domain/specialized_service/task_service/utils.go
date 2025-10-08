@@ -140,6 +140,13 @@ func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, r
 }
 
 func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) {
+	fmt.Println("CHECK", map[string]interface{}{
+		ds.DestTableDBField: task[ds.DestTableDBField],
+		ds.SchemaDBField:    task[ds.SchemaDBField],
+		ds.RequestDBField:   task[ds.RequestDBField],
+		"name":              connector.Quote(utils.GetString(task, "name")),
+		ds.UserDBField:      task[ds.UserDBField],
+	})
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		ds.DestTableDBField: task[ds.DestTableDBField],
 		ds.SchemaDBField:    task[ds.SchemaDBField],
@@ -201,6 +208,7 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 
 func CreateDelegated(record utils.Record, request utils.Record, id int64, initialRec map[string]interface{}, domain utils.DomainITF) {
 	currentTime := time.Now()
+	fmt.Println("IS BINDED", initialRec["binded_dbtask"])
 	if initialRec["binded_dbtask"] != nil {
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			utils.SpecialIDParam: record["binded_dbtask"],

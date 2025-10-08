@@ -139,6 +139,9 @@ func (db *Database) CreateTableQuery(name string) error {
 }
 
 func (db *Database) UpdateQuery(name string, record map[string]interface{}, restriction map[string]interface{}, isOr bool) error {
+	if strings.Contains(name, "request") {
+		fmt.Println("tt", name, record, restriction)
+	}
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
