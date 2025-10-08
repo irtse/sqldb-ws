@@ -21,20 +21,15 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 			if sch, err := schema.GetSchemaByID(schemaID); err == nil && sch.Name == ds.DBTask.Name {
 				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 					ds.UserDBField: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
-						ds.DestTableDBField: destID,
-						ds.SchemaDBField:    schemaID,
-						ds.UserDBField:      id,
+						ds.UserDBField: id,
 					}, false, "delegated_"+ds.UserDBField),
 					"binded_dbtask": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name,
 						map[string]interface{}{
 							ds.UserDBField: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
-								ds.DestTableDBField:            destID,
-								ds.SchemaDBField:               schemaID,
-								ds.UserDBField:                 id,
-								"!delegated_" + ds.UserDBField: id,
+								ds.UserDBField: id,
 							}, false, ds.UserDBField),
 						}, false, utils.SpecialIDParam),
-				}, false); err == nil {
+				}, true); err == nil {
 					for _, r := range res {
 						i, err := domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
 							utils.Record{

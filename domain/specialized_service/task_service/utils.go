@@ -126,13 +126,6 @@ func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, r
 }
 
 func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) {
-	fmt.Println("CHECK", map[string]interface{}{
-		ds.DestTableDBField: task[ds.DestTableDBField],
-		ds.SchemaDBField:    task[ds.SchemaDBField],
-		ds.RequestDBField:   task[ds.RequestDBField],
-		"name":              connector.Quote(utils.GetString(task, "name")),
-		ds.UserDBField:      task[ds.UserDBField],
-	})
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		ds.DestTableDBField: task[ds.DestTableDBField],
 		ds.SchemaDBField:    task[ds.SchemaDBField],
@@ -196,18 +189,14 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 	currentTime := time.Now()
 	bd := utils.GetString(initialRec, "binded_dbtask")
 	if bd != "" {
-		fmt.Println("IS BINDED", bd)
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			utils.SpecialIDParam: bd,
 		}, false); err == nil && len(res) > 0 {
-			fmt.Println("IS BINDED 2", res)
 			newRec := record.Copy()
 			newRec["binded_dbtask"] = id
 			newRec[ds.UserDBField] = res[0][ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
 			createTaskAndNotify(newRec, request, initialRec, domain, true)
-		} else {
-			fmt.Println("IS BINDED 3", res, err)
 		}
 	}
 	sqlFilter := []string{
@@ -232,6 +221,8 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			ks2 := ds.UserDBField
 			newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
+			fmt.Println(newRec, request, initialRec)
+			createTaskAndNotify(newRec, request, initialRec, domain, true)
 			share := map[string]interface{}{
 				ks1:                  delegated[k1],
 				ks2:                  delegated[k2],
@@ -265,7 +256,6 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 				}
 			}
-			createTaskAndNotify(newRec, request, initialRec, domain, true)
 		}
 	}
 }
@@ -298,10 +288,9 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 		}, false); err == nil && len(res) > 0 {
 			m["binded_dbtask"] = id
 			for _, r := range res {
-				err := domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, m, map[string]interface{}{
+				domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, m, map[string]interface{}{
 					utils.SpecialIDParam: r[utils.SpecialIDParam],
 				}, false)
-				fmt.Println("UPPER BINDED", r, err)
 				go UpdateDelegated(r, request, domain)
 			}
 		}

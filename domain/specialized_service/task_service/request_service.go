@@ -2,7 +2,6 @@ package task_service
 
 import (
 	"errors"
-	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
@@ -75,7 +74,6 @@ func GetHierarchical(domain utils.DomainITF) ([]map[string]interface{}, error) {
 func (s *RequestService) Entity() utils.SpecializedServiceInfo                                    { return ds.DBRequest }
 func (s *RequestService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {}
 func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
-	fmt.Println("VERIFY", record)
 	if s.Domain.GetMethod() == utils.CREATE {
 		if _, ok := record[utils.RootDestTableIDParam]; !ok {
 			return record, errors.New("missing related data"), false
@@ -96,7 +94,6 @@ func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tabl
 		if wf, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 			utils.SpecialIDParam: record[ds.WorkflowDBField],
 		}, false); err != nil || len(wf) == 0 {
-			fmt.Println("VERIFY 4", record)
 			return record, nil, true
 		} else {
 			record["name"] = wf[0][sm.NAMEKEY]
@@ -109,11 +106,9 @@ func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tabl
 		if rec, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
 			return s.AbstractSpecializedService.VerifyDataIntegrity(rec, tablename)
 		} else {
-			fmt.Println("VERIFY 2", record)
 			return record, err, err == nil
 		}
 	}
-	fmt.Println("VERIFY 3", record)
 	return record, nil, true
 }
 func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
