@@ -18,36 +18,6 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 	}, true); err == nil && len(users) > 0 {
 		for _, destID := range destIDs {
 			id := utils.GetString(users[0], utils.SpecialIDParam)
-			if domain.GetMethod() == utils.SELECT {
-				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
-					ds.DBDataAccess.Name, map[string]interface{}{
-						"write":             false,
-						"update":            false,
-						ds.DestTableDBField: destID,
-						ds.SchemaDBField:    schemaID,
-						ds.UserDBField:      id,
-					}, false); err == nil && len(res) == 0 {
-					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
-						utils.Record{
-							"write":             domain.GetMethod() == utils.CREATE,
-							"update":            domain.GetMethod() == utils.UPDATE,
-							ds.DestTableDBField: destID,
-							ds.SchemaDBField:    schemaID,
-							ds.UserDBField:      id}, func(s string) (string, bool) {
-							return "", true
-						})
-				}
-				return
-			}
-			domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
-				utils.Record{
-					"write":             domain.GetMethod() == utils.CREATE,
-					"update":            domain.GetMethod() == utils.UPDATE,
-					ds.DestTableDBField: destID,
-					ds.SchemaDBField:    schemaID,
-					ds.UserDBField:      id}, func(s string) (string, bool) {
-					return "", true
-				})
 			if sch, err := schema.GetSchemaByID(schemaID); err == nil && sch.Name == ds.DBTask.Name {
 				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 					ds.UserDBField: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
@@ -80,6 +50,36 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 				}
 
 			}
+			if domain.GetMethod() == utils.SELECT {
+				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
+					ds.DBDataAccess.Name, map[string]interface{}{
+						"write":             false,
+						"update":            false,
+						ds.DestTableDBField: destID,
+						ds.SchemaDBField:    schemaID,
+						ds.UserDBField:      id,
+					}, false); err == nil && len(res) == 0 {
+					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+						utils.Record{
+							"write":             domain.GetMethod() == utils.CREATE,
+							"update":            domain.GetMethod() == utils.UPDATE,
+							ds.DestTableDBField: destID,
+							ds.SchemaDBField:    schemaID,
+							ds.UserDBField:      id}, func(s string) (string, bool) {
+							return "", true
+						})
+				}
+				return
+			}
+			domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+				utils.Record{
+					"write":             domain.GetMethod() == utils.CREATE,
+					"update":            domain.GetMethod() == utils.UPDATE,
+					ds.DestTableDBField: destID,
+					ds.SchemaDBField:    schemaID,
+					ds.UserDBField:      id}, func(s string) (string, bool) {
+					return "", true
+				})
 		}
 	}
 }

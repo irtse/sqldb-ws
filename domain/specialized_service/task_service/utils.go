@@ -194,10 +194,11 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 
 func CreateDelegated(record utils.Record, request utils.Record, id int64, initialRec map[string]interface{}, domain utils.DomainITF) {
 	currentTime := time.Now()
-	fmt.Println("IS BINDED", initialRec["binded_dbtask"])
-	if initialRec["binded_dbtask"] != nil {
+	bd := utils.GetString(initialRec, "binded_dbtask")
+	if bd != "" {
+		fmt.Println("IS BINDED", bd)
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-			utils.SpecialIDParam: record["binded_dbtask"],
+			utils.SpecialIDParam: bd,
 		}, false); err == nil && len(res) > 0 {
 			fmt.Println("IS BINDED 2", res)
 			newRec := record.Copy()
