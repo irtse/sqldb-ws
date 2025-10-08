@@ -219,9 +219,6 @@ func (d *SpecializedDomain) GetRowResults(
 					d.Params.Set(utils.RootOffset, "0")
 				}
 			}
-			if d.Method == utils.UPDATE {
-				fmt.Println("UPDATE", record)
-			}
 			res, err := d.Invoke(record, d.Method, args...)
 			if err != nil {
 				return all_results, err

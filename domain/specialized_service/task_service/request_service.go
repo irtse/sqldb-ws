@@ -2,6 +2,7 @@ package task_service
 
 import (
 	"errors"
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
@@ -74,6 +75,7 @@ func GetHierarchical(domain utils.DomainITF) ([]map[string]interface{}, error) {
 func (s *RequestService) Entity() utils.SpecializedServiceInfo                                    { return ds.DBRequest }
 func (s *RequestService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {}
 func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
+	fmt.Println("VERIFY", record)
 	if s.Domain.GetMethod() == utils.CREATE {
 		if _, ok := record[utils.RootDestTableIDParam]; !ok {
 			return record, errors.New("missing related data"), false
@@ -110,6 +112,7 @@ func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tabl
 			return record, err, false
 		}
 	}
+	fmt.Println("VERIFY 2", record)
 	return record, nil, true
 }
 func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {

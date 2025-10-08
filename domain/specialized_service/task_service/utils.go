@@ -205,6 +205,8 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			newRec[ds.UserDBField] = res[0][ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
 			createTaskAndNotify(newRec, request, initialRec, domain, true)
+		} else {
+			fmt.Println("IS BINDED 3", res, err)
 		}
 	}
 	sqlFilter := []string{

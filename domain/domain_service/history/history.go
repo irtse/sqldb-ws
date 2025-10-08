@@ -1,6 +1,7 @@
 package history
 
 import (
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -63,9 +64,9 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 								"!delegated_" + ds.UserDBField: id,
 							}, false, ds.UserDBField),
 						}, false, utils.SpecialIDParam),
-				}, false); err == nil && len(res) > 0 {
+				}, false); err == nil {
 					for _, r := range res {
-						domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+						i, err := domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
 							utils.Record{
 								"write":             domain.GetMethod() == utils.CREATE,
 								"update":            domain.GetMethod() == utils.UPDATE,
@@ -74,6 +75,7 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 								ds.UserDBField:      r[ds.UserDBField]}, func(s string) (string, bool) {
 								return "", true
 							})
+						fmt.Println("CREATE HISTORY", i, err)
 					}
 				}
 
