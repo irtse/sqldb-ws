@@ -107,9 +107,24 @@ func CreateNewDataFromTask(schema sm.SchemaModel, newTask utils.Record, record u
 	return newTask
 }
 
+func foundRealTask(record map[string]interface{}, domain utils.DomainITF) map[string]interface{} {
+	if record["binded_dbtask"] != nil {
+		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			utils.SpecialIDParam: record["binded_dbtask"],
+		}, false); err == nil && len(res) > 0 {
+			if res[0]["binded_dbtask"] != nil {
+				return foundRealTask(res[0], domain)
+			}
+			return res[0]
+		}
+	}
+	return record
+}
+
 func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, record map[string]interface{}, domain utils.DomainITF, fromTask bool) map[string]interface{} {
 	newTask := ConstructNotificationTask(scheme, request, domain)
 	delete(newTask, utils.SpecialIDParam)
+	record = foundRealTask(record, domain)
 	if utils.GetString(newTask, ds.SchemaDBField) == utils.GetString(request, ds.SchemaDBField) {
 		newTask[ds.SchemaDBField] = request[ds.SchemaDBField]
 		newTask[ds.DestTableDBField] = request[ds.DestTableDBField]
