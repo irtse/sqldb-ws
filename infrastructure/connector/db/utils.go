@@ -188,8 +188,20 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 	}
 	if foreignName != "" {
 		if strings.Contains(sql, "%") {
-			alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE LOWER(name::text) LIKE LOWER(" + sql + ") OR LOWER(id::text) LIKE LOWER(" + sql + "))"
-			return key, "IN", "(SELECT id FROM " + foreignName + " WHERE LOWER(name::text) LIKE LOWER(" + sql + ") OR LOWER(id::text) LIKE LOWER(" + sql + "))", alterRestr
+			// LIKE
+			subAlt := ""
+			ssql := strings.Split(sql, " ")
+			for _, s := range ssql {
+				if s == "" {
+					continue
+				}
+				if len(subAlt) > 0 {
+					subAlt += " AND "
+				}
+				subAlt += "(LOWER(name::text) LIKE LOWER(" + s + ") OR LOWER(id::text) LIKE LOWER(" + s + "))"
+			}
+			alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE " + subAlt + ")"
+			return key, "IN", "(SELECT id FROM " + foreignName + " WHERE " + subAlt + ")", alterRestr
 		} else {
 			if strings.Contains(sql, "'") {
 				if strings.Contains(sql, "NULL") {
@@ -209,7 +221,17 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 		if strings.Contains(operator, "NOT") || strings.Contains(operator, "!") {
 			no = "NOT LIKE"
 		}
-		alterRestr += "LOWER(" + key + "::text) " + no + " LOWER(" + sql + ")"
+		// LIKE
+		ssql := strings.Split(sql, " ")
+		for _, s := range ssql {
+			if s == "" {
+				continue
+			}
+			if len(alterRestr) > 0 {
+				alterRestr += " AND "
+			}
+			alterRestr += "LOWER(" + key + "::text) " + no + " LOWER(" + s + ")"
+		}
 		return key, no, or, alterRestr
 	} else {
 		if strings.Contains(sql, "'") && !strings.Contains(typ, "enum") && !strings.Contains(typ, "many") {
