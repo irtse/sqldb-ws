@@ -286,11 +286,9 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 			m["binded_dbtask"] = id
 			for _, r := range res {
 				r, err := domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, r[utils.SpecialIDParam]), m, true)
-				fmt.Println("BINDED", r, err)
+				fmt.Println("UPPER BINDED", r, err)
 			}
 		}
-		r, err := domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, id), m, true)
-		fmt.Println("UPPER BINDED", r, err)
 	}
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		"binded_dbtask": id,
