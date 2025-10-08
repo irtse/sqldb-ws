@@ -96,12 +96,12 @@ func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tabl
 		if wf, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 			utils.SpecialIDParam: record[ds.WorkflowDBField],
 		}, false); err != nil || len(wf) == 0 {
+			fmt.Println("VERIFY 4", record)
 			return record, nil, true
 		} else {
 			record["name"] = wf[0][sm.NAMEKEY]
 			record[ds.SchemaDBField] = wf[0][ds.SchemaDBField]
 		}
-
 	} else if s.Domain.GetMethod() == utils.UPDATE {
 		record = SetClosureStatus(record)
 	}
@@ -109,10 +109,11 @@ func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tabl
 		if rec, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
 			return s.AbstractSpecializedService.VerifyDataIntegrity(rec, tablename)
 		} else {
-			return record, err, false
+			fmt.Println("VERIFY 2", record)
+			return record, err, err == nil
 		}
 	}
-	fmt.Println("VERIFY 2", record)
+	fmt.Println("VERIFY 3", record)
 	return record, nil, true
 }
 func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
