@@ -203,7 +203,6 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 				subAlt += "(LOWER(name::text) LIKE LOWER('%" + s + "%') OR LOWER(id::text) LIKE LOWER('%" + s + "%'))"
 			}
 			alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE " + subAlt + ")"
-			fmt.Println("LIKE 2 -> ", alterRestr)
 			return key, "IN", "(SELECT id FROM " + foreignName + " WHERE " + subAlt + ")", alterRestr
 		} else {
 			if strings.Contains(sql, "'") {
@@ -237,7 +236,6 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			s = strings.ReplaceAll(s, "%'", "")
 			alterRestr += "(LOWER(" + key + "::text) " + no + " LOWER('%" + s + "%'))"
 		}
-		fmt.Println("LIKE -> ", alterRestr)
 		return key, no, or, alterRestr
 	} else {
 		if strings.Contains(sql, "'") && !strings.Contains(typ, "enum") && !strings.Contains(typ, "many") {

@@ -1,7 +1,6 @@
 package history
 
 import (
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -31,16 +30,24 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 						}, false, utils.SpecialIDParam),
 				}, true); err == nil {
 					for _, r := range res {
-						i, err := domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
-							utils.Record{
+						if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
+							ds.DBDataAccess.Name, map[string]interface{}{
 								"write":             domain.GetMethod() == utils.CREATE,
 								"update":            domain.GetMethod() == utils.UPDATE,
-								ds.DestTableDBField: r[utils.SpecialIDParam],
+								ds.DestTableDBField: destID,
 								ds.SchemaDBField:    schemaID,
-								ds.UserDBField:      r[ds.UserDBField]}, func(s string) (string, bool) {
-								return "", true
-							})
-						fmt.Println("CREATE HISTORY", i, err)
+								ds.UserDBField:      id,
+							}, false); err == nil && len(res) == 0 {
+							domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+								utils.Record{
+									"write":             domain.GetMethod() == utils.CREATE,
+									"update":            domain.GetMethod() == utils.UPDATE,
+									ds.DestTableDBField: r[utils.SpecialIDParam],
+									ds.SchemaDBField:    schemaID,
+									ds.UserDBField:      r[ds.UserDBField]}, func(s string) (string, bool) {
+									return "", true
+								})
+						}
 					}
 				}
 

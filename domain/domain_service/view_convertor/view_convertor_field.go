@@ -1,7 +1,6 @@
 package view_convertor
 
 import (
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
@@ -63,7 +62,6 @@ func (s *ViewConvertor) GetFieldsRules(schName string, values map[string]interfa
 			}
 		}
 	}
-	fmt.Println("RULES", rules)
 	return rules
 }
 

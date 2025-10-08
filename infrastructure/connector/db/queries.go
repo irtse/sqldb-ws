@@ -32,9 +32,6 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(name, "task") {
-		fmt.Println(q)
-	}
 	return db.QueryAssociativeArray(q)
 }
 
@@ -62,7 +59,6 @@ func (db *Database) MathQuery(algo string, name string, naming ...string) ([]map
 		q = db.BuildMathQuery(algo, name, naming...)
 	}
 	res, err := db.QueryAssociativeArray(q)
-	fmt.Println(res, err, q)
 	return res, err
 }
 
@@ -139,9 +135,6 @@ func (db *Database) CreateTableQuery(name string) error {
 }
 
 func (db *Database) UpdateQuery(name string, record map[string]interface{}, restriction map[string]interface{}, isOr bool) error {
-	if strings.Contains(name, "request") {
-		fmt.Println("tt", name, record, restriction)
-	}
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
@@ -154,9 +147,6 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 	}
 	if err != nil {
 		return err
-	}
-	if strings.Contains(name, "request") {
-		fmt.Println(name, q, record, restriction)
 	}
 	err = db.Query(q)
 	if err != nil && strings.Contains(err.Error(), "unique") {

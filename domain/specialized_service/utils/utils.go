@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/triggers"
@@ -252,7 +251,6 @@ func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
 func (t *AbstractSpecializedService) GetFieldInfo(fromSchema sm.SchemaModel, record utils.Record) (bool, error) {
 	filterService := filter.NewFilterService(t.Domain)
 	if s, err := filterService.GetFieldRestriction(fromSchema); err == nil {
-		fmt.Println("GetFieldInfo", s)
 		if s == "" {
 			return true, nil
 		}
