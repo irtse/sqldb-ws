@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"mime"
 	"net/smtp"
 	"os"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -68,6 +69,11 @@ func ForgeMail(from utils.Record, to utils.Record, subject string, tpl string,
 	return m, nil
 }
 
+func formatSubject(subject string) string {
+	// Use Q-encoding to make the subject RFC 2047 compliant
+	return mime.QEncoding.Encode("utf-8", subject)
+}
+
 func SendMail(from string, to string, mail utils.Record, isValidButton bool) error {
 	var body bytes.Buffer
 	boundary := "mixed-boundary"
@@ -75,7 +81,7 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 	// En-têtes MIME
 	body.WriteString(fmt.Sprintf("From: %s\r\n", from))
 	body.WriteString(fmt.Sprintf("To: %s\r\n", to))
-	body.WriteString("Subject: " + RemoveAccents(utils.GetString(mail, "subject")) + "\r\n")
+	body.WriteString("Subject: " + formatSubject(utils.GetString(mail, "subject")) + "\r\n")
 	body.WriteString("MIME-Version: 1.0\r\n")
 	body.WriteString("Content-Type: multipart/mixed; boundary=\"" + boundary + "\"\r\n")
 	body.WriteString("\r\n--" + boundary + "\r\n")
@@ -145,7 +151,7 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 				fileBase64 := base64.StdEncoding.EncodeToString(fileData)
 				body.WriteString("Content-Type: application/octet-stream\r\n")
 				body.WriteString("Content-Transfer-Encoding: base64\r\n")
-				body.WriteString("Content-Disposition: attachment; filename=\"" + fileName + "\"\r\n\r\n")
+				body.WriteString("Content-Disposition: attachment; filename=\"" + formatSubject(fileName) + "\"\r\n\r\n")
 				// Diviser le base64 en lignes de 76 caractères (RFC)
 				for i := 0; i < len(fileBase64); i += 76 {
 					end := i + 76

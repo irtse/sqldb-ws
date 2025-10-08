@@ -235,7 +235,7 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			}
 			s = strings.ReplaceAll(s, "'%", "")
 			s = strings.ReplaceAll(s, "%'", "")
-			alterRestr += "LOWER(" + key + "::text) " + no + " LOWER('%" + s + "%')"
+			alterRestr += "(LOWER(" + key + "::text) " + no + " LOWER('%" + s + "%'))"
 		}
 		fmt.Println("LIKE -> ", alterRestr)
 		return key, no, or, alterRestr
