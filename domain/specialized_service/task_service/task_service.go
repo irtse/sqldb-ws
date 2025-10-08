@@ -57,7 +57,7 @@ func (s *TaskService) SpecializedCreateRow(record map[string]interface{}, tableN
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 		utils.SpecialIDParam: record[ds.RequestDBField],
 	}, false); err == nil && len(res) > 0 {
-		CreateDelegated(record, res[0], utils.GetInt(record, utils.SpecialIDParam), s.Domain)
+		CreateDelegated(record, res[0], utils.GetInt(record, utils.SpecialIDParam), record, s.Domain)
 	}
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }

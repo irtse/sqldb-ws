@@ -135,11 +135,11 @@ func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, r
 	}
 	shouldCreate := utils.GetString(record, "nexts") == utils.ReservedParam || utils.GetString(record, "nexts") == "" || isMeta
 	if shouldCreate {
-		createTaskAndNotify(newTask, request, domain, fromTask)
+		createTaskAndNotify(newTask, request, record, domain, fromTask)
 	}
 }
 
-func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, domain utils.DomainITF, isTask bool) {
+func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) {
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		ds.DestTableDBField: task[ds.DestTableDBField],
 		ds.SchemaDBField:    task[ds.SchemaDBField],
@@ -153,7 +153,7 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 		if err != nil {
 			return
 		}
-		CreateDelegated(task, request, i, domain)
+		CreateDelegated(task, request, i, initialRec, domain)
 		notify(task, i, domain)
 	}
 }
@@ -199,9 +199,9 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 	})
 }
 
-func CreateDelegated(record utils.Record, request utils.Record, id int64, domain utils.DomainITF) {
+func CreateDelegated(record utils.Record, request utils.Record, id int64, initialRec map[string]interface{}, domain utils.DomainITF) {
 	currentTime := time.Now()
-	if record["binded_dbtask"] != nil {
+	if initialRec["binded_dbtask"] != nil {
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			utils.SpecialIDParam: record["binded_dbtask"],
 		}, false); err == nil && len(res) > 0 {
@@ -209,7 +209,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 			newRec["binded_dbtask"] = id
 			newRec[ds.UserDBField] = res[0][ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
-			createTaskAndNotify(newRec, request, domain, true)
+			createTaskAndNotify(newRec, request, initialRec, domain, true)
 		}
 	}
 	sqlFilter := []string{
@@ -267,7 +267,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, domain
 					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 				}
 			}
-			createTaskAndNotify(newRec, request, domain, true)
+			createTaskAndNotify(newRec, request, initialRec, domain, true)
 		}
 	}
 }
@@ -334,7 +334,7 @@ func HandleHierarchicalVerification(domain utils.DomainITF, request utils.Record
 	return record
 }
 
-func CreateHierarchicalTask(domain utils.DomainITF, request utils.Record, record, hierarch map[string]interface{}) {
+func CreateHierarchicalTask(domain utils.DomainITF, request utils.Record, record map[string]interface{}, hierarch map[string]interface{}) {
 	newTask := utils.Record{
 		ds.SchemaDBField:    record[ds.SchemaDBField],
 		ds.DestTableDBField: record[ds.DestTableDBField],
@@ -348,7 +348,7 @@ func CreateHierarchicalTask(domain utils.DomainITF, request utils.Record, record
 	if i, err := domain.GetDb().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) {
 		return "", true
 	}); err == nil {
-		CreateDelegated(newTask, request, i, domain)
+		CreateDelegated(newTask, request, i, record, domain)
 		notify(newTask, i, domain)
 	}
 }
