@@ -48,7 +48,7 @@ func (s *RequestService) TransformToGenericView(results utils.Results, tableName
 func (s *RequestService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
 	n := []string{}
 	f := filter.NewFilterService(s.Domain)
-	if !s.Domain.IsSuperCall() {
+	if !s.Domain.IsSuperAdmin() {
 		n = append(n, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			ds.UserDBField: s.Domain.GetUserID(),
 			ds.UserDBField + "_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
