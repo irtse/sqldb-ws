@@ -215,7 +215,7 @@ func (d *SpecializedDomain) GetRowResults(
 			p, _ := d.Params.Get(utils.RootShallow)
 			if p == "enable" {
 				if _, ok := d.Params.Get(utils.RootOffset); !ok {
-					d.Params.Set(utils.RootLimit, "10")
+					d.Params.Set(utils.RootLimit, "30")
 					d.Params.Set(utils.RootOffset, "0")
 				}
 			}

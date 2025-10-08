@@ -2,6 +2,7 @@ package history
 
 import (
 	"slices"
+	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
@@ -46,6 +47,37 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 					ds.UserDBField:      id}, func(s string) (string, bool) {
 					return "", true
 				})
+			if sch, err := schema.GetSchemaByID(schemaID); err == nil && sch.Name == ds.DBTask.Name {
+				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					ds.UserDBField: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+						ds.DestTableDBField: destID,
+						ds.SchemaDBField:    schemaID,
+						ds.UserDBField:      id,
+					}, false, "delegated_"+ds.UserDBField),
+					"binded_dbtask": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name,
+						map[string]interface{}{
+							ds.UserDBField: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+								ds.DestTableDBField:            destID,
+								ds.SchemaDBField:               schemaID,
+								ds.UserDBField:                 id,
+								"!delegated_" + ds.UserDBField: id,
+							}, false, ds.UserDBField),
+						}, false, utils.SpecialIDParam),
+				}, false); err == nil && len(res) > 0 {
+					for _, r := range res {
+						domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+							utils.Record{
+								"write":             domain.GetMethod() == utils.CREATE,
+								"update":            domain.GetMethod() == utils.UPDATE,
+								ds.DestTableDBField: r[utils.SpecialIDParam],
+								ds.SchemaDBField:    schemaID,
+								ds.UserDBField:      r[ds.UserDBField]}, func(s string) (string, bool) {
+								return "", true
+							})
+					}
+				}
+
+			}
 		}
 	}
 }
