@@ -124,7 +124,7 @@ func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, r
 	}
 }
 
-func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) {
+func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) int64 {
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		ds.DestTableDBField: task[ds.DestTableDBField],
 		ds.SchemaDBField:    task[ds.SchemaDBField],
@@ -136,11 +136,13 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 			return "", true
 		})
 		if err != nil {
-			return
+			return -1
 		}
 		CreateDelegated(task, request, i, initialRec, domain)
 		notify(task, i, domain)
+		return i
 	}
+	return -1
 }
 
 func notify(task utils.Record, i int64, domain utils.DomainITF) {
@@ -192,10 +194,16 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			utils.SpecialIDParam: bd,
 		}, false); err == nil && len(res) > 0 {
 			newRec := record.Copy()
-			newRec["binded_dbtask"] = id
+			newRec["binded_dbtask"] = nil
 			newRec[ds.UserDBField] = res[0][ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
-			go createTaskAndNotify(newRec, request, initialRec, domain, true)
+			if i := createTaskAndNotify(newRec, request, initialRec, domain, true); i >= 0 {
+				domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, map[string]interface{}{
+					"binded_dbtask": i,
+				}, map[string]interface{}{
+					utils.SpecialIDParam: id,
+				}, false)
+			}
 		}
 	}
 	sqlFilter := []string{
