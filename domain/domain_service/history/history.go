@@ -38,7 +38,7 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 								"update":            domain.GetMethod() == utils.UPDATE,
 								ds.DestTableDBField: r[utils.SpecialIDParam],
 								ds.SchemaDBField:    schemaID,
-								ds.UserDBField:      r[ds.UserDBField]}, func(s string) (string, bool) {
+								ds.UserDBField:      id}, func(s string) (string, bool) {
 								return "", true
 							})
 					}
