@@ -297,6 +297,7 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 					m[key][operator] = "(SELECT " + fromF + " FROM " + fromSchema.Name + " WHERE " + ff + ")"
 				}
 				sql += key + " " + operator + " " + m[key][operator]
+				fmt.Println("SQL", sql)
 				continue
 			}
 			if len(sql) > 0 {
