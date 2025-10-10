@@ -78,28 +78,32 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 	var body bytes.Buffer
 	boundary := "mixed-boundary"
 	altboundary := "alt-boundary"
-	// En-têtes MIME
-	body.WriteString(fmt.Sprintf("From: %s\r\n", from))
-	body.WriteString(fmt.Sprintf("To: %s\r\n", to))
-	body.WriteString("Subject: " + formatSubject(utils.GetString(mail, "subject")) + "\r\n")
-	body.WriteString("MIME-Version: 1.0\r\n")
-	body.WriteString("Content-Type: multipart/mixed; boundary=\"" + boundary + "\"\r\n")
-	body.WriteString("\r\n--" + boundary + "\r\n")
-	body.WriteString(fmt.Sprintf("Content-Type: multipart/alternative; boundary=\"%s\"\r\n", altboundary))
-	body.WriteString("\r\n")
-	// Partie texte
-	body.WriteString(fmt.Sprintf("--%s\r\n", altboundary))
-	body.WriteString("Content-Type: text/html; charset=\"utf-8\"\r\n")
-	body.WriteString("Content-Transfer-Encoding: 7bit\r\n\r\n")
-	body.WriteString("<html>")
-	body.WriteString(`
-		<head>
-			<meta charset="UTF-8">
-		</head>
-	`)
-	body.WriteString("<body style=\"margin:0; padding:0; font-family:Arial, sans-serif;\">")
 
-	body.WriteString(utils.GetString(mail, "content"))
+	writeLine := func(s string) {
+		body.WriteString(s + "\r\n")
+	}
+
+	// En-têtes
+	writeLine(fmt.Sprintf("From: %s", from))
+	writeLine(fmt.Sprintf("To: %s", to))
+	writeLine("Subject: " + formatSubject(utils.GetString(mail, "subject")))
+	writeLine("MIME-Version: 1.0")
+	writeLine("Content-Type: multipart/mixed; boundary=\"" + boundary + "\"")
+	writeLine("")
+
+	// Début multipart/mixed
+	writeLine("--" + boundary)
+	writeLine("Content-Type: multipart/alternative; boundary=\"" + altboundary + "\"")
+	writeLine("")
+
+	// Partie texte HTML
+	writeLine("--" + altboundary)
+	writeLine("Content-Type: text/html; charset=\"utf-8\"")
+	writeLine("Content-Transfer-Encoding: 7bit")
+	writeLine("")
+	writeLine("<html><head><meta charset=\"UTF-8\"></head>")
+	writeLine("<body style=\"margin:0; padding:0; font-family:Arial, sans-serif;\">")
+	writeLine(utils.GetString(mail, "content"))
 
 	code := utils.GetString(mail, "code")
 	if isValidButton {
@@ -107,84 +111,99 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 		if host == "" {
 			host = "http://capitalisation.irt-aese.local"
 		}
-		body.WriteString(fmt.Sprintf(`
+		writeLine(fmt.Sprintf(`
 			<div style="display:flex;justify-content:center;align-items: center;">
-			<br>
+				<br>
 				<table border="0" cellspacing="0" cellpadding="0" style="margin:0 10px 0 0">
 					<tr>
 						<td align="center" style="border-radius: 5px; background-color: #13aa52;">
-							<a rel="noopener" target="_blank" rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=true" target="_blank" style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; font-weight: bold; text-decoration: none;border-radius: 5px; padding: 12px 18px; border: 1px solid #13aa52; display: inline-block;">✔</a>
+							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=true" style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; font-weight: bold; text-decoration: none;border-radius: 5px; padding: 12px 18px; border: 1px solid #13aa52; display: inline-block;">✔</a>
 						</td>
 					</tr>
 				</table>
 				<table border="0" cellspacing="0" cellpadding="0">
 					<tr>
 						<td align="center" style="border-radius: 5px; background-color: #FF4742;">
-							<a rel="noopener" target="_blank" rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=false" target="_blank" style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; font-weight: bold; text-decoration: none;border-radius: 5px; padding: 12px 18px; border: 1px solid #FF4742; display: inline-block;">✘</a>
+							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=false" style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; font-weight: bold; text-decoration: none;border-radius: 5px; padding: 12px 18px; border: 1px solid #FF4742; display: inline-block;">✘</a>
 						</td>
 					</tr>
 				</table>
-				</div style="display:flex; ">
-			<br>
-		`, host, code, host, code))
+			</div>
+			<br>`, host, code, host, code))
 	}
-	body.WriteString("</body>")
-	body.WriteString("</html>")
-	body.WriteString("\n--" + altboundary + "--\n")
 
-	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPort := os.Getenv("SMTP_PORT")
-	pwd := os.Getenv("SMTP_PASSWORD")
+	writeLine("</body></html>")
 
-	if file_attached := utils.GetString(mail, "file_attached"); file_attached != "" {
-		files := strings.Split(file_attached, ",")
+	// Fin du multipart/alternative
+	writeLine("--" + altboundary + "--")
+	writeLine("")
+
+	// Pièces jointes
+	if fileAttached := utils.GetString(mail, "file_attached"); fileAttached != "" {
+		files := strings.Split(fileAttached, ",")
 		for _, filePath := range files {
-			splitted := strings.Split(filePath, "/")
-			fileName := splitted[len(splitted)-1]
-			if !strings.Contains(filePath, "/mnt/files/") {
+			filePath = strings.TrimSpace(filePath)
+			fileName := filePath
+			if strings.Contains(filePath, "/") {
+				parts := strings.Split(filePath, "/")
+				fileName = parts[len(parts)-1]
+			}
+			if !strings.HasPrefix(filePath, "/mnt/files/") {
 				filePath = "/mnt/files/" + filePath
 			}
-			fileData, err := os.ReadFile(filePath)
-			if err == nil {
-				body.WriteString("--" + boundary + "\n")
 
-				fileBase64 := base64.StdEncoding.EncodeToString(fileData)
-				body.WriteString("Content-Type: application/octet-stream\r\n")
-				body.WriteString("Content-Transfer-Encoding: base64\r\n")
-				body.WriteString("Content-Disposition: attachment; filename=\"" + formatSubject(fileName) + "\"\r\n\r\n")
-				// Diviser le base64 en lignes de 76 caractères (RFC)
-				for i := 0; i < len(fileBase64); i += 76 {
-					end := i + 76
-					if end > len(fileBase64) {
-						end = len(fileBase64)
-					}
-					body.WriteString(fileBase64[i:end] + "\r\n")
+			data, err := os.ReadFile(filePath)
+			if err != nil {
+				fmt.Println("Could not read file:", filePath, err)
+				continue
+			}
+
+			writeLine("--" + boundary)
+			writeLine("Content-Type: application/octet-stream")
+			writeLine("Content-Transfer-Encoding: base64")
+
+			// Encodage MIME pour le nom du fichier
+			encodedName := mime.QEncoding.Encode("UTF-8", fileName)
+			writeLine("Content-Disposition: attachment; filename=\"" + encodedName + "\"")
+			writeLine("")
+
+			encoded := base64.StdEncoding.EncodeToString(data)
+			for i := 0; i < len(encoded); i += 76 {
+				end := i + 76
+				if end > len(encoded) {
+					end = len(encoded)
 				}
+				writeLine(encoded[i:end])
 			}
 		}
 	}
 
-	body.WriteString("--" + boundary + "--\n")
-	// Charger le template HTML
+	// Fin du multipart/mixed
+	writeLine("--" + boundary + "--")
+
+	// Envoi SMTP
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+	pwd := os.Getenv("SMTP_PASSWORD")
+
 	var err error
+	if smtpHost == "" || smtpPort == "" {
+		return fmt.Errorf("SMTP_HOST or SMTP_PORT not set")
+	}
+
 	if pwd != "" {
 		auth := smtp.PlainAuth("", from, pwd, smtpHost)
-		err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from,
-			[]string{
-				to,
-			}, body.Bytes())
+		err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, body.Bytes())
 	} else {
-		fmt.Println(smtpHost+":"+smtpPort, from, to, string(body.Bytes()))
-		err = smtp.SendMail(smtpHost+":"+smtpPort, nil, from,
-			[]string{
-				to,
-			}, body.Bytes())
+		err = smtp.SendMail(smtpHost+":"+smtpPort, nil, from, []string{to}, body.Bytes())
 	}
+
 	if err != nil {
-		fmt.Println("EMAIL NOT SEND", err)
+		fmt.Println("EMAIL NOT SENT:", err)
 		return err
 	}
-	fmt.Println("EMAIL SEND")
+
+	fmt.Println("EMAIL SENT")
 	return nil
 }
 
