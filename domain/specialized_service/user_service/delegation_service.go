@@ -87,7 +87,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 					if utils.GetString(rr, "end_date") != "" {
 						share["end_date"] = connector.Quote(utils.GetString(rr, "end_date"))
 					}
-					arr := []string{
+					arr := []interface{}{
 						connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 							"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
 							ds.UserDBField:             rr[ds.UserDBField],
