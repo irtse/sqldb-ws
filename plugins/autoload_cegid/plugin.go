@@ -134,7 +134,7 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 }
 
 func (s *PublicationService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
 
 type PosterService struct {
@@ -171,7 +171,7 @@ func (s *PosterService) VerifyDataIntegrity(record map[string]interface{}, table
 }
 
 func (s *PosterService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
 
 type PresentationService struct {
@@ -208,7 +208,7 @@ func (s *PresentationService) VerifyDataIntegrity(record map[string]interface{},
 }
 
 func (s *PresentationService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
 
 type ConferenceService struct {
@@ -245,5 +245,5 @@ func (s *ConferenceService) VerifyDataIntegrity(record map[string]interface{}, t
 }
 
 func (s *ConferenceService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
