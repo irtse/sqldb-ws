@@ -29,7 +29,7 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 							"update":            domain.GetMethod() == utils.UPDATE,
 							ds.DestTableDBField: destID,
 							ds.SchemaDBField:    schemaID,
-							ds.UserDBField:      r[ds.UserDBField],
+							ds.UserDBField:      id,
 						}, false); err == nil && len(res) == 0 {
 						fmt.Println("REAL CREATE DELEGATED HISTORY", res)
 						domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
