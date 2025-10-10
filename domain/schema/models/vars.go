@@ -242,6 +242,9 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 func IsDateComparable(typ string, val string, val2 string, record utils.Record, operator string) (bool, time.Time, time.Time) {
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := time.Parse("2006-01-02T15:04:05.000", val)
+		if err != nil {
+			time1, err = time.Parse("2006-01-02", val2)
+		}
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
 			now := time.Now().UTC()
 			rnow, _ := time.Parse("2006-01-02", now.Format("2006-01-02"))
@@ -256,6 +259,9 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 			}
 		}
 		time2, err2 := time.Parse("2006-01-02T15:04:05.000", val2)
+		if err2 != nil {
+			time2, err2 = time.Parse("2006-01-02", val2)
+		}
 		fmt.Println("T2", err)
 		return err == nil && err2 == nil, time1, time2
 	}
