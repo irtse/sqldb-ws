@@ -3,25 +3,33 @@ package connector
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"mime"
+	"net"
 	"net/smtp"
 	"os"
+	"path/filepath"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/utils"
 	"strings"
 	"text/template"
-	"unicode"
+	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 )
 
 type EmailData struct {
 	Name string
 	Code string
+}
+
+type CachedMail struct {
+	From          string
+	To            string
+	MailRecord    utils.Record
+	IsValidButton bool
+	Timestamp     time.Time
 }
 
 func ForgeMail(from utils.Record, to utils.Record, subject string, tpl string,
@@ -74,7 +82,71 @@ func formatSubject(subject string) string {
 	return mime.QEncoding.Encode("utf-8", subject)
 }
 
-func SendMail(from string, to string, mail utils.Record, isValidButton bool) error {
+// ---------- Detect if SMTP is unreachable ----------
+func isSMTPUnreachable(err error) bool {
+	if err == nil {
+		return false
+	}
+	if ne, ok := err.(net.Error); ok {
+		return !ne.Temporary() || ne.Timeout()
+	}
+	if _, ok := err.(*net.OpError); ok {
+		return true
+	}
+	lower := strings.ToLower(err.Error())
+	if strings.Contains(lower, "connection refused") ||
+		strings.Contains(lower, "i/o timeout") ||
+		strings.Contains(lower, "no such host") {
+		return true
+	}
+	return false
+}
+
+// ---------- Retry wrapper ----------
+func SendMailWithRetry(from, to string, mail utils.Record, isValidButton bool, maxRetries int, cacheDir string) error {
+	backoff := 2 * time.Second
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		cache, err := sendMail(from, to, mail, isValidButton)
+		if err == nil {
+			fileName := fmt.Sprintf("%d_%s.json", time.Now().UnixNano(), strings.ReplaceAll(cache.To, "@", "_"))
+			os.Remove(filepath.Join(cacheDir, fileName))
+			return nil
+		}
+		if !isSMTPUnreachable(err) {
+			return err // non-retryable
+		}
+		fmt.Printf("Attempt %d/%d failed, SMTP unreachable: %v\n", attempt, maxRetries, err)
+		time.Sleep(backoff)
+		backoff *= 2
+	}
+	return fmt.Errorf("all retries failed for %s", to)
+}
+
+// ---------- Cache local ----------
+func cacheMail(cm CachedMail, cacheDir string) error {
+	os.MkdirAll(cacheDir, 0755)
+	fileName := fmt.Sprintf("%d_%s.json", time.Now().UnixNano(), strings.ReplaceAll(cm.To, "@", "_"))
+	data, err := json.Marshal(cm)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(cacheDir, fileName), data, 0644)
+}
+
+// ---------- Send safe with cache ----------
+func SendMailSafe(from, to string, mail utils.Record, isValidButton bool) error {
+	cacheDir := "./mail_cache"
+	err := SendMailWithRetry(from, to, mail, isValidButton, 3, cacheDir)
+	if err != nil && isSMTPUnreachable(err) {
+		fmt.Println("SMTP unreachable, caching mail:", to)
+		cm := CachedMail{From: from, To: to, MailRecord: mail, IsValidButton: isValidButton, Timestamp: time.Now()}
+		return cacheMail(cm, cacheDir)
+	}
+	return err
+}
+
+// ---------- SendMail with MIME ----------
+func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMail, error) {
 	var body bytes.Buffer
 	boundary := "mixed-boundary"
 	altboundary := "alt-boundary"
@@ -83,7 +155,7 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 		body.WriteString(s + "\r\n")
 	}
 
-	// En-têtes
+	// Headers
 	writeLine(fmt.Sprintf("From: %s", from))
 	writeLine(fmt.Sprintf("To: %s", to))
 	writeLine("Subject: " + formatSubject(utils.GetString(mail, "subject")))
@@ -91,12 +163,11 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 	writeLine("Content-Type: multipart/mixed; boundary=\"" + boundary + "\"")
 	writeLine("")
 
-	// Début multipart/mixed
+	// Multipart alternative (HTML)
 	writeLine("--" + boundary)
 	writeLine("Content-Type: multipart/alternative; boundary=\"" + altboundary + "\"")
 	writeLine("")
 
-	// Partie texte HTML
 	writeLine("--" + altboundary)
 	writeLine("Content-Type: text/html; charset=\"utf-8\"")
 	writeLine("Content-Transfer-Encoding: 7bit")
@@ -112,33 +183,32 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 			host = "http://capitalisation.irt-aese.local"
 		}
 		writeLine(fmt.Sprintf(`
-			<div style="display:flex;justify-content:center;align-items: center;">
+			<div style="display:flex;justify-content:center;align-items:center;">
 				<br>
 				<table border="0" cellspacing="0" cellpadding="0" style="margin:0 10px 0 0">
 					<tr>
-						<td align="center" style="border-radius: 5px; background-color: #13aa52;">
-							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=true" style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; font-weight: bold; text-decoration: none;border-radius: 5px; padding: 12px 18px; border: 1px solid #13aa52; display: inline-block;">✔</a>
+						<td align="center" style="border-radius:5px; background-color:#13aa52;">
+							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=true" style="font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#fff; font-weight:bold; text-decoration:none;border-radius:5px; padding:12px 18px; border:1px solid #13aa52; display:inline-block;">✔</a>
 						</td>
 					</tr>
 				</table>
 				<table border="0" cellspacing="0" cellpadding="0">
 					<tr>
-						<td align="center" style="border-radius: 5px; background-color: #FF4742;">
-							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=false" style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; font-weight: bold; text-decoration: none;border-radius: 5px; padding: 12px 18px; border: 1px solid #FF4742; display: inline-block;">✘</a>
+						<td align="center" style="border-radius:5px; background-color:#FF4742;">
+							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=false" style="font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#fff; font-weight:bold; text-decoration:none;border-radius:5px; padding:12px 18px; border:1px solid #FF4742; display:inline-block;">✘</a>
 						</td>
 					</tr>
 				</table>
-			</div>
-			<br>`, host, code, host, code))
+			</div><br>`, host, code, host, code))
 	}
 
 	writeLine("</body></html>")
 
-	// Fin du multipart/alternative
+	// End multipart alternative
 	writeLine("--" + altboundary + "--")
 	writeLine("")
 
-	// Pièces jointes
+	// Attachments
 	if fileAttached := utils.GetString(mail, "file_attached"); fileAttached != "" {
 		files := strings.Split(fileAttached, ",")
 		for _, filePath := range files {
@@ -161,8 +231,6 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 			writeLine("--" + boundary)
 			writeLine("Content-Type: application/octet-stream")
 			writeLine("Content-Transfer-Encoding: base64")
-
-			// Encodage MIME pour le nom du fichier
 			encodedName := mime.QEncoding.Encode("UTF-8", fileName)
 			writeLine("Content-Disposition: attachment; filename=\"" + encodedName + "\"")
 			writeLine("")
@@ -178,38 +246,21 @@ func SendMail(from string, to string, mail utils.Record, isValidButton bool) err
 		}
 	}
 
-	// Fin du multipart/mixed
+	// End multipart/mixed
 	writeLine("--" + boundary + "--")
 
-	// Envoi SMTP
 	smtpHost := os.Getenv("SMTP_HOST")
 	smtpPort := os.Getenv("SMTP_PORT")
-	pwd := os.Getenv("SMTP_PASSWORD")
+	smtpPwd := os.Getenv("SMTP_PASSWORD")
 
-	var err error
 	if smtpHost == "" || smtpPort == "" {
-		return fmt.Errorf("SMTP_HOST or SMTP_PORT not set")
+		return CachedMail{From: from, To: to, MailRecord: mail, IsValidButton: isValidButton, Timestamp: time.Now()}, fmt.Errorf("SMTP_HOST or SMTP_PORT not set")
 	}
 
-	if pwd != "" {
-		auth := smtp.PlainAuth("", from, pwd, smtpHost)
-		err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, body.Bytes())
-	} else {
-		err = smtp.SendMail(smtpHost+":"+smtpPort, nil, from, []string{to}, body.Bytes())
+	var auth smtp.Auth
+	if smtpPwd != "" {
+		auth = smtp.PlainAuth("", from, smtpPwd, smtpHost)
 	}
 
-	if err != nil {
-		fmt.Println("EMAIL NOT SENT:", err)
-		return err
-	}
-
-	fmt.Println("EMAIL SENT")
-	return nil
-}
-
-// RemoveAccents transforms é → e, à → a, ç → c, etc.
-func RemoveAccents(input string) string {
-	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
-	result, _, _ := transform.String(t, input)
-	return result
+	return CachedMail{From: from, To: to, MailRecord: mail, IsValidButton: isValidButton, Timestamp: time.Now()}, smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, body.Bytes())
 }

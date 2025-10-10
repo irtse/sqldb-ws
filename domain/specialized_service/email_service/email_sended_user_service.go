@@ -53,7 +53,7 @@ func (s *EmailSendedUserService) SpecializedCreateRow(record map[string]interfac
 		if rr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
 			utils.SpecialIDParam: record[ds.EmailSendedDBField],
 		}, false); err == nil && len(rr) > 0 {
-			go conn.SendMail(utils.GetString(res[0], "email"), emailTo, rr[0], isValid)
+			go conn.SendMailSafe(utils.GetString(res[0], "email"), emailTo, rr[0], isValid)
 		}
 	} else {
 		fmt.Println("can't email because of a missing <send to> user")
