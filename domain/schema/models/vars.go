@@ -170,7 +170,7 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	if record[val2] != nil {
 		val2 = fmt.Sprintf("%v", record[val2])
 	}
-	if ok, a, b := IsDateComparable(typ, val, val2, record); ok {
+	if ok, a, b := IsDateComparable(typ, val, val2, record, operator); ok {
 		switch operator {
 		case ">":
 			return a.After(b), nil
@@ -234,7 +234,7 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	return false, fmt.Errorf("unknown comparator: %s", operator)
 }
 
-func IsDateComparable(typ string, val string, val2 string, record utils.Record) (bool, time.Time, time.Time) {
+func IsDateComparable(typ string, val string, val2 string, record utils.Record, operator string) (bool, time.Time, time.Time) {
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := time.Parse("2006-01-02T15:04:05.000", val)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
@@ -243,7 +243,8 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record) 
 			return err == nil, time1, rnow
 		}
 		if strings.Contains(val2, "date") && record[val2] == nil {
-			if strings.Contains(val2, "end") {
+			fmt.Println("THERE")
+			if strings.Contains(operator, "<") {
 				return err == nil, time1, time.Now().Add(time.Hour * 24)
 			} else {
 				return err == nil, time1, time.Now()
