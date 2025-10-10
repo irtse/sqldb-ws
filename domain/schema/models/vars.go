@@ -239,18 +239,28 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	return false, fmt.Errorf("unknown comparator: %s", operator)
 }
 
+var layouts = []string{
+	time.RFC3339,
+	"2006-01-02 15:04:05",
+	"2006-01-02",
+	"01/02/2006",
+	"02/01/2006",
+	"January 2, 2006 3:04 PM",
+}
+
+func parseDate(input string) (time.Time, error) {
+	for _, layout := range layouts {
+		if t, err := time.Parse(layout, input); err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("unknown date format: %s", input)
+}
+
 func IsDateComparable(typ string, val string, val2 string, record utils.Record, operator string) (bool, time.Time, time.Time) {
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
-		time1, err := time.Parse("2006-01-02T15:04:05.000", val)
+		time1, err := parseDate(val)
 		fmt.Println("ERR1", err)
-		if err != nil {
-			time1, err = time.Parse("2006-01-02 15:04:05.000", val2)
-			fmt.Println("ERR3", err)
-			if err != nil {
-				time1, err = time.Parse("2006-01-02", val2)
-				fmt.Println("ERR32", err)
-			}
-		}
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
 			now := time.Now().UTC()
 			rnow, _ := time.Parse("2006-01-02", now.Format("2006-01-02"))
@@ -266,17 +276,8 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 				return err == nil, time1, time.Now()
 			}
 		}
-		time2, err2 := time.Parse("2006-01-02T15:04:05.000", val2)
+		time2, err2 := parseDate(val2)
 		fmt.Println("ERR12", err)
-
-		if err2 != nil {
-			time2, err2 = time.Parse("2006-01-02 15:04:05.000", val2)
-			if err2 != nil {
-				time2, err2 = time.Parse("2006-01-02", val2)
-			}
-		}
-		fmt.Println("ERR&3", err)
-
 		return err == nil && err2 == nil, time1, time2
 	}
 	fmt.Println("T3")
