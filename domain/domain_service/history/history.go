@@ -1,6 +1,7 @@
 package history
 
 import (
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -11,78 +12,70 @@ import (
 )
 
 func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
-	if users, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-		"name":  connector.Quote(domain.GetUser()),
-		"email": connector.Quote(domain.GetUser()),
-	}, true); err == nil && len(users) > 0 {
-		for _, destID := range destIDs {
-			id := utils.GetString(users[0], utils.SpecialIDParam)
-			if sch, err := schema.GetSchemaByID(schemaID); err == nil && sch.Name == ds.DBTask.Name {
-				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.UserDBField: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
-						ds.UserDBField: id,
-					}, false, "delegated_"+ds.UserDBField),
-					"binded_dbtask": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name,
-						map[string]interface{}{
-							ds.UserDBField: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
-								ds.UserDBField: id,
-							}, false, ds.UserDBField),
-						}, false, utils.SpecialIDParam),
-				}, true); err == nil {
-					for _, r := range res {
-						if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
-							ds.DBDataAccess.Name, map[string]interface{}{
-								"write":             domain.GetMethod() == utils.CREATE,
-								"update":            domain.GetMethod() == utils.UPDATE,
-								ds.DestTableDBField: destID,
-								ds.SchemaDBField:    schemaID,
-								ds.UserDBField:      id,
-							}, false); err == nil && len(res) == 0 {
-							domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
-								utils.Record{
-									"write":             domain.GetMethod() == utils.CREATE,
-									"update":            domain.GetMethod() == utils.UPDATE,
-									ds.DestTableDBField: r[utils.SpecialIDParam],
-									ds.SchemaDBField:    schemaID,
-									ds.UserDBField:      r[ds.UserDBField]}, func(s string) (string, bool) {
-									return "", true
-								})
-						}
-					}
-				}
-
-			}
-			if domain.GetMethod() == utils.SELECT {
-				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
-					ds.DBDataAccess.Name, map[string]interface{}{
-						"write":             false,
-						"update":            false,
-						ds.DestTableDBField: destID,
-						ds.SchemaDBField:    schemaID,
-						ds.UserDBField:      id,
-					}, false); err == nil && len(res) == 0 {
-					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
-						utils.Record{
+	for _, destID := range destIDs {
+		id := domain.GetUserID()
+		if sch, err := schema.GetSchemaByID(schemaID); err == nil && sch.Name == ds.DBTask.Name {
+			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name,
+					map[string]interface{}{ds.UserDBField: id}, false, "binded_dbtask"),
+				"binded_dbtask": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name,
+					map[string]interface{}{ds.UserDBField: id}, false, utils.SpecialIDParam),
+			}, true); err == nil {
+				fmt.Println("CREATE DELEGATED HISTORY", res)
+				for _, r := range res {
+					if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
+						ds.DBDataAccess.Name, map[string]interface{}{
 							"write":             domain.GetMethod() == utils.CREATE,
 							"update":            domain.GetMethod() == utils.UPDATE,
 							ds.DestTableDBField: destID,
 							ds.SchemaDBField:    schemaID,
-							ds.UserDBField:      id}, func(s string) (string, bool) {
-							return "", true
-						})
+							ds.UserDBField:      r[ds.UserDBField],
+						}, false); err == nil && len(res) == 0 {
+						fmt.Println("REAL CREATE DELEGATED HISTORY", res)
+						domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+							utils.Record{
+								"write":             domain.GetMethod() == utils.CREATE,
+								"update":            domain.GetMethod() == utils.UPDATE,
+								ds.DestTableDBField: r[utils.SpecialIDParam],
+								ds.SchemaDBField:    schemaID,
+								ds.UserDBField:      r[ds.UserDBField]}, func(s string) (string, bool) {
+								return "", true
+							})
+					}
 				}
-				return
 			}
-			domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
-				utils.Record{
-					"write":             domain.GetMethod() == utils.CREATE,
-					"update":            domain.GetMethod() == utils.UPDATE,
+
+		}
+		if domain.GetMethod() == utils.SELECT {
+			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
+				ds.DBDataAccess.Name, map[string]interface{}{
+					"write":             false,
+					"update":            false,
 					ds.DestTableDBField: destID,
 					ds.SchemaDBField:    schemaID,
-					ds.UserDBField:      id}, func(s string) (string, bool) {
-					return "", true
-				})
+					ds.UserDBField:      id,
+				}, false); err == nil && len(res) == 0 {
+				domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+					utils.Record{
+						"write":             domain.GetMethod() == utils.CREATE,
+						"update":            domain.GetMethod() == utils.UPDATE,
+						ds.DestTableDBField: destID,
+						ds.SchemaDBField:    schemaID,
+						ds.UserDBField:      id}, func(s string) (string, bool) {
+						return "", true
+					})
+			}
+			return
 		}
+		domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
+			utils.Record{
+				"write":             domain.GetMethod() == utils.CREATE,
+				"update":            domain.GetMethod() == utils.UPDATE,
+				ds.DestTableDBField: destID,
+				ds.SchemaDBField:    schemaID,
+				ds.UserDBField:      id}, func(s string) (string, bool) {
+				return "", true
+			})
 	}
 }
 

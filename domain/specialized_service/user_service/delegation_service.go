@@ -2,7 +2,6 @@ package user_service
 
 import (
 	"errors"
-	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -186,13 +185,8 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 		currentTime := time.Now()
 		arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND ('"+currentTime.Format("2006-01-02")+"' < end_date OR end_date IS NULL))")
 		if rr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, arr, false); err == nil && len(rr) == 0 {
-			fmt.Println("NO DELEGATION ACTIVE", map[string]interface{}{
-				ds.UserDBField: res["delegated_"+ds.UserDBField],
-				"binded_dbtask": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.UserDBField: s.Domain.GetUserID(),
-				}, false, utils.SpecialIDParam),
-			})
 			s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				"is_close":     false,
 				ds.UserDBField: res["delegated_"+ds.UserDBField],
 				"binded_dbtask": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 					ds.UserDBField: s.Domain.GetUserID(),

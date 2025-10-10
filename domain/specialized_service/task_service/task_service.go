@@ -213,9 +213,5 @@ func (s *TaskService) GenerateQueryFilter(tableName string, innerestr ...string)
 			"meta_" + RequestDBField: nil,
 		}, true))
 	}
-	avoid := false
-	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && scope == "enable" {
-		avoid = true
-	}
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), avoid, innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
