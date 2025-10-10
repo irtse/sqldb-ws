@@ -246,6 +246,10 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 		if err != nil {
 			time1, err = time.Parse("2006-01-02 15:04:05.000", val2)
 			fmt.Println("ERR3", err)
+			if err != nil {
+				time1, err = time.Parse("2006-01-02", val2)
+				fmt.Println("ERR32", err)
+			}
 		}
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
 			now := time.Now().UTC()
@@ -267,6 +271,9 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 
 		if err2 != nil {
 			time2, err2 = time.Parse("2006-01-02 15:04:05.000", val2)
+			if err2 != nil {
+				time2, err2 = time.Parse("2006-01-02", val2)
+			}
 		}
 		fmt.Println("ERR&3", err)
 
