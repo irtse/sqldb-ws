@@ -170,6 +170,7 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	if record[val2] != nil {
 		val2 = fmt.Sprintf("%v", record[val2])
 	}
+	fmt.Println("wtf ", typ, val, val2, record)
 	if ok, a, b := IsDateComparable(typ, val, val2, record, operator); ok {
 		switch operator {
 		case ">":
