@@ -173,12 +173,16 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	if ok, a, b := IsDateComparable(typ, val, val2, record, operator); ok {
 		switch operator {
 		case ">":
+			fmt.Println("after = ", a, b, a.After(b))
 			return a.After(b), nil
 		case "<":
+			fmt.Println("bef ", a, b, a.Before(b))
 			return a.Before(b), nil
 		case ">=":
+			fmt.Println("after = ", a, b, a.After(b) || a == b)
 			return a.After(b) || a == b, nil
 		case "<=":
+			fmt.Println("bef = ", a, b, a.Before(b) || a == b)
 			return a.Before(b) || a == b, nil
 		case "=", "==", "IN":
 			return a == b, nil
@@ -243,7 +247,6 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 			return err == nil, time1, rnow
 		}
 		if strings.Contains(val2, "date") && record[val2] == nil {
-			fmt.Println("THERE")
 			if strings.Contains(operator, "<") {
 				return err == nil, time1, time.Now().Add(time.Hour * 24)
 			} else {
