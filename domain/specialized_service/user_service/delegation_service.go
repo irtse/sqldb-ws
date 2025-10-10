@@ -189,13 +189,13 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 			fmt.Println("NO DELEGATION ACTIVE", map[string]interface{}{
 				ds.UserDBField: res["delegated_"+ds.UserDBField],
 				"binded_dbtask": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.UserDBField: res[ds.UserDBField],
+					ds.UserDBField: s.Domain.GetUserID(),
 				}, false, utils.SpecialIDParam),
 			})
 			s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				ds.UserDBField: res["delegated_"+ds.UserDBField],
 				"binded_dbtask": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.UserDBField: res[ds.UserDBField],
+					ds.UserDBField: s.Domain.GetUserID(),
 				}, false, utils.SpecialIDParam),
 			}, false)
 		}

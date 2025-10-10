@@ -189,7 +189,7 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 
 	}
 	isUser := false
-	isUser = schema.HasField(ds.UserDBField) || s.Domain.GetTable() == ds.DBUser.Name
+	isUser = (schema.HasField(ds.UserDBField) || s.Domain.GetTable() == ds.DBUser.Name)
 	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); !(ok && scope == "enable" && schema.Name == ds.DBTask.Name) && !(ok && scope == "disable" && schema.Name == ds.DBUser.Name) {
 		if isUser {
 			key := ds.UserDBField
