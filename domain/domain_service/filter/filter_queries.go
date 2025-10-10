@@ -330,7 +330,7 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 			}
 			m[key][operator] = utils.ToString(t.fromITF(val))
 			return m, "(" + key + " " + operator + " " + m[key][operator] + ")"
-		} else if t.fromITF(val) == "" {
+		} else if t.fromITF(val) == nil {
 			return m, ""
 		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
 			if basefromSchema != nil && basefromSchema.Name == fromSchema.Name {
