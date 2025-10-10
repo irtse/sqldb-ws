@@ -2,6 +2,7 @@ package favorite_service
 
 import (
 	"fmt"
+	"sqldb-ws/domain/domain_service/filter"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
@@ -17,6 +18,11 @@ func NewHistoryService() utils.SpecializedServiceITF {
 }
 
 func (s *HistoryService) Entity() utils.SpecializedServiceInfo { return ds.DBDataAccess }
+
+func (s *HistoryService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
+	restr, _, _, _ := filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), true, innerestr...)
+	return restr, "", "", ""
+}
 
 func (s *HistoryService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) (res utils.Results) {
 	fmt.Println("THERE", results)

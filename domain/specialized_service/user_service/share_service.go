@@ -56,5 +56,5 @@ func (s *ShareService) GenerateQueryFilter(tableName string, innerestr ...string
 			ds.UserDBField: s.Domain.GetUserID(),
 		}, true))
 	}
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }

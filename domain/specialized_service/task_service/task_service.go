@@ -213,5 +213,5 @@ func (s *TaskService) GenerateQueryFilter(tableName string, innerestr ...string)
 			"meta_" + RequestDBField: nil,
 		}, true))
 	}
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }

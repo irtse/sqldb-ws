@@ -56,7 +56,7 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 }
 
 func (s *WorkflowService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	s1, s2, s3, s4 := filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	s1, s2, s3, s4 := filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 	return s1, s2, s3, s4
 }
 

@@ -40,7 +40,7 @@ func (s *ViewService) GenerateQueryFilter(tableName string, innerestr ...string)
 	if !s.Domain.IsSuperAdmin() {
 		innerestr = append(innerestr, "only_super_admin=false")
 	}
-	restr, _, _, _ := filterserv.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	restr, _, _, _ := filterserv.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 	return restr, "", "", ""
 }
 
@@ -258,7 +258,7 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 	datas := utils.Results{}
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
-		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, sqlFilter)
+		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
 		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false)

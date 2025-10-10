@@ -31,7 +31,7 @@ func (s *AbstractSpecializedService) Entity() utils.SpecializedServiceInfo {
 func (s *AbstractSpecializedService) Trigger(record map[string]interface{}, db *connector.Database) {}
 
 func (s *AbstractSpecializedService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
 
 func (s *AbstractSpecializedService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
@@ -397,7 +397,7 @@ func (s *SpecializedService) TransformToGenericView(results utils.Results, table
 	return t
 }
 func (s *SpecializedService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
 
 func CheckAutoLoad(tablename string, record utils.Record, domain utils.DomainITF) (utils.Record, error, bool) {

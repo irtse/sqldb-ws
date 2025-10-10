@@ -67,7 +67,7 @@ func (s *DashboardService) Write(record map[string]interface{}, tableName string
 	}
 }
 func (s *DashboardService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
 
 func (s *DashboardService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {

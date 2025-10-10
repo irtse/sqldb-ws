@@ -145,7 +145,7 @@ func (s *FilterService) GenerateQueryFilter(tableName string, innerestr ...strin
 		innerestr = append(innerestr, "dashboard_restricted=false") // add dashboard_restricted filter if not present AD
 	}
 	innerestr = append(innerestr, "hidden=false") // add dashboard_restricted filter if not present AD
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
 
 func (s *FilterService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {

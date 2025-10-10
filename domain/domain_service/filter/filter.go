@@ -21,7 +21,7 @@ func NewFilterService(domain utils.DomainITF) *FilterService {
 	return &FilterService{Domain: domain}
 }
 
-func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Params, innerRestriction ...string) (string, string, string, string) {
+func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Params, avoidUser bool, innerRestriction ...string) (string, string, string, string) {
 	schema, err := sch.GetSchema(tableName)
 	if err != nil {
 		return "", "", "", ""
@@ -82,7 +82,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		SQLrestriction = append(SQLrestriction, "id="+id)
 	} else if id, _ := domainParams.Get(utils.SpecialIDParam); id != "" {
 		SQLrestriction = append(SQLrestriction, "id="+id)
-	} else if f.Domain.GetMethod() != utils.DELETE {
+	} else if f.Domain.GetMethod() != utils.DELETE && !avoidUser {
 		SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
 	}
 	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")

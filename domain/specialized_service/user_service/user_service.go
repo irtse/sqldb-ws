@@ -75,5 +75,5 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 			}, true, "delegated_"+ds.UserDBField),
 		}, true))
 	}
-	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), innerestr...)
+	return filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 }
