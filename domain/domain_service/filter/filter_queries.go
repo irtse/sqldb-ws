@@ -227,7 +227,7 @@ func (t *FilterService) GetFieldCondition(fromSchema sm.SchemaModel, record util
 }
 
 func (t *FilterService) fromITF(val interface{}) interface{} {
-	if val == nil {
+	if val == nil || val == "null" {
 		return nil
 	}
 	if slices.Contains([]string{"true", "false"}, utils.ToString(val)) {
@@ -324,14 +324,15 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 				}
 			}
 		}
-		if key == "id" || fromSchema == nil {
+		fmt.Println("V", val)
+		if t.fromITF(val) == nil {
+			return m, ""
+		} else if key == "id" || fromSchema == nil {
 			if m[key] == nil {
 				m[key] = map[string]string{}
 			}
 			m[key][operator] = utils.ToString(t.fromITF(val))
 			return m, "(" + key + " " + operator + " " + m[key][operator] + ")"
-		} else if t.fromITF(val) == nil {
-			return m, ""
 		} else if k, v, op, typ, link, err := fromSchema.GetTypeAndLinkForField(key, utils.ToString(t.fromITF(val)), operator, func(s string, search string) {}); err == nil {
 			if basefromSchema != nil && basefromSchema.Name == fromSchema.Name {
 				kk, opp, sql, _ := connector.MakeSqlItem("", typ, link, k, v, op)
