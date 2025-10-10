@@ -170,12 +170,16 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	if ok, a, b := IsDateComparable(typ, val, val2); ok {
 		switch operator {
 		case ">":
+			fmt.Println("AFTER", a, b)
 			return a.After(b), nil
 		case "<":
+			fmt.Println("BEF", a, b)
 			return a.Before(b), nil
 		case ">=":
+			fmt.Println("AFTER=", a, b)
 			return a.After(b) || a == b, nil
 		case "<=":
+			fmt.Println("BEFORE=", a, b)
 			return a.Before(b) || a == b, nil
 		case "=", "==", "IN":
 			return a == b, nil
