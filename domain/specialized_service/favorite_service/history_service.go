@@ -1,6 +1,7 @@
 package favorite_service
 
 import (
+	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
@@ -18,6 +19,7 @@ func NewHistoryService() utils.SpecializedServiceITF {
 func (s *HistoryService) Entity() utils.SpecializedServiceInfo { return ds.DBDataAccess }
 
 func (s *HistoryService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) (res utils.Results) {
+	fmt.Println("THERE", results)
 	for _, d := range results {
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 			utils.SpecialIDParam: d[ds.UserDBField],

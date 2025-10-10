@@ -87,11 +87,18 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 					if utils.GetString(rr, "end_date") != "" {
 						share["end_date"] = connector.Quote(utils.GetString(rr, "end_date"))
 					}
-					if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-						ds.DelegationDBField: rr[utils.SpecialIDParam],
-					}, false); err == nil && len(res) == 0 {
-						share["start_date"] = rr["start_date"]
-						share["end_date"] = rr["end_datey"]
+					arr := []string{
+						connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+							"shared_" + ds.UserDBField: rr["delegated_"+ds.UserDBField],
+							ds.UserDBField:             rr[ds.UserDBField],
+							"start_date":               connector.Quote(utils.GetString(rr, "start_date")),
+							ds.SchemaDBField:           r[ds.SchemaDBField],
+							ds.DestTableDBField:        r[ds.DestTableDBField],
+						}, false),
+					}
+					currentTime := time.Now()
+					arr = append(arr, "('"+currentTime.Format("2006-01-02")+"' >= start_date AND ('"+currentTime.Format("2006-01-02")+"' < end_date OR end_date IS NULL))")
+					if res, err := db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 						db.ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 					}
 					if res, err := db.SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
