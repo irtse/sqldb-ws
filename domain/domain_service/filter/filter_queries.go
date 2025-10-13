@@ -325,7 +325,7 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 			}
 		}
 		fmt.Println("V", val)
-		if t.fromITF(val) == nil {
+		if t.fromITF(val) == nil || t.fromITF(val) == "" {
 			return m, ""
 		} else if key == "id" || fromSchema == nil {
 			if m[key] == nil {
