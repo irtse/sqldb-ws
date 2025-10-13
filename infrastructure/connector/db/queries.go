@@ -32,7 +32,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(name, "data_access") {
+	if strings.Contains(name, "project") || strings.Contains(name, "axis") {
 		fmt.Println("DATAAccess", name, q)
 	}
 	return db.QueryAssociativeArray(q)
