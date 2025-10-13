@@ -22,6 +22,7 @@ services:
     # adding the mount volume point which we create earlier
     volumes:
       - '$PWD/data:/var/lib/grafana'
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
       - ./grafana/fr.json:/usr/share/grafana/public/locales/fr.json
   pg:
     image: postgres:alpine
