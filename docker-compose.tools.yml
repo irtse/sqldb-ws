@@ -21,6 +21,7 @@ services:
     # adding the mount volume point which we create earlier
     volumes:
       - '$PWD/data:/var/lib/grafana'
+      - ./grafana/fr.json:/usr/share/grafana/public/locales/fr.json
   pg:
     image: postgres:alpine
     container_name: ${DBHOST:-sqldb-ws-pg}
