@@ -41,6 +41,7 @@ services:
       HOST: ${HOST:-http://capitalisation.irt-aese.local}
       USER_FILE_PATH: ${USER_FILE_PATH:-Salarié.csv}
       PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-Projets.csv}
+      VISIBILITY_FILE_PATH: ${VISIBILITY_FILE_PATH:-Visibilité_projet.csv}
 networks:
   sqldb:
     external: true

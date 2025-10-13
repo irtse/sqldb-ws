@@ -23,7 +23,46 @@ func Run() {
 	for {
 		ImportUserHierachy()
 		ImportProjectAxis()
+		ImportVisibility()
 		time.Sleep(24 * time.Hour)
+	}
+}
+
+func ImportVisibility() {
+	d := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
+	filepath := os.Getenv("VISIBILITY_FILE_PATH")
+	if filepath == "" {
+		filepath = "./visibility_test.csv"
+	} else {
+		filepath = "/mnt/plugin_files/" + filepath
+	}
+	_, datas := importFile(filepath)
+	for _, data := range datas {
+		if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+			ds.EntityDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntity.Name, map[string]interface{}{
+				"name": d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(models.Project.Name, map[string]interface{}{
+					"code": connector.Quote(utils.ToString(data[2])),
+				}, false, "name"),
+			}, false, utils.SpecialIDParam),
+			ds.UserDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+				"name": connector.Quote(data[1]),
+			}, false, utils.SpecialIDParam),
+		}, false); err == nil && len(res) == 0 {
+			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntity.Name, map[string]interface{}{
+				"name": d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(models.Project.Name, map[string]interface{}{
+					"code": connector.Quote(utils.ToString(data[2])),
+				}, false, "name"),
+			}, false); err == nil && len(res) > 0 {
+				if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+					"name": connector.Quote(data[1]),
+				}, false); err == nil && len(usr) > 0 {
+					d.GetDb().CreateQuery(ds.DBEntityUser.Name, map[string]interface{}{
+						ds.UserDBField:   usr[0][utils.SpecialIDParam],
+						ds.EntityDBField: res[0][utils.SpecialIDParam],
+					}, func(s string) (string, bool) { return "", true })
+				}
+			}
+		}
 	}
 }
 
