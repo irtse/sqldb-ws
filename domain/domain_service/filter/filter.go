@@ -29,6 +29,8 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	var SQLview, SQLrestriction, SQLOrder []string = []string{}, []string{}, []string{}
 	var SQLLimit string
 
+	SQLrestriction = append(SQLrestriction, "active=true")
+
 	restr, view, order, dir, state := f.GetFilterForQuery("", "", schema, domainParams)
 	if restr != "" && !f.Domain.IsSuperCall() {
 		SQLrestriction = append(SQLrestriction, restr)
