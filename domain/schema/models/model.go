@@ -31,6 +31,7 @@ func (t SchemaModel) Map(m map[string]interface{}) *SchemaModel {
 		Name:           utils.ToString(m["name"]),
 		Label:          utils.ToString(m["label"]),
 		Category:       utils.ToString(m["category"]),
+		IsAssociated:   utils.Compare(m["is_associated"], true),
 		CanOwned:       utils.Compare(m["can_owned"], true),
 		ViewIDOnDelete: utils.ToString(m["redirect_view_id_on_delete"]),
 	}
