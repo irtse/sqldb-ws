@@ -21,6 +21,7 @@ type SchemaModel struct { // lightest definition a db table
 	CanOwned       bool         `json:"can_owned"`
 	Description    string       `json:"description"` // Special case for ownership, it's schema that can be owned by any user (like a request)
 	Fields         []FieldModel `json:"fields,omitempty"`
+	IsAssociated   bool         `json:"is_associated"`
 	ViewIDOnDelete string       `json:"redirect_view_id_on_delete"`
 }
 
@@ -184,11 +185,12 @@ func (v SchemaModel) ToSchemaRecord() utils.Record {
 	}
 	var r utils.Record
 	b, _ := json.Marshal(SchemaModel{
-		ID:       v.ID,
-		Name:     v.Name,
-		Label:    v.Label,
-		Category: v.Category,
-		Fields:   fields,
+		ID:           v.ID,
+		Name:         v.Name,
+		Label:        v.Label,
+		Category:     v.Category,
+		IsAssociated: v.IsAssociated,
+		Fields:       fields,
 	})
 	json.Unmarshal(b, &r)
 	return r
