@@ -17,8 +17,9 @@ services:
       - ${PLUGIN_FILES:-/dev/null}:/mnt/plugin_files
     labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.sqldb.entrypoints=web"
-        - "traefik.http.routers.sqldb.rule=PathPrefix(`/v1`)"
+        - "traefik.http.routers.sqldb.entrypoints=websecure"
+        - "traefik.http.routers.front.rule=Host(`${HOST_SHORT:-capitalisation.irt-aese.local}`) && PathPrefix(`/v1`)"
+        - "traefik.http.routers.sqldb.tls.certresolver=mytlsresolver"
         - "traefik.http.services.sqldb.loadbalancer.server.port=8080"
     environment:
       LDAP_ADDR: ${LDAP_ADDR:-ldap://irt00v001.irt-aese.local:389}
@@ -38,7 +39,7 @@ services:
       DBPWD : ${DBPWD:-test}
       DBNAME: ${DBNAME:-test}
       DBSSL: ${DBSSL:-disable}
-      HOST: ${HOST:-http://capitalisation.irt-aese.local}
+      HOST: ${HOST:-https://capitalisation.irt-aese.local}
       USER_FILE_PATH: ${USER_FILE_PATH:-Salarié.csv}
       PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-Projets.csv}
       VISIBILITY_FILE_PATH: ${VISIBILITY_FILE_PATH:-Visibilité_projet.csv}
