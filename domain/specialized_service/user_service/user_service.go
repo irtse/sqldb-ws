@@ -62,13 +62,13 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 			}, true))
 		}
 	}
-	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && scope == "enable_delegate" && s.Domain.GetUserID() != "" {
+	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "enable_delegate") && s.Domain.GetUserID() != "" {
 		innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!" + utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
 				ds.UserDBField: s.Domain.GetUserID(),
 			}, true, "delegated_"+ds.UserDBField),
 		}, true))
-	} else if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && scope == "disable_delegate" && s.Domain.GetUserID() != "" {
+	} else if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "disable_delegate") && s.Domain.GetUserID() != "" {
 		innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
 				ds.UserDBField: s.Domain.GetUserID(),
