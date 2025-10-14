@@ -17,8 +17,9 @@ services:
       - ${PLUGIN_FILES:-/dev/null}:/mnt/plugin_files
     labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.sqldb.entrypoints=web"
-        - "traefik.http.routers.front.rule=PathPrefix(`/v1`)"
+        - "traefik.http.routers.sqldb.entrypoints=websecure"
+        - "traefik.http.routers.front.rule=Host(`${HOST_SHORT:-capitalisation.irt-aese.local}`) && PathPrefix(`/v1`)"
+        - "traefik.http.routers.sqldb.tls.certresolver=mytlsresolver"
         - "traefik.http.services.sqldb.loadbalancer.server.port=8080"
     environment:
       LDAP_ADDR: ${LDAP_ADDR:-ldap://irt00v001.irt-aese.local:389}
