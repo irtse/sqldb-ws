@@ -18,7 +18,7 @@ services:
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.sqldb.entrypoints=websecure"
-        - "traefik.http.routers.front.rule=Host(`${HOST_SHORT:-capitalisation.irt-aese.local}`) && PathPrefix(`/v1`)"
+        - "traefik.http.routers.front.rule=PathPrefix(`/v1`)"
         - "traefik.http.routers.sqldb.tls.certresolver=mytlsresolver"
         - "traefik.http.services.sqldb.loadbalancer.server.port=8080"
     environment:
