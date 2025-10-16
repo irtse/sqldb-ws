@@ -98,7 +98,9 @@ func (d *ViewConvertor) GetViewFields(tableName string, noRecursive bool, result
 		} else {
 			ids := []string{}
 			for _, r := range results {
-				ids = append(ids, utils.GetString(r, utils.SpecialIDParam))
+				if utils.GetString(r, utils.SpecialIDParam) != "" {
+					ids = append(ids, utils.GetString(r, utils.SpecialIDParam))
+				}
 			}
 			if len(ids) > 0 && strings.Trim(strings.Join(ids, ""), " ") != "" {
 				// exception when a task is active with workflow schema with filter and its id
