@@ -51,8 +51,7 @@ func (s *FilterService) GetFilterForQuery(filterID string, viewfilterID string, 
 	return filter, view, order, dir, state
 }
 func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, domainParams utils.Params) []string {
-	p, ok := domainParams.Get(utils.RootFilterMode)
-	if !ok || p != "delete" {
+	if s.Domain.GetMode() != "delete" {
 		return restr
 	}
 	perms := 0
@@ -83,9 +82,8 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 	return restr
 }
 func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, domainParams utils.Params) []string {
-	p, ok := domainParams.Get(utils.RootFilterMode)
-	fmt.Println(p, ok)
-	if !ok || p != "edit" {
+	fmt.Println(s.Domain.GetMode())
+	if s.Domain.GetMode() != "edit" {
 		return restr
 	}
 	if schema.Name == ds.DBTask.Name {
