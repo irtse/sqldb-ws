@@ -150,7 +150,6 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 			}, false, "COUNT(id)"),
 		}, true))
 	}
-	fmt.Println("RESTR", restr)
 	return restr
 }
 
