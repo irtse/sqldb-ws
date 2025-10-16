@@ -684,6 +684,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				fmt.Println("REQUEST CLOSED FOUND", subMap)
 				return true // if a request about this data is end up, only one
 			} else { // in case of no request at all !
+				fmt.Println("NO REQUEST FOUND", subMap)
 				for k, _ := range d.GetParams().Values {
 					if sch.HasField(k) { // a method to override per params
 						return false
