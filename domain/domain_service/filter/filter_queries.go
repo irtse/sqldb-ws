@@ -84,6 +84,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel) [
 }
 func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []string {
 	p, ok := s.Domain.GetParams().Get(utils.RootFilterMode)
+	fmt.Println(p, ok)
 	if !ok || p != "edit" {
 		return restr
 	}
