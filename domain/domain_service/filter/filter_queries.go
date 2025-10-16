@@ -105,12 +105,22 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 				ds.DestTableDBField: "main.id",
 				ds.SchemaDBField:    schema.ID,
+				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					ds.DestTableDBField: "main.id",
+					ds.SchemaDBField:    schema.ID,
+					ds.UserDBField:      s.Domain.GetUserID(),
+				}, false, ds.RequestDBField),
 			}, false, utils.SpecialIDParam),
 		}
 		if schema.HasField(ds.DestTableDBField) {
 			subM[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 				ds.DestTableDBField: "main." + ds.DestTableDBField,
 				ds.SchemaDBField:    "main." + ds.SchemaDBField,
+				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					ds.DestTableDBField: "main." + ds.DestTableDBField,
+					ds.SchemaDBField:    "main." + ds.SchemaDBField,
+					ds.UserDBField:      s.Domain.GetUserID(),
+				}, false, ds.RequestDBField),
 			}, false, utils.SpecialIDParam)
 
 			subMH[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
