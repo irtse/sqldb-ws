@@ -32,7 +32,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(name, "poster") {
+	if strings.Contains(name, "article") {
 		fmt.Println(q)
 		debug.PrintStack()
 	}
