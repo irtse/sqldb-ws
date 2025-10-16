@@ -87,8 +87,8 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
 	}
 	fmt.Println("restr", len(SQLrestriction))
-	SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
-	SQLrestriction = f.GetFilterDelete(SQLrestriction, schema)
+	SQLrestriction = f.GetFilterEdit(SQLrestriction, schema, domainParams)
+	SQLrestriction = f.GetFilterDelete(SQLrestriction, schema, domainParams)
 	fmt.Println("restr1", len(SQLrestriction))
 
 	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
