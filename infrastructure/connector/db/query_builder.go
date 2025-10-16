@@ -238,7 +238,6 @@ func (db *Database) ApplyQueryFilters(restr string, order string, limit string, 
 			}
 		}
 	}
-	fmt.Println("ORDER", order, "LIMIT", limit, "VIEW", views)
 	if order != "" {
 		db.SQLOrder = order
 	}
