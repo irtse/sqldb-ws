@@ -82,7 +82,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 				"is_close":          false,
 				ds.UserDBField:      s.Domain.GetUserID(),
 			}, false, ds.RequestDBField),
-		}, false, utils.SpecialIDParam)
+		}, false, "COUNT("+utils.SpecialIDParam+")")
 	}
 	subMH := map[string]interface{}{
 		"!0_1": perms,
