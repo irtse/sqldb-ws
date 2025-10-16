@@ -105,6 +105,7 @@ func (d *SpecializedDomain) SuperCall(params utils.Params, record utils.Record, 
 	d2 := Domain(true, d.User, d.PermsService)
 	d2.DomainRequestID = d.DomainRequestID
 	d2.SetAutoload(d.GetAutoload())
+	d2.Mode = d.Mode
 	if isOwn {
 		d2.Own = d.IsOwn(false, false, method)
 	}
@@ -126,6 +127,7 @@ func (d *SpecializedDomain) onBooleanValue(key string, sup func(bool)) {
 func (d *SpecializedDomain) call(params utils.Params, record utils.Record, method utils.Method, args ...interface{}) (utils.Results, error) {
 	d.Method = method
 	d.Params = params
+	d.Mode, _ = params.Get(utils.RootFilterMode)
 	d.onBooleanValue(utils.RootShallow, func(b bool) { d.Shallowed = b })
 	if tablename, ok := params.Get(utils.RootTableParam); ok { // retrieve tableName in query (not optionnal)
 		d.TableName = strings.ToLower(schserv.GetTablename(tablename))

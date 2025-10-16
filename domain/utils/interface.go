@@ -29,6 +29,7 @@ type DomainITF interface {
 	// Main accessor defined by DomainITF interface
 	GetUniqueRedirection() string
 	GetDomainID() string
+	GetMode() string
 	GetDb() *conn.Database
 	SetDb(db *conn.Database)
 	GetMethod() Method

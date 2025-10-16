@@ -26,6 +26,11 @@ type AbstractDomain struct {
 	FileHandler        *multipart.FileHeader
 	SearchInFiles      map[string]string
 	IsDraftToPublished bool
+	Mode               string
+}
+
+func (d *AbstractDomain) GetMode() string {
+	return d.Mode
 }
 
 func (d *AbstractDomain) GetSpecialized(override string) infrastructure.InfraSpecializedServiceItf {
