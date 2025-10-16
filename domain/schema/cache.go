@@ -214,6 +214,9 @@ func ValidateBySchema(data utils.Record, tableName string, method utils.Method, 
 				}
 			}
 		}
+		if field.Readonly && method == utils.UPDATE {
+			continue
+		}
 		if v, ok := data[field.Name]; ok {
 			newData[field.Name] = v
 			if field.Name == models.FOREIGNTABLEKEY {

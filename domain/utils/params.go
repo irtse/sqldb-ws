@@ -235,14 +235,12 @@ const RootColumnsParam = "columns"
 const RootOrderParam = "orderby"
 const RootDirParam = "dir"
 const RootFilterNewState = "filter_status" // all - new - old
-const RootFilterLine = "filter_line"       // + == "and" | == "or" ~ == "like" : == "=" > == ">" < == "<"
-const RootFilter = "filter"
-const RootViewFilter = "view_filter"
+const RootFilterLine = "filter_line"
+const RootFilterMode = "filter_mode" // + == "and" | == "or" ~ == "like" : == "=" > == ">" < == "<"
 const RootRawView = "rawview"
 const RootExport = "export"
 const RootFilename = "filename"
 const RootShallow = "shallow"
-const RootSuperCall = "super"
 const RootDestIDParam = "dest_id"
 const RootDestTableIDParam = "dbdest_table_id"
 const RootCommandRow = "command_row"
@@ -252,8 +250,6 @@ const RootOffset = "offset"
 const RootScope = "scope"
 const RootGroupBy = "group_by"
 
-const RootSchemaID = "dbschema_id"
-
 var RootParamsDesc = map[string]string{
 	RootRowsParam:    "needed on a rows level request (value=all for post/put method or a get/delete all)",
 	RootColumnsParam: "needed on a columns level request (POST/PUT/DELETE with no rows query params) will set up a view on row level (show only expected columns)",
@@ -262,13 +258,11 @@ var RootParamsDesc = map[string]string{
 	RootDirParam:     "sets up a sql direction in query (ex.ASC|DESC) (don't even try to inject you little joker)",
 	RootRawView:      "set 'enable' to activate a response without the main response format",
 	RootFilterLine:   "set a filter command line compose as (key~value(+|))",
-	RootFilter:       "set filter identifier to activate a specific restrictive filter in db",
-	RootViewFilter:   "set view filter identifier to activate a specific view filter in db",
 }
 var HiddenParams = []string{}
 var RootParams = []string{RootRowsParam, RootColumnsParam, RootOrderParam, RootDirParam, RootLimit, RootOffset,
-	RootShallow, RootRawView, RootExport, RootFilename, RootFilterNewState, RootFilterLine, RootFilter, RootViewFilter,
-	RootSuperCall, RootCommandRow, SpecialIDParam, RootGroupBy, RootScope, RootDestIDParam}
+	RootShallow, RootRawView, RootExport, RootFilename, RootFilterNewState, RootFilterLine,
+	RootCommandRow, SpecialIDParam, RootGroupBy, RootScope, RootDestIDParam}
 
 const SpecialIDParam = "id"
 const SpecialSubIDParam = "subid"

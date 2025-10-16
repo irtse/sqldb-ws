@@ -17,7 +17,6 @@ type AbstractDomain struct {
 	Shallowed          bool
 	SuperAdmin         bool
 	RawView            bool
-	Super              bool
 	Empty              bool
 	LowerRes           bool
 	Own                bool
@@ -77,7 +76,6 @@ func (d *AbstractDomain) GetUserID() string {
 }
 func (d *AbstractDomain) GetUser() string     { return d.User }
 func (d *AbstractDomain) IsSuperAdmin() bool  { return d.SuperAdmin }
-func (d *AbstractDomain) IsSuperCall() bool   { return d.Super && d.SuperAdmin }
 func (d *AbstractDomain) IsShallowed() bool   { return d.Shallowed }
 func (d *AbstractDomain) GetParams() Params   { return d.Params }
 func (d *AbstractDomain) GetTable() string    { return d.TableName }

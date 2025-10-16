@@ -45,7 +45,6 @@ type DomainITF interface {
 	// Main accessor defined by DomainITF interface
 	SetOwn(own bool)
 	IsOwn(checkPerm bool, force bool, method Method) bool
-	IsSuperCall() bool
 	IsSuperAdmin() bool
 	IsShallowed() bool
 	IsLowerResult() bool

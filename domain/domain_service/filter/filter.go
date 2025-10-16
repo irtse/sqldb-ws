@@ -32,7 +32,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	SQLrestriction = append(SQLrestriction, "active=true")
 
 	restr, view, order, dir, state := f.GetFilterForQuery("", "", schema, domainParams)
-	if restr != "" && !f.Domain.IsSuperCall() {
+	if restr != "" && !f.Domain.IsSuperAdmin() {
 		SQLrestriction = append(SQLrestriction, restr)
 	}
 	later := []string{}
@@ -48,7 +48,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		}
 	}
 	if view != "" {
-		domainParams.Add(utils.RootColumnsParam, view, func(v string) bool { return !f.Domain.IsSuperCall() })
+		domainParams.Add(utils.RootColumnsParam, view, func(v string) bool { return !f.Domain.IsSuperAdmin() })
 	}
 	if order != "" {
 		domainParams.Add(utils.RootOrderParam, order, func(v string) bool { return true })
@@ -67,7 +67,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		}
 	}
 
-	if f.Domain.IsSuperCall() {
+	if f.Domain.IsSuperAdmin() && !f.Domain.IsOwn(false, true, f.Domain.GetMethod()) {
 		return strings.Join(SQLrestriction, " AND "), strings.Join(SQLview, ","), strings.Join(SQLOrder, ","), SQLLimit
 	}
 	if s, ok := domainParams.Get(utils.RootFilterNewState); ok && s != "" {
@@ -87,6 +87,8 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	} else if f.Domain.GetMethod() != utils.DELETE && !avoidUser && !schema.IsAssociated {
 		SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
 	}
+	SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
+	SQLrestriction = f.GetFilterDelete(SQLrestriction, schema)
 	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
 }
 
@@ -94,7 +96,7 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 	restriction := map[string]interface{}{}
 	restriction["active"] = true
 	if schema, err := sch.GetSchema(tableName); err == nil {
-		if schema.HasField("is_meta") && !d.Domain.IsSuperCall() {
+		if schema.HasField("is_meta") && !d.Domain.IsSuperAdmin() {
 			restriction["is_meta"] = false
 		}
 		alterRestr := []string{}

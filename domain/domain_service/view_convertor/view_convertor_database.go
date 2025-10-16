@@ -155,19 +155,8 @@ func (d *ViewConvertor) ProcessPermissions(
 	for _, meth := range []utils.Method{utils.SELECT, utils.CREATE, utils.UPDATE, utils.DELETE} {
 		if utils.DELETE == meth && len(record) == 1 {
 			createdIds := history.GetCreatedAccessData(schema.ID, d.Domain)
-			if !IsReadonly(schema.Name, record[0], createdIds, d.Domain) && !slices.Contains(additionalActions, meth.Method()) {
-				if schema.Name == ds.DBTask.Name {
-					if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-						"is_close": false,
-						utils.SpecialIDParam: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-							utils.SpecialIDParam: record[0][utils.SpecialIDParam],
-						}, false, ds.RequestDBField),
-					}, false); err == nil && len(res) > 0 {
-						additionalActions = append(additionalActions, meth.Method())
-					}
-				} else {
-					additionalActions = append(additionalActions, meth.Method())
-				}
+			if !IsReadonly(schema.Name, record[0], createdIds, d.Domain) && !slices.Contains(additionalActions, meth.Method()) && slices.Contains(createdIds, utils.GetString(record[0], utils.SpecialIDParam)) {
+				additionalActions = append(additionalActions, meth.Method())
 			}
 		} else if d.Domain.VerifyAuth(tableName, "", "", meth) && (((meth == utils.SELECT || meth == utils.CREATE) && d.Domain.GetEmpty()) || !d.Domain.GetEmpty()) {
 			if !slices.Contains(additionalActions, meth.Method()) {

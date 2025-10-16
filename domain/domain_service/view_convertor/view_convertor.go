@@ -9,7 +9,6 @@ import (
 	"sort"
 	"sqldb-ws/domain/domain_service/history"
 	"sqldb-ws/domain/domain_service/triggers"
-	"sqldb-ws/domain/schema"
 	scheme "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -650,63 +649,45 @@ func (d *ViewConvertor) ApplyCommandRow(record utils.Record, vals map[string]int
 	}
 }
 
-// BUG
 func IsReadonly(tableName string, record utils.Record, createdIds []string, d utils.DomainITF) bool {
 	if d.GetEmpty() || utils.GetBool(record, "is_draft") {
 		return false
 	}
-	readonly := true
-	for _, meth := range []utils.Method{utils.CREATE, utils.UPDATE} {
-		if (meth == utils.CREATE && d.GetEmpty()) || meth == utils.UPDATE {
-			if d.VerifyAuth(tableName, "", "", meth, record.GetString(utils.SpecialIDParam)) {
-				readonly = false
-				break
-			}
-		}
-	}
 	if sch, err := scheme.GetSchema(tableName); err == nil {
-		m := map[string]interface{}{
-			"is_close":     false,
-			ds.UserDBField: d.GetUserID(),
-		}
 		if tableName == ds.DBTask.Name {
-			delete(m, ds.UserDBField)
-			m[utils.SpecialIDParam+"_1"] = d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-				ds.EntityDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(
-					ds.DBEntityUser.Name,
-					map[string]interface{}{
-						ds.UserDBField: d.GetUserID(),
-					}, true, ds.EntityDBField),
-				ds.UserDBField: d.GetUserID(),
-			}, true, utils.SpecialIDParam)
-			m[utils.SpecialIDParam] = record[utils.SpecialIDParam]
-			m[ds.WorkflowSchemaDBField] = d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
-				utils.SpecialIDParam: record[ds.WorkflowSchemaDBField],
-			}, false, utils.SpecialIDParam)
-			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, m, false); err != nil || len(res) == 0 {
-				return true
-			} else if slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)) {
-				return false
+			if !utils.GetBool(record, "is_close") && (utils.GetString(record, ds.UserDBField) == d.GetUserID()) || slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)) {
+				return false // if its my task and currently working allow it
 			}
-		} else {
-			m[ds.DestTableDBField] = record[utils.SpecialIDParam]
+		} else { // if no task then follow this
+			subMap := map[string]interface{}{
+				utils.SpecialIDParam: d.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+					ds.DestTableDBField: "main.id",
+					ds.SchemaDBField:    sch.ID,
+				}, true, utils.SpecialIDParam),
+			}
 			if record[ds.DestTableDBField] != nil {
-				m[ds.DestTableDBField] = record[ds.DestTableDBField]
-			} else if sch, err := schema.GetSchema(tableName); err == nil {
-				m[ds.SchemaDBField] = sch.ID
+				subMap[utils.SpecialIDParam+"_1"] = d.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+					ds.DestTableDBField: record[ds.DestTableDBField],
+					ds.SchemaDBField:    record[ds.SchemaDBField],
+				}, true, utils.SpecialIDParam)
 			}
-			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, m, false); err != nil || len(res) == 0 {
-				m["is_close"] = true
-				if rr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, m, false); err != nil || len(rr) > 0 {
-					return true
-				}
-				// REWORK THE PART OF PARAMS LATER
+			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ // then if there is request in run it should not be readonly
+				"is_close":           false,
+				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMap, true, utils.SpecialIDParam),
+			}, false); err == nil && len(res) > 0 {
+				return false
+			} else if rr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ //then no request are active, if there some closed protecting data, then readonly
+				"is_close":           true,
+				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMap, true, utils.SpecialIDParam),
+			}, false); err != nil || len(rr) > 0 {
+				return true // if a request about this data is end up, only one
+			} else { // in case of no request at all !
 				for k, _ := range d.GetParams().Values {
-					if sch.HasField(k) {
+					if sch.HasField(k) { // a method to override per params
 						return false
 					}
 				}
-				for _, f := range sch.Fields {
+				/*for _, f := range sch.Fields { // a method to setup no readonly on sub form
 					if f.GetLink() > 0 && !strings.Contains(f.Type, "many") {
 						if sch2, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
 							for _, ff := range sch2.Fields {
@@ -716,12 +697,20 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 							}
 						}
 					}
+				}*/
+				if slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)) { // if created it's our own we can update it
+					return false
 				}
-				return !slices.Contains(createdIds, record.GetString(utils.SpecialIDParam))
-			} else if slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)) {
-				return false
 			}
 		}
 	}
-	return readonly || record["state"] == "completed" || record["state"] == "dismiss" || record["state"] == "refused" || record["state"] == "canceled"
+	// if nothing occurs before... then... check if there is permission allowing you to update
+	for _, meth := range []utils.Method{utils.CREATE, utils.UPDATE} {
+		if (meth == utils.CREATE && d.GetEmpty()) || meth == utils.UPDATE {
+			if d.VerifyAuth(tableName, "", "", meth, record.GetString(utils.SpecialIDParam)) {
+				return false // if allowed then not readonly, like in a superadmin non requestable data
+			}
+		}
+	}
+	return true
 }

@@ -208,7 +208,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 }
 
 func (s *TaskService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	if !s.Domain.IsSuperCall() {
+	if !s.Domain.IsSuperAdmin() {
 		innerestr = append(innerestr, conn.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"meta_" + RequestDBField: nil,
 		}, true))

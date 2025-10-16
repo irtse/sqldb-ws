@@ -126,7 +126,6 @@ func (d *SpecializedDomain) onBooleanValue(key string, sup func(bool)) {
 func (d *SpecializedDomain) call(params utils.Params, record utils.Record, method utils.Method, args ...interface{}) (utils.Results, error) {
 	d.Method = method
 	d.Params = params
-	d.onBooleanValue(utils.RootSuperCall, func(b bool) { d.Super = b })
 	d.onBooleanValue(utils.RootShallow, func(b bool) { d.Shallowed = b })
 	if tablename, ok := params.Get(utils.RootTableParam); ok { // retrieve tableName in query (not optionnal)
 		d.TableName = strings.ToLower(schserv.GetTablename(tablename))
@@ -178,7 +177,6 @@ func (d *SpecializedDomain) GetRowResults(
 	specializedService utils.SpecializedServiceITF,
 	args ...interface{},
 ) (utils.Results, error) {
-
 	rowName, _ = url.QueryUnescape(rowName)
 	ids := strings.Split(rowName, ",")
 	all_results := utils.Results{}
@@ -224,7 +222,7 @@ func (d *SpecializedDomain) GetRowResults(
 				return all_results, err
 			}
 			p, _ = d.Params.Get(utils.RootRawView)
-			if p != "enable" && err == nil && !d.IsSuperCall() && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
+			if p != "enable" && err == nil && !d.IsSuperAdmin() && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
 				res = specializedService.TransformToGenericView(res, d.TableName, d.Params.GetAsArgs(utils.RootDestIDParam)...)
 				d.Redirections = append(d.Redirections, d.GetRedirections(res)...)
 			}
