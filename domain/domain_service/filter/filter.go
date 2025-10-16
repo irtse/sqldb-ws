@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"net/url"
 	"slices"
 	"sqldb-ws/domain/domain_service/history"
@@ -69,7 +68,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	}
 
 	if f.Domain.IsSuperAdmin() && !f.Domain.IsOwn(false, true, f.Domain.GetMethod()) {
-		return strings.Join(SQLrestriction, " AND "), strings.Join(SQLview, ","), strings.Join(SQLOrder, ","), SQLLimit
+		return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
 	}
 	if s, ok := domainParams.Get(utils.RootFilterNewState); ok && s != "" {
 		state = s
@@ -91,7 +90,6 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
 	SQLrestriction = f.GetFilterDelete(SQLrestriction, schema)
 
-	fmt.Println("QUERY", SQLrestriction, "ord", SQLOrder, "limit", SQLLimit, "view", SQLview)
 	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
 }
 
