@@ -61,6 +61,8 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		}
 	}
 	channel := make(chan utils.Record, len(results))
+	debug.PrintStack()
+	fmt.Println(results)
 	for _, record := range results {
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
 	}
@@ -259,8 +261,6 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 	datas := utils.Results{}
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
-		debug.PrintStack()
-		fmt.Println(params, s.Domain.GetParams())
 		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
