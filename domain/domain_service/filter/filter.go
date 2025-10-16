@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"fmt"
 	"net/url"
 	"slices"
 	"sqldb-ws/domain/domain_service/history"
@@ -89,6 +90,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	}
 	SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
 	SQLrestriction = f.GetFilterDelete(SQLrestriction, schema)
+	fmt.Println("restr", len(SQLrestriction))
 
 	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
 }
