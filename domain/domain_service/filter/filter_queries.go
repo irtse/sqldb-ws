@@ -94,6 +94,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 	mH := map[string]interface{}{
 		"write":              true,
 		ds.UserDBField:       s.Domain.GetUserID(),
+		"0":                  s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, false, "COUNT("+utils.SpecialIDParam+")"),
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, subMH, true, utils.SpecialIDParam),
 	}
 	if schema.HasField(ds.DestTableDBField) {
@@ -104,7 +105,6 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 	}
 	restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"is_draft": true,
-		"0":        s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, false, "COUNT("+utils.SpecialIDParam+")"),
 		"!0_1":     s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, mH, false, "COUNT(id)"),
 	}, true)+")")
 	return restr
