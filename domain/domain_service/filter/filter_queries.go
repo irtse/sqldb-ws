@@ -122,11 +122,6 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 			subM[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 				ds.DestTableDBField: "main." + ds.DestTableDBField,
 				ds.SchemaDBField:    "main." + ds.SchemaDBField,
-				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.DestTableDBField: "main." + ds.DestTableDBField,
-					ds.SchemaDBField:    "main." + ds.SchemaDBField,
-					ds.UserDBField:      s.Domain.GetUserID(),
-				}, false, ds.RequestDBField),
 			}, false, utils.SpecialIDParam)
 
 			subMH[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
@@ -143,8 +138,13 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 		restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"is_draft": true,
 			"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				"is_close":           false,
-				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, true, utils.SpecialIDParam),
+				"is_close": false,
+				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+					ds.DestTableDBField: "main." + ds.DestTableDBField,
+					ds.SchemaDBField:    "main." + ds.SchemaDBField,
+					ds.UserDBField:      s.Domain.GetUserID(),
+				}, false, ds.RequestDBField),
+				utils.SpecialIDParam + "_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, true, utils.SpecialIDParam),
 			}, false, "COUNT(id)"),
 			"0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 				"0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
