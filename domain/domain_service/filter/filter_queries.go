@@ -82,11 +82,10 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 				"is_close":          false,
 				ds.UserDBField:      s.Domain.GetUserID(),
 			}, false, ds.RequestDBField),
-		}, false, "COUNT("+utils.SpecialIDParam+")")
+		}, false, utils.SpecialIDParam)
 	}
 	subMH := map[string]interface{}{
 		"!0_1": perms,
-		"0":    s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, false, utils.SpecialIDParam),
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: "main.id",
 			ds.SchemaDBField:    schema.ID,
@@ -105,7 +104,8 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 	}
 	restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"is_draft": true,
-		"!0":       s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, mH, false, "COUNT(id)"),
+		"0":        s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, false, "COUNT("+utils.SpecialIDParam+")"),
+		"!0_1":     s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, mH, false, "COUNT(id)"),
 	}, true)+")")
 	return restr
 }
