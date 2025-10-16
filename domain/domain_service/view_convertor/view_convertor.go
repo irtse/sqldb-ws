@@ -660,13 +660,13 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 			}
 		} else { // if no task then follow this
 			subMap := map[string]interface{}{
-				utils.SpecialIDParam: d.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 					ds.DestTableDBField: record[utils.SpecialIDParam],
 					ds.SchemaDBField:    sch.ID,
 				}, false, utils.SpecialIDParam),
 			}
 			if record[ds.DestTableDBField] != nil {
-				subMap[utils.SpecialIDParam+"_1"] = d.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+				subMap[utils.SpecialIDParam+"_1"] = d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 					ds.DestTableDBField: record[ds.DestTableDBField],
 					ds.SchemaDBField:    record[ds.SchemaDBField],
 				}, false, utils.SpecialIDParam)
@@ -687,17 +687,6 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 						return false
 					}
 				}
-				/*for _, f := range sch.Fields { // a method to setup no readonly on sub form
-					if f.GetLink() > 0 && !strings.Contains(f.Type, "many") {
-						if sch2, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
-							for _, ff := range sch2.Fields {
-								if ff.GetLink() == sch.GetID() && strings.Contains(ff.Type, "many") {
-									return f.Readonly
-								}
-							}
-						}
-					}
-				}*/
 				if slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)) { // if created it's our own we can update it
 					return false
 				}
