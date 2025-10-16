@@ -34,6 +34,7 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 	}
 	if strings.Contains(name, "poster") {
 		fmt.Println(q)
+		debug.PrintStack()
 	}
 	return db.QueryAssociativeArray(q)
 }

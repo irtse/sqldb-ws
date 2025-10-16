@@ -3,7 +3,6 @@ package schema_service
 import (
 	"fmt"
 	"runtime"
-	"runtime/debug"
 	"slices"
 	"sort"
 	filterserv "sqldb-ws/domain/domain_service/filter"
@@ -61,8 +60,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		}
 	}
 	channel := make(chan utils.Record, len(results))
-	debug.PrintStack()
-	fmt.Println(results)
 	for _, record := range results {
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
 	}
