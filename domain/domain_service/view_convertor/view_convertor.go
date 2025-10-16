@@ -661,7 +661,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 		} else { // if no task then follow this
 			subMap := map[string]interface{}{
 				utils.SpecialIDParam: d.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-					ds.DestTableDBField: "main.id",
+					ds.DestTableDBField: record[utils.SpecialIDParam],
 					ds.SchemaDBField:    sch.ID,
 				}, true, utils.SpecialIDParam),
 			}
