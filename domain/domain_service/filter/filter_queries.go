@@ -66,7 +66,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel) [
 		}, false, utils.SpecialIDParam),
 	}
 	mH := map[string]interface{}{
-		"create":             true,
+		"write":              true,
 		utils.SpecialIDParam: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, subMH, true, utils.SpecialIDParam),
 	}
 	if schema.HasField(ds.DestTableDBField) {
@@ -121,7 +121,7 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 			}, false, utils.SpecialIDParam)
 		}
 		mH := map[string]interface{}{
-			"create":             true,
+			"write":              true,
 			utils.SpecialIDParam: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, subMH, true, utils.SpecialIDParam),
 		}
 		perms := 0
