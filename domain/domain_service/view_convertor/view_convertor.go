@@ -675,16 +675,13 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				"is_close":           false,
 				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMap, true, utils.SpecialIDParam),
 			}, false); err == nil && len(res) > 0 {
-				fmt.Println("REQUEST UNCLOSED FOUND", subMap)
 				return false
 			} else if rr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ //then no request are active, if there some closed protecting data, then readonly
 				"is_close":           true,
 				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMap, true, utils.SpecialIDParam),
 			}, false); err != nil || len(rr) > 0 {
-				fmt.Println("REQUEST CLOSED FOUND", subMap)
 				return true // if a request about this data is end up, only one
 			} else { // in case of no request at all !
-				fmt.Println("NO REQUEST FOUND", subMap)
 				for k, _ := range d.GetParams().Values {
 					if sch.HasField(k) { // a method to override per params
 						return false
