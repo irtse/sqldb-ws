@@ -663,13 +663,13 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				utils.SpecialIDParam: d.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 					ds.DestTableDBField: record[utils.SpecialIDParam],
 					ds.SchemaDBField:    sch.ID,
-				}, true, utils.SpecialIDParam),
+				}, false, utils.SpecialIDParam),
 			}
 			if record[ds.DestTableDBField] != nil {
 				subMap[utils.SpecialIDParam+"_1"] = d.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 					ds.DestTableDBField: record[ds.DestTableDBField],
 					ds.SchemaDBField:    record[ds.SchemaDBField],
-				}, true, utils.SpecialIDParam)
+				}, false, utils.SpecialIDParam)
 			}
 			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ // then if there is request in run it should not be readonly
 				"is_close":           false,
