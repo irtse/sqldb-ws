@@ -59,6 +59,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 		perms = 1
 	}
 	subMH := map[string]interface{}{
+		"!0_1": perms,
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: "main.id",
 			ds.SchemaDBField:    schema.ID,
@@ -96,7 +97,12 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 			}, false, utils.SpecialIDParam),
 		}, true))
 	} else {
+		perms := 0
+		if s.Domain.VerifyAuth(schema.Name, "", "", s.Domain.GetMethod()) {
+			perms = 1
+		}
 		subMH := map[string]interface{}{
+			"!0_1": perms,
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 				ds.DestTableDBField: "main.id",
 				ds.SchemaDBField:    schema.ID,
@@ -134,10 +140,7 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 			ds.UserDBField:       s.Domain.GetUserID(),
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, subMH, true, utils.SpecialIDParam),
 		}
-		perms := 0
-		if s.Domain.VerifyAuth(schema.Name, "", "", s.Domain.GetMethod()) {
-			perms = 1
-		}
+
 		restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"is_draft": true,
 			"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
