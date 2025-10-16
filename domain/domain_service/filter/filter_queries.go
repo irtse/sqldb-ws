@@ -55,7 +55,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 		return restr
 	}
 	perms := 0
-	if s.Domain.VerifyAuth(schema.Name, "", "", s.Domain.GetMethod()) {
+	if s.Domain.VerifyAuth(schema.Name, "", "", utils.DELETE) {
 		perms = 1
 	}
 	subMH := map[string]interface{}{
@@ -79,7 +79,6 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 	restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"is_draft": true,
 		"!0":       s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, mH, false, "COUNT(id)"),
-		"!0_1":     perms,
 	}, true)+")")
 	return restr
 }
@@ -159,7 +158,6 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 					"is_close":           true,
 					utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, true, utils.SpecialIDParam),
 				}, false, "COUNT(id)"),
-				"!0_1": perms,
 			}, false, "COUNT(id)"),
 		}, true)+")")
 	}
