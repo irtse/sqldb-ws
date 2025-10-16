@@ -62,6 +62,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: "main.id",
 			ds.SchemaDBField:    schema.ID,
+			ds.UserDBField:      s.Domain.GetUserID(),
 		}, false, utils.SpecialIDParam),
 	}
 	mH := map[string]interface{}{
@@ -72,6 +73,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 		subMH[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: "main." + ds.DestTableDBField,
 			ds.SchemaDBField:    "main." + ds.SchemaDBField,
+			ds.UserDBField:      s.Domain.GetUserID(),
 		}, false, utils.SpecialIDParam)
 	}
 	restr = append(restr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
@@ -99,6 +101,7 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 				ds.DestTableDBField: "main.id",
 				ds.SchemaDBField:    schema.ID,
+				ds.UserDBField:      s.Domain.GetUserID(),
 			}, false, utils.SpecialIDParam),
 		}
 		subM := map[string]interface{}{
@@ -126,6 +129,7 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, dom
 			subMH[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 				ds.DestTableDBField: "main." + ds.DestTableDBField,
 				ds.SchemaDBField:    "main." + ds.SchemaDBField,
+				ds.UserDBField:      s.Domain.GetUserID(),
 			}, false, utils.SpecialIDParam)
 		}
 		mH := map[string]interface{}{
