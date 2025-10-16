@@ -82,7 +82,6 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, d
 	return restr
 }
 func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, domainParams utils.Params) []string {
-	fmt.Println(s.Domain.GetMode())
 	if s.Domain.GetMode() != "edit" {
 		return restr
 	}
@@ -399,7 +398,6 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 				}
 				m[key][operator] = append(m[key][operator], vv)
 				sql += key + " " + operator + " " + vv
-				fmt.Println("SQL", sql)
 				continue
 			}
 			if len(sql) > 0 {
@@ -430,7 +428,6 @@ func (t *FilterService) GetFieldSQL(key string, operator string, basefromSchema 
 				}
 			}
 		}
-		fmt.Println("V", val)
 		typ, value := t.fromITF(val)
 		if value == "" {
 			return m, ""

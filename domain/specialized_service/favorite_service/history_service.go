@@ -1,7 +1,6 @@
 package favorite_service
 
 import (
-	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -25,7 +24,6 @@ func (s *HistoryService) GenerateQueryFilter(tableName string, innerestr ...stri
 }
 
 func (s *HistoryService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) (res utils.Results) {
-	fmt.Println("THERE", results)
 	for _, d := range results {
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 			utils.SpecialIDParam: d[ds.UserDBField],

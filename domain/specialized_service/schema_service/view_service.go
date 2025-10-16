@@ -3,6 +3,7 @@ package schema_service
 import (
 	"fmt"
 	"runtime"
+	"runtime/debug"
 	"slices"
 	"sort"
 	filterserv "sqldb-ws/domain/domain_service/filter"
@@ -258,6 +259,7 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 	datas := utils.Results{}
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
+		debug.PrintStack()
 		fmt.Println(params, s.Domain.GetParams())
 		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()

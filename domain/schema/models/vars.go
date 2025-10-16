@@ -170,20 +170,15 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	if record[val2] != nil {
 		val2 = fmt.Sprintf("%v", record[val2])
 	}
-	fmt.Println("wtf ", typ, val, val2, record)
 	if ok, a, b := IsDateComparable(typ, val, val2, record, operator); ok {
 		switch operator {
 		case ">":
-			fmt.Println("after = ", a, b, a.After(b))
 			return a.After(b), nil
 		case "<":
-			fmt.Println("bef ", a, b, a.Before(b))
 			return a.Before(b), nil
 		case ">=":
-			fmt.Println("after = ", a, b, a.After(b) || a == b)
 			return a.After(b) || a == b, nil
 		case "<=":
-			fmt.Println("bef = ", a, b, a.Before(b) || a == b)
 			return a.Before(b) || a == b, nil
 		case "=", "==", "IN":
 			return a == b, nil
@@ -261,27 +256,21 @@ func parseDate(input string) (time.Time, error) {
 func IsDateComparable(typ string, val string, val2 string, record utils.Record, operator string) (bool, time.Time, time.Time) {
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := parseDate(val)
-		fmt.Println("ERR1", err)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
 			now := time.Now().UTC()
 			rnow, _ := time.Parse("2006-01-02", now.Format("2006-01-02"))
-			fmt.Println("ERR4", err)
 			return err == nil, time1, rnow
 		}
 		if strings.Contains(val2, "date") && record[val2] == nil {
 			if strings.Contains(operator, "<") {
-				fmt.Println("ERR5", err)
 				return err == nil, time1, time.Now().Add(time.Hour * 24)
 			} else {
-				fmt.Println("ERR6", err)
 				return err == nil, time1, time.Now()
 			}
 		}
 		time2, err2 := parseDate(val2)
-		fmt.Println("ERR12", err)
 		return err == nil && err2 == nil, time1, time2
 	}
-	fmt.Println("T3")
 	return false, time.Now().UTC(), time.Now().UTC()
 }
 
