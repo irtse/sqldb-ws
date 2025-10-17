@@ -190,16 +190,13 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
 	for _, sch := range models.SchemaRegistry {
 		for _, r := range results {
-			if tableName != sch.Name {
-				continue
-			}
 			if sch.HasField(ds.SchemaDBField) && sch.HasField(ds.DestTableDBField) {
 				if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 					ds.SchemaDBField:    sch.ID,
 					ds.DestTableDBField: utils.GetInt(r, utils.SpecialIDParam),
 				}, false); err == nil {
 					for _, rrr := range res {
-						s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+						go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
 					}
 				}
 			}
@@ -209,7 +206,7 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 						f.Name: r[utils.SpecialIDParam],
 					}, false); err == nil {
 						for _, rrr := range res {
-							s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+							go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
 						}
 					}
 				}
