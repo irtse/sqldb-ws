@@ -19,6 +19,14 @@ func NewParams(vals map[string]string) Params {
 	}
 }
 
+func (p Params) GetLine() string {
+	l := []string{}
+	for k, v := range p.Values {
+		l = append(l, k+":"+v)
+	}
+	return strings.Join(l, ",")
+}
+
 func (p Params) GetAsArgs(key string) []string {
 	p.Mutex.RLock()
 	defer p.Mutex.RUnlock()
