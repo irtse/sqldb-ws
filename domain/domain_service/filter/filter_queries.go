@@ -50,144 +50,82 @@ func (s *FilterService) GetFilterForQuery(filterID string, viewfilterID string, 
 	}
 	return filter, view, order, dir, state
 }
-func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel, domainParams utils.Params) []string {
-	if s.Domain.GetMode() != "delete" || schema.Name == ds.DBView.Name {
-		return restr
-	}
+
+func (s *FilterService) getFilterReadonly(schema sm.SchemaModel) []string {
 	perms := 0
 	if s.Domain.VerifyAuth(schema.Name, "", "", utils.DELETE) {
 		perms = 1
 	}
-	subM := map[string]interface{}{
-		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-			ds.DestTableDBField: "main.id",
-			ds.SchemaDBField:    schema.ID,
-			"is_close":          false,
-			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-				ds.DestTableDBField: "main.id",
-				ds.SchemaDBField:    schema.ID,
-				"is_close":          false,
-				ds.UserDBField:      s.Domain.GetUserID(),
-			}, false, ds.RequestDBField),
-		}, false, utils.SpecialIDParam),
-	}
-	if schema.HasField(ds.DestTableDBField) {
-		subM[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-			ds.DestTableDBField: "main." + ds.DestTableDBField,
-			ds.SchemaDBField:    "main." + ds.SchemaDBField,
-			"is_close":          false,
-			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-				ds.DestTableDBField: "main.id",
-				ds.SchemaDBField:    schema.ID,
-				"is_close":          false,
-				ds.UserDBField:      s.Domain.GetUserID(),
-			}, false, ds.RequestDBField),
-		}, false, utils.SpecialIDParam)
-	}
-	subMH := map[string]interface{}{
-		"!0_1": perms,
+
+	/*
+		on est pas read only quand :
+
+
+		ou qu'on a les droits ok
+		ou qu'on nous a share les droits. ok
+		ou qu'une requete est en cours et qu'on a soit une tache active dessus (pas pour delete),
+		que ça nous appartient ET
+			on est en draft et que ça nous appartient, // ça normalement on l'a déjà.
+			ou  soit ça nous appartient
+			ou qu'il n'existe aucune requete et que ça nous appartient. ok
+	*/
+	subrestr := []string{}
+	subrestr = append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+		"!0": perms,
+		"!0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+			ds.DestTableDBField:        "main.id",
+			ds.SchemaDBField:           schema.ID,
+			"shared_" + ds.UserDBField: s.Domain.GetUserID(),
+			"delete":                   true,
+		}, false, "COUNT(*)"),
+	}, true)+")")
+
+	subSubRestr := []string{}
+	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 			ds.DestTableDBField: "main.id",
 			ds.SchemaDBField:    schema.ID,
-		}, false, utils.SpecialIDParam),
-	}
-	mH := map[string]interface{}{
-		"write":              true,
-		ds.UserDBField:       s.Domain.GetUserID(),
-		"0":                  s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, false, "COUNT("+utils.SpecialIDParam+")"),
-		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, subMH, true, utils.SpecialIDParam),
-	}
-	if schema.HasField(ds.DestTableDBField) {
-		subMH[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
-			ds.DestTableDBField: "main." + ds.DestTableDBField,
-			ds.SchemaDBField:    "main." + ds.SchemaDBField,
-		}, false, utils.SpecialIDParam)
-	}
-	restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+			ds.UserDBField:      s.Domain.GetUserID(),
+		}, false, ds.DestTableDBField),
+	}, false)+")")
+	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"is_draft": true,
-		"!0_1":     s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, mH, false, "COUNT(id)"),
+		"0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+			ds.DestTableDBField: "main.id",
+			ds.SchemaDBField:    schema.ID,
+		}, false, "COUNT(*)"),
 	}, true)+")")
+
+	subrestr = append(subrestr, "("+strings.Join(subSubRestr, " AND ")+")")
+	return subrestr
+}
+
+func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel) []string {
+	if s.Domain.GetMode() != "delete" || schema.Name == ds.DBView.Name {
+		return restr
+	}
+	restr = append(restr, "("+strings.Join(s.getFilterReadonly(schema), " OR ")+")")
 	return restr
 }
-func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel, domainParams utils.Params) []string {
+func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []string {
 	if s.Domain.GetMode() != "edit" || schema.Name == ds.DBView.Name {
 		return restr
 	}
-	if schema.Name == ds.DBTask.Name {
-		restr = append(restr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
-			"is_draft": true,
-			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+	subRestr := s.getFilterReadonly(schema)
+	subRestr = append(subRestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+		"!0": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+			ds.RequestDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 				utils.SpecialIDParam: "main.id",
+				ds.SchemaDBField:     schema.ID,
 				"is_close":           false,
 				ds.UserDBField:       s.Domain.GetUserID(),
-			}, false, utils.SpecialIDParam),
-		}, true))
-	} else {
-		perms := 0
-		if s.Domain.VerifyAuth(schema.Name, "", "", s.Domain.GetMethod()) {
-			perms = 1
-		}
-		subMH := map[string]interface{}{
-			"!0_1": perms,
-			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
-				ds.DestTableDBField: "main.id",
-				ds.SchemaDBField:    schema.ID,
-			}, false, utils.SpecialIDParam),
-		}
-		subM := map[string]interface{}{
-			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				ds.DestTableDBField: "main.id",
-				ds.SchemaDBField:    schema.ID,
-				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.DestTableDBField: "main.id",
-					ds.SchemaDBField:    schema.ID,
-					ds.UserDBField:      s.Domain.GetUserID(),
-				}, false, ds.RequestDBField),
-			}, false, utils.SpecialIDParam),
-		}
-		if schema.HasField(ds.DestTableDBField) {
-			subM[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				ds.DestTableDBField: "main." + ds.DestTableDBField,
-				ds.SchemaDBField:    "main." + ds.SchemaDBField,
-			}, false, utils.SpecialIDParam)
-
-			subMH[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
-				ds.DestTableDBField: "main." + ds.DestTableDBField,
-				ds.SchemaDBField:    "main." + ds.SchemaDBField,
-			}, false, utils.SpecialIDParam)
-		}
-		mH := map[string]interface{}{
-			"write":              true,
-			ds.UserDBField:       s.Domain.GetUserID(),
-			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, subMH, true, utils.SpecialIDParam),
-		}
-
-		restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
-			"is_draft": true,
-			"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				"is_close": false,
-				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-					ds.DestTableDBField: "main." + ds.DestTableDBField,
-					ds.SchemaDBField:    "main." + ds.SchemaDBField,
-					ds.UserDBField:      s.Domain.GetUserID(),
-				}, false, ds.RequestDBField),
-				utils.SpecialIDParam + "_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, true, utils.SpecialIDParam),
-			}, false, "COUNT(id)"),
-			"0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				"0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-					"is_close":           true,
-					utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, true, utils.SpecialIDParam),
-				}, false, "COUNT(id)"),
-				"!0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, mH, false, "COUNT(id)"),
-			}, false, "COUNT(id)"),
-			"0_2": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				"0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-					"is_close":           true,
-					utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subM, true, utils.SpecialIDParam),
-				}, false, "COUNT(id)"),
-			}, false, "COUNT(id)"),
-		}, true)+")")
-	}
+			}, false, ds.RequestDBField),
+			ds.DestTableDBField: "main.id",
+			ds.SchemaDBField:    schema.ID,
+			"is_close":          false,
+		}, false, "COUNT(*)"),
+	}, false))
+	restr = append(restr, "("+strings.Join(subRestr, " OR ")+")")
 	return restr
 }
 
