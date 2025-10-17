@@ -124,7 +124,7 @@ func (d *SpecializedDomain) onBooleanValue(key string, sup func(bool)) {
 	}
 }
 
-var cache = map[string]utils.Results{}
+var cache = map[string]map[string]utils.Results{}
 
 // Main process to call an Infra function
 func (d *SpecializedDomain) call(params utils.Params, record utils.Record, method utils.Method, args ...interface{}) (utils.Results, error) {
@@ -221,9 +221,9 @@ func (d *SpecializedDomain) GetRowResults(
 					d.Params.Set(utils.RootLimit, "30")
 					d.Params.Set(utils.RootOffset, "0")
 				}
-				if cache[d.Params.GetLine()] != nil {
+				if cache[d.GetUserID()] != nil && cache[d.GetUserID()][d.Params.GetLine()] != nil {
 					fmt.Println("FROM CACHE")
-					return cache[d.Params.GetLine()], nil
+					return cache[d.GetUserID()][d.Params.GetLine()], nil
 				}
 			}
 			res, err := d.Invoke(record, d.Method, args...)
@@ -231,10 +231,13 @@ func (d *SpecializedDomain) GetRowResults(
 				return all_results, err
 			}
 			if p == "enable" {
-				cache[d.Params.GetLine()] = res
+				if cache[d.GetUserID()] == nil {
+					delete(cache, d.GetUserID())
+				}
+				cache[d.GetUserID()][d.Params.GetLine()] = res
 				go func() {
 					time.Sleep(time.Second * 3)
-					delete(cache, d.Params.GetLine())
+					delete(cache[d.GetUserID()], d.Params.GetLine())
 				}()
 			}
 			p, _ = d.Params.Get(utils.RootRawView)
