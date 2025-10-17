@@ -222,6 +222,7 @@ func (d *SpecializedDomain) GetRowResults(
 					d.Params.Set(utils.RootOffset, "0")
 				}
 				if cache[d.Params.GetLine()] != nil {
+					fmt.Println("FROM CACHE")
 					return cache[d.Params.GetLine()], nil
 				}
 			}
