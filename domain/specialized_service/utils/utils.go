@@ -276,7 +276,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 	if sch, err := schema.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
-		if s.Domain.GetMethod() != utils.UPDATE {
+		if s.Domain.GetMethod() != utils.UPDATE && s.Domain.GetMethod() != utils.CREATE {
 			ids := history.GetCreatedAccessData(sch.ID, s.Domain)
 			if ok := view_convertor.IsReadonly(tablename, record, ids, s.Domain); !ok {
 				return record, errors.New("can't update this record"), false
