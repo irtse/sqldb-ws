@@ -232,7 +232,7 @@ func (d *SpecializedDomain) GetRowResults(
 			}
 			if p == "enable" {
 				if cache[d.GetUserID()] == nil {
-					delete(cache, d.GetUserID())
+					cache[d.GetUserID()] = make(map[string]utils.Results)
 				}
 				cache[d.GetUserID()][d.Params.GetLine()] = res
 				go func() {
