@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
-	"time"
 
 	"sqldb-ws/domain/domain_service"
 	permissions "sqldb-ws/domain/domain_service/permission"
@@ -124,8 +123,6 @@ func (d *SpecializedDomain) onBooleanValue(key string, sup func(bool)) {
 	}
 }
 
-var cache = map[string]map[string]utils.Results{}
-
 // Main process to call an Infra function
 func (d *SpecializedDomain) call(params utils.Params, record utils.Record, method utils.Method, args ...interface{}) (utils.Results, error) {
 	d.Method = method
@@ -221,24 +218,10 @@ func (d *SpecializedDomain) GetRowResults(
 					d.Params.Set(utils.RootLimit, "30")
 					d.Params.Set(utils.RootOffset, "0")
 				}
-				if cache[d.GetUserID()] != nil && cache[d.GetUserID()][d.Params.GetLine()] != nil {
-					fmt.Println("FROM CACHE")
-					return cache[d.GetUserID()][d.Params.GetLine()], nil
-				}
 			}
 			res, err := d.Invoke(record, d.Method, args...)
 			if err != nil {
 				return all_results, err
-			}
-			if p == "enable" {
-				if cache[d.GetUserID()] == nil {
-					cache[d.GetUserID()] = make(map[string]utils.Results)
-				}
-				cache[d.GetUserID()][d.Params.GetLine()] = res
-				go func() {
-					time.Sleep(time.Second * 3)
-					delete(cache[d.GetUserID()], d.Params.GetLine())
-				}()
 			}
 			p, _ = d.Params.Get(utils.RootRawView)
 			if p != "enable" && err == nil && !d.IsSuperAdmin() && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
