@@ -106,12 +106,12 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 	subRestr := s.getFilterReadonly(schema, true)
 	subRestr = append(subRestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"!0": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-			ds.RequestDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-				utils.SpecialIDParam: "main.id",
-				ds.SchemaDBField:     schema.ID,
-				"is_close":           false,
-				ds.UserDBField:       s.Domain.GetUserID(),
-			}, false, ds.RequestDBField),
+			utils.SpecialIDParam: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+				ds.DestTableDBField: "main.id",
+				ds.SchemaDBField:    schema.ID,
+				"is_close":          false,
+				ds.UserDBField:      s.Domain.GetUserID(),
+			}, false, utils.SpecialIDParam),
 			ds.DestTableDBField: "main.id",
 			ds.SchemaDBField:    schema.ID,
 			"is_close":          false,
