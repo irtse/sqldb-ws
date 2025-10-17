@@ -2,6 +2,7 @@ package favorite_service
 
 import (
 	"fmt"
+	"runtime/debug"
 	"sort"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -67,6 +68,8 @@ func (s *FilterService) Write(record utils.Record, tableName string) {
 }
 
 func (s *FilterService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) (res utils.Results) {
+	fmt.Println("FILTER")
+	debug.PrintStack()
 	selected := make(map[string]bool)
 	for _, rec := range results { // memorize selected filters
 		id := rec.GetString(utils.SpecialIDParam)
