@@ -210,7 +210,6 @@ func (db *Database) Query(query string) error {
 		defer db.Close()
 	}
 	rows, err := db.Conn.Query(query)
-	fmt.Println(query, err)
 	if err != nil {
 		return err
 	}
