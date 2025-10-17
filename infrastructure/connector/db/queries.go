@@ -32,10 +32,6 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(name, "article") {
-		fmt.Println(q)
-		debug.PrintStack()
-	}
 	return db.QueryAssociativeArray(q)
 }
 
@@ -214,6 +210,7 @@ func (db *Database) Query(query string) error {
 		defer db.Close()
 	}
 	rows, err := db.Conn.Query(query)
+	fmt.Println(query, err)
 	if err != nil {
 		return err
 	}
