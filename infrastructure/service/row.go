@@ -100,22 +100,15 @@ func (t *TableRowService) Create(record map[string]interface{}) ([]map[string]in
 
 func (t *TableRowService) Update(record map[string]interface{}, restriction ...string) ([]map[string]interface{}, error) {
 	var err error
-	if strings.Contains(t.Name, "request") {
-		fmt.Println("REQ", record)
-	}
 	if record, err = t.setupFilter(record, true, true, restriction...); err != nil {
+		fmt.Println(record, err)
 		return nil, err
 	}
-	if strings.Contains(t.Name, "request") {
-		fmt.Println("REQ1", record)
-	}
+	fmt.Println(record)
 	/* if strings.Contains(t.DB.GetSQLRestriction(), "id=null") {
 		t.DB.ClearQueryFilter()
 		return t.Create(record)
 	}*/
-	if strings.Contains(t.Name, "request") {
-		fmt.Println("REQ2", record)
-	}
 	t.EmptyCol.Name = t.Name
 	if query, err := t.DB.BuildUpdateRowQuery(t.Table.Name, record, t.EmptyCol.Verify); err == nil {
 		if strings.Contains(t.Name, "request") {
