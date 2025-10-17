@@ -95,7 +95,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				newSchema["type"] = typ
 			}
 			res[0]["schema"] = newSchema
-			res[0]["multi_view_path"] = utils.BuildPath(schema.ID, utils.ReservedParam)
+			res[0]["multi_view_path"] = append(res[0]["multi_view_path"].([]string), utils.BuildPath(schema.Name, utils.ReservedParam))
 		}
 		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
 		for range schemas {
