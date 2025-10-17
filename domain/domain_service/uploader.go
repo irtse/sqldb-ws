@@ -28,41 +28,18 @@ func (u *Uploader) ApplyUpload(file multipart.File, handler *multipart.FileHeade
 	tableName := u.Domain.GetTable()
 	if columnName, ok := u.Domain.GetParams().Get(utils.RootColumnsParam); !ok && len(strings.Split(columnName, ",")) > 0 {
 		return "", errors.New("must have only one column field")
-	} else if id, ok := u.Domain.GetParams().Get(utils.SpecialIDParam); ok {
+	} else {
 		if path, err := u.upload(file, handler); err == nil {
 			if sch, err := schema.GetSchema(schema.GetTablename(tableName)); err == nil && sch.HasField(columnName) {
 				if f, _ := sch.GetField(columnName); !strings.Contains(f.Type, "upload") {
 					return "", errors.New("must be a field of upload type")
 				}
-				if res, err := u.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name,
-					map[string]interface{}{
-						utils.SpecialIDParam: id,
-					}, false); err == nil && len(res) > 0 {
-					f := utils.GetString(res[0], columnName)
-					paths := []string{}
-					if f != "" {
-						for _, ff := range strings.Split(f, ",") {
-							if strings.Contains(path, ff) {
-								paths = append(paths, path)
-							} else {
-								paths = append(paths, ff)
-							}
-						}
-					}
-					/*if err := u.Domain.GetDb().UpdateQuery(sch.Name, map[string]interface{}{
-						columnName: strings.Join(paths, ","),
-					}, map[string]interface{}{
-						utils.SpecialIDParam: id,
-					}, false); err != nil {
-						return "", err
-					}*/
-				}
-
 			}
 			return path, nil
+		} else {
+			return "", err
 		}
 	}
-	return "", errors.New("must have an id")
 }
 
 func (u *Uploader) deleteBeforeUpload(storage string, fileName string) {
