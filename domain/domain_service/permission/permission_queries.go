@@ -1,15 +1,11 @@
 package permission
 
 import (
-	"sqldb-ws/domain/domain_service/history"
-	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
-	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
-	"strings"
 	"time"
 )
 
@@ -73,48 +69,4 @@ func (p *PermDomainService) checkUpdateCreatePermissions(tableName, destID strin
 		"is_close":                 false,
 	}, false)
 	return err == nil && len(res) > 0 && res[0]["result"] != nil && utils.ToInt64(res[0]["result"]) > 0
-}
-
-func (d *PermDomainService) CanDelete(params map[string]string, record utils.Record, domain utils.DomainITF) bool {
-	if d.IsSuperAdmin || d.PermsCheck(
-		domain.GetTable(), "", "",
-		domain.IsOwn(false, false, utils.DELETE), utils.DELETE, domain) {
-		return true
-	}
-	foundDeps := map[string]string{}
-	for kp, pv := range params {
-		if strings.Contains(kp, "_id") {
-			foundDeps[kp] = pv
-		}
-	}
-	if len(foundDeps) == 0 {
-		for kp, pv := range foundDeps {
-			createdIds := []string{}
-			kp = strings.ReplaceAll(kp, "_id", "")
-			sch, err := schserv.GetSchema(kp)
-			if err == nil {
-				createdIds = history.GetCreatedAccessData(sch.ID, domain)
-			} else {
-				kp = strings.ReplaceAll(kp, "db", "")
-				sch, err := schserv.GetSchema(kp)
-				if err == nil {
-					createdIds = history.GetCreatedAccessData(sch.ID, domain)
-				}
-			}
-			if view_convertor.IsReadonly(kp, utils.Record{utils.SpecialIDParam: pv}, createdIds, domain) {
-				return false
-			}
-		}
-	} else {
-		createdIds := []string{}
-		sch, err := schserv.GetSchema(domain.GetTable())
-		if err == nil {
-			createdIds = history.GetCreatedAccessData(sch.ID, domain)
-		}
-		if view_convertor.IsReadonly(domain.GetTable(),
-			utils.Record{utils.SpecialIDParam: record[utils.SpecialIDParam]}, createdIds, domain) {
-			return false
-		}
-	}
-	return true
 }

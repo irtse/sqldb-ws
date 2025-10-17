@@ -203,10 +203,6 @@ func (d *SpecializedDomain) GetRowResults(
 		} else if record != nil {
 			record[utils.SpecialIDParam], _ = d.Params.Get(utils.SpecialIDParam)
 		}
-		if id, _ := d.Params.Get(utils.SpecialIDParam); d.Method == utils.DELETE && (!d.PermsService.CanDelete(d.Params.Values, record, d) || (id == "" && !d.IsSuperAdmin())) {
-			fmt.Println("can't delete datas", id, d.PermsService.CanDelete(d.Params.Values, record, d))
-			continue
-		}
 		d.Service = infrastructure.NewTableRowService(d.Db, d.SuperAdmin, d.User, strings.ToLower(d.TableName), specializedService)
 		if d.Method == utils.IMPORT {
 			path, err := domain_service.NewUploader(d).ApplyUpload(d.File, d.FileHandler)
