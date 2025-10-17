@@ -93,14 +93,14 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 }
 
 func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel) []string {
-	if s.Domain.GetMode() != "delete" || schema.Name == ds.DBView.Name {
+	if s.Domain.GetMode() != "delete" && s.Domain.GetMethod() != utils.DELETE || schema.Name == ds.DBView.Name {
 		return restr
 	}
 	restr = append(restr, "("+strings.Join(s.getFilterReadonly(schema, false), " OR ")+")")
 	return restr
 }
 func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []string {
-	if s.Domain.GetMode() != "edit" || schema.Name == ds.DBView.Name {
+	if s.Domain.GetMode() != "edit" && s.Domain.GetMethod() != utils.UPDATE || schema.Name == ds.DBView.Name {
 		return restr
 	}
 	subRestr := s.getFilterReadonly(schema, true)
