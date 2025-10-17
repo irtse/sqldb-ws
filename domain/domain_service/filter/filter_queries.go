@@ -74,9 +74,9 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 	subSubRestr := []string{}
 	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
-			ds.DestTableDBField: "main.id",
-			ds.SchemaDBField:    schema.ID,
-			ds.UserDBField:      s.Domain.GetUserID(),
+			"write":          true,
+			ds.SchemaDBField: schema.ID,
+			ds.UserDBField:   s.Domain.GetUserID(),
 		}, false, ds.DestTableDBField),
 	}, false)+")")
 	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
