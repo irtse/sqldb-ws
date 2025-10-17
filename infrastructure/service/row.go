@@ -109,10 +109,10 @@ func (t *TableRowService) Update(record map[string]interface{}, restriction ...s
 	if strings.Contains(t.Name, "request") {
 		fmt.Println("REQ1", record)
 	}
-	if strings.Contains(t.DB.GetSQLRestriction(), "id=null") {
+	/* if strings.Contains(t.DB.GetSQLRestriction(), "id=null") {
 		t.DB.ClearQueryFilter()
 		return t.Create(record)
-	}
+	}*/
 	if strings.Contains(t.Name, "request") {
 		fmt.Println("REQ2", record)
 	}

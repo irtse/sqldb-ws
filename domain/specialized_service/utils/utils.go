@@ -268,6 +268,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 	if s.Domain.GetAutoload() {
 		return record, nil, true
 	}
+
 	if s.Domain.GetMethod() != utils.DELETE {
 		rec, err := schema.ValidateBySchema(record, tablename, s.Domain.GetMethod(), s.Domain, s.Domain.VerifyAuth)
 		if err != nil {
