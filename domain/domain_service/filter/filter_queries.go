@@ -51,24 +51,15 @@ func (s *FilterService) GetFilterForQuery(filterID string, viewfilterID string, 
 	return filter, view, order, dir, state
 }
 
-func (s *FilterService) getFilterReadonly(schema sm.SchemaModel) []string {
+func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) []string {
 	perms := 0
 	if s.Domain.VerifyAuth(schema.Name, "", "", utils.DELETE) {
 		perms = 1
 	}
-
-	/*
-		on est pas read only quand :
-
-
-		ou qu'on a les droits ok
-		ou qu'on nous a share les droits. ok
-		ou qu'une requete est en cours et qu'on a soit une tache active dessus (pas pour delete),
-		que ça nous appartient ET
-			on est en draft et que ça nous appartient, // ça normalement on l'a déjà.
-			ou  soit ça nous appartient
-			ou qu'il n'existe aucune requete et que ça nous appartient. ok
-	*/
+	k := "delete_access"
+	if isUpdate {
+		k = "update_access"
+	}
 	subrestr := []string{}
 	subrestr = append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"!0": perms,
@@ -76,7 +67,7 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel) []string {
 			ds.DestTableDBField:        "main.id",
 			ds.SchemaDBField:           schema.ID,
 			"shared_" + ds.UserDBField: s.Domain.GetUserID(),
-			"delete":                   true,
+			k:                          true,
 		}, false, "COUNT(*)"),
 	}, true)+")")
 
@@ -104,14 +95,14 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel) [
 	if s.Domain.GetMode() != "delete" || schema.Name == ds.DBView.Name {
 		return restr
 	}
-	restr = append(restr, "("+strings.Join(s.getFilterReadonly(schema), " OR ")+")")
+	restr = append(restr, "("+strings.Join(s.getFilterReadonly(schema, false), " OR ")+")")
 	return restr
 }
 func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []string {
 	if s.Domain.GetMode() != "edit" || schema.Name == ds.DBView.Name {
 		return restr
 	}
-	subRestr := s.getFilterReadonly(schema)
+	subRestr := s.getFilterReadonly(schema, true)
 	subRestr = append(subRestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"!0": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 			ds.RequestDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
