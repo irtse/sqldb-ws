@@ -321,7 +321,7 @@ func NewView(id int64, name string, label string, schema *SchemaModel, tableName
 		Items:         []ViewItemModel{},
 		Triggers:      triggers,
 		Max:           max,
-		MultiViewPath: []string{utils.BuildPath(schema.Name, utils.ReservedParam)},
+		MultiViewPath: []string{utils.BuildPath(schema.ID, utils.ReservedParam)},
 	}
 }
 
