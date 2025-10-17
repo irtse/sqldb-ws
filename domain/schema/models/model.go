@@ -279,47 +279,49 @@ type ManualTriggerModel struct {
 }
 
 type ViewModel struct { // lightest struct based on SchemaModel dedicate to view
-	ID           int64                    `json:"id"`
-	Name         string                   `json:"name"`
-	Label        string                   `json:"label"`
-	SchemaID     int64                    `json:"schema_id"`
-	SchemaName   string                   `json:"schema_name"`
-	Description  string                   `json:"description"`
-	Path         string                   `json:"link_path"`
-	Order        []string                 `json:"order"`
-	Schema       utils.Record             `json:"schema"`
-	Items        []ViewItemModel          `json:"items"`
-	Actions      []string                 `json:"actions"`
-	ActionPath   string                   `json:"action_path"`
-	ExportPath   string                   `json:"export_path"`
-	Readonly     bool                     `json:"readonly"`
-	Workflow     *WorkflowModel           `json:"workflow"`
-	IsWrapper    bool                     `json:"is_wrapper"`
-	Shortcuts    map[string]string        `json:"shortcuts"`
-	Consents     []map[string]interface{} `json:"consents"`
-	CommentBody  map[string]interface{}   `json:"comment_body"`
-	Translatable bool                     `json:"translatable,omitempty"`
-	Redirection  string                   `json:"redirection,omitempty"`
-	Triggers     []ManualTriggerModel     `json:"triggers,omitempty"`
-	Max          int64                    `json:"max"`
-	Rules        []map[string]interface{} `json:"rules"`
+	ID            int64                    `json:"id"`
+	Name          string                   `json:"name"`
+	Label         string                   `json:"label"`
+	SchemaID      int64                    `json:"schema_id"`
+	SchemaName    string                   `json:"schema_name"`
+	Description   string                   `json:"description"`
+	Path          string                   `json:"link_path"`
+	Order         []string                 `json:"order"`
+	Schema        utils.Record             `json:"schema"`
+	Items         []ViewItemModel          `json:"items"`
+	Actions       []string                 `json:"actions"`
+	ActionPath    string                   `json:"action_path"`
+	ExportPath    string                   `json:"export_path"`
+	Readonly      bool                     `json:"readonly"`
+	Workflow      *WorkflowModel           `json:"workflow"`
+	IsWrapper     bool                     `json:"is_wrapper"`
+	Shortcuts     map[string]string        `json:"shortcuts"`
+	Consents      []map[string]interface{} `json:"consents"`
+	CommentBody   map[string]interface{}   `json:"comment_body"`
+	Translatable  bool                     `json:"translatable,omitempty"`
+	Redirection   string                   `json:"redirection,omitempty"`
+	Triggers      []ManualTriggerModel     `json:"triggers,omitempty"`
+	Max           int64                    `json:"max"`
+	Rules         []map[string]interface{} `json:"rules"`
+	MultiViewPath []string                 `json:"multi_view_path"`
 }
 
 func NewView(id int64, name string, label string, schema *SchemaModel, tableName string, max int64, triggers []ManualTriggerModel) ViewModel {
 	return ViewModel{
-		ID:          id,
-		Name:        name,
-		SchemaName:  schema.Name,
-		SchemaID:    schema.GetID(),
-		Description: fmt.Sprintf("%s data", schema.Name),
-		ActionPath:  utils.BuildPath(schema.Name, utils.ReservedParam),
-		ExportPath:  utils.BuildPath(schema.Name, utils.ReservedParam),
-		Path:        utils.BuildPath(schema.Name, utils.ReservedParam),
-		IsWrapper:   tableName == "dbtask" || tableName == "dbrequest",
-		Label:       label,
-		Items:       []ViewItemModel{},
-		Triggers:    triggers,
-		Max:         max,
+		ID:            id,
+		Name:          name,
+		SchemaName:    schema.Name,
+		SchemaID:      schema.GetID(),
+		Description:   fmt.Sprintf("%s data", schema.Name),
+		ActionPath:    utils.BuildPath(schema.Name, utils.ReservedParam),
+		ExportPath:    utils.BuildPath(schema.Name, utils.ReservedParam),
+		Path:          utils.BuildPath(schema.Name, utils.ReservedParam),
+		IsWrapper:     tableName == "dbtask" || tableName == "dbrequest",
+		Label:         label,
+		Items:         []ViewItemModel{},
+		Triggers:      triggers,
+		Max:           max,
+		MultiViewPath: []string{utils.BuildPath(schema.Name, utils.ReservedParam)},
 	}
 }
 
