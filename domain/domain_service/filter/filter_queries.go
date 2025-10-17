@@ -81,9 +81,10 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 	}, false)+")")
 	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"is_draft": true,
-		"0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+		"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 			ds.DestTableDBField: "main.id",
 			ds.SchemaDBField:    schema.ID,
+			"is_close":          false,
 		}, false, "COUNT(*)"),
 	}, true)+")")
 
