@@ -215,10 +215,20 @@ func (d *SpecializedDomain) GetRowResults(
 					d.Params.Set(utils.RootOffset, "0")
 				}
 			}
-			res, err := d.Invoke(record, d.Method, args...)
+			var res utils.Results
+			var err error
+			meth := d.Method
+			tb := d.TableName
+			cp := d.Params.Copy()
+			if ok, rr := GetInCache(d.UserID, tb, meth, cp); ok {
+				res = rr
+			} else {
+				res, err = d.Invoke(record, d.Method, args...)
+			}
 			if err != nil {
 				return all_results, err
 			}
+			AddInCache(d.UserID, tb, meth, cp, res)
 			p, _ = d.Params.Get(utils.RootRawView)
 			if p != "enable" && err == nil && !d.IsSuperAdmin() && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
 				res = specializedService.TransformToGenericView(res, d.TableName, d.Params.GetAsArgs(utils.RootDestIDParam)...)

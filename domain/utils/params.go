@@ -19,6 +19,21 @@ func NewParams(vals map[string]string) Params {
 	}
 }
 
+func (p Params) Compare(pc Params) bool {
+	if len(p.Values) != len(pc.Values) {
+		return false
+	}
+	for k, v := range pc.Values {
+		if !p.Has(k) {
+			return false
+		}
+		if v != p.Values[k] {
+			return false
+		}
+	}
+	return true
+}
+
 func (p Params) GetLine() string {
 	l := []string{}
 	for k, v := range p.Values {

@@ -1,0 +1,130 @@
+package domain
+
+import (
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
+	"encoding/json"
+	"io"
+	"sqldb-ws/domain/utils"
+	"strings"
+)
+
+var params = []utils.Params{} // SHOULD add comparision. in params
+
+func addParams(p utils.Params) (int, utils.Params) {
+	if i := checkParamsAlreadyExists(p); i != -1 {
+		return i, params[i]
+	}
+	i := len(params)
+	params = append(params, p)
+	return i, p
+}
+
+func checkParamsAlreadyExists(p utils.Params) int {
+	for i, pp := range params {
+		if pp.Compare(p) {
+			return i
+		}
+	}
+	return -1
+}
+
+var cache = map[string]map[string]map[int]*string{} // userID -> tablename -> params index -> data
+
+func AddInCache(userID string, tableName string, method utils.Method, params utils.Params, res utils.Results) {
+	if method != utils.SELECT {
+		return
+	}
+	i, _ := addParams(params)
+	if cache[userID] == nil {
+		cache[userID] = map[string]map[int]*string{}
+	}
+	if cache[userID][tableName] == nil {
+		cache[userID][tableName] = map[int]*string{}
+	}
+	str, err := CompressMap(res)
+	if err == nil {
+		cache[userID][tableName][i] = &str
+	}
+
+}
+
+func deleteInCache(userID string, tableName string) {
+	if cache[userID] == nil {
+		return
+	}
+	if strings.Contains(tableName, "user") || strings.Contains(tableName, "role") || strings.Contains(tableName, "permission") || strings.Contains(tableName, "entity") {
+		cache = map[string]map[string]map[int]*string{}
+		return
+	}
+	if cache[userID][tableName] == nil {
+		return
+	}
+	delete(cache[userID], tableName)
+}
+
+func GetInCache(userID string, tableName string, method utils.Method, params utils.Params) (bool, utils.Results) {
+	if method != utils.SELECT {
+		deleteInCache(userID, tableName)
+		return false, utils.Results{}
+	}
+	if cache[userID] == nil || cache[userID][tableName] == nil {
+		return false, utils.Results{}
+	}
+	i, _ := addParams(params)
+	if cache[userID][tableName][i] == nil {
+		return false, utils.Results{}
+	}
+	dp, err := DecompressMap(*cache[userID][tableName][i])
+	if err != nil {
+		return false, utils.Results{}
+	}
+	return true, dp
+}
+
+func CompressMap(m utils.Results) (string, error) {
+	// 1. Convert map to JSON
+	jsonBytes, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
+
+	// 2. Compress with gzip
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	if _, err := gz.Write(jsonBytes); err != nil {
+		return "", err
+	}
+	gz.Close()
+
+	// 3. Encode to base64
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+// --- DECOMPRESS MAP ---
+func DecompressMap(encoded string) (utils.Results, error) {
+	// 1. Base64 decode
+	compressedData, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Gzip decompress
+	gr, err := gzip.NewReader(bytes.NewReader(compressedData))
+	if err != nil {
+		return nil, err
+	}
+	var out bytes.Buffer
+	if _, err := io.Copy(&out, gr); err != nil {
+		return nil, err
+	}
+	gr.Close()
+
+	// 3. Unmarshal JSON back to map
+	var m utils.Results
+	if err := json.Unmarshal(out.Bytes(), &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
