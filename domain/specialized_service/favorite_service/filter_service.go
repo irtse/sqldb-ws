@@ -259,7 +259,7 @@ func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []st
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
 		"name":               connector.Quote(name),
 		utils.SpecialIDParam: ids,
-	}, false); err != nil && len(res) > 0 {
+	}, false); err == nil && len(res) > 0 {
 		return s.RecursiveHandleEntityFilterNaming(label, ids, index+1, name)
 	}
 	if index > 1 {
