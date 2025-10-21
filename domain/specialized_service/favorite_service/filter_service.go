@@ -256,8 +256,12 @@ func (s *FilterService) HandleEntityFilterNaming(record map[string]interface{}, 
 }
 
 func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []string, index int, name string) string {
+	rName := name
+	if index > 1 {
+		rName += fmt.Sprintf("%s n°%d", label, index)
+	}
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
-		"name":               connector.Quote(name),
+		"name":               connector.Quote(rName),
 		utils.SpecialIDParam: ids,
 	}, false); err == nil && len(res) > 0 {
 		return s.RecursiveHandleEntityFilterNaming(label, ids, index+1, name)
