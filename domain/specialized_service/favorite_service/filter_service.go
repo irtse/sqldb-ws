@@ -210,6 +210,7 @@ func (s *FilterService) HandleCreate(record map[string]interface{}) {
 		name += "view "
 		record["is_view"] = true
 	}
+	record[ds.UserDBField] = s.Domain.GetUserID()
 	if schemaID := record[ds.SchemaDBField]; schemaID != nil {
 		schema, _ := schserv.GetSchemaByID(utils.ToInt64(schemaID))
 		if e, ok := record[ds.DBEntity.Name]; !ok && (e != nil && e != "") {
@@ -224,9 +225,8 @@ func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, sc
 	if s.Domain.GetAutoload() {
 		return name
 	}
-	record[ds.UserDBField] = s.Domain.GetUserID()
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
-		ds.UserDBField:   s.Domain.GetUserID(),
+		ds.UserDBField:   record[ds.UserDBField],
 		ds.SchemaDBField: schema.ID,
 	}, false); err == nil && len(res) > 0 {
 		ids := []string{}
