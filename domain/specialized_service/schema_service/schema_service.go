@@ -35,6 +35,30 @@ func (s *SchemaService) VerifyDataIntegrity(record map[string]interface{}, table
 	if fields, ok := record["fields"]; ok && fields != nil {
 		s.Fields = utils.ToList(fields)
 		delete(record, "fields")
+		if sch, err := schserv.GetSchema(utils.GetString(record, "name")); err == nil {
+			if s.Domain.GetMethod() == utils.CREATE {
+				for _, field := range s.Fields {
+					f := utils.ToMap(field)
+					f[ds.SchemaDBField] = sch.ID
+					field, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
+					if err != nil || len(field) == 0 {
+						continue
+					}
+					sch = sch.SetField(field[0])
+				}
+			} else if s.Domain.GetMethod() == utils.UPDATE {
+				for _, field := range s.Fields {
+					f := utils.ToMap(field)
+					f[ds.SchemaDBField] = sch.ID
+					if sch.HasField(utils.ToString(f[sm.NAMEKEY])) {
+						s.Domain.UpdateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
+					} else {
+						s.Domain.CreateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
+					}
+					sch = sch.SetField(f)
+				}
+			}
+		}
 	}
 	return s.SpecializedService.VerifyDataIntegrity(record, tablename)
 }
@@ -79,15 +103,6 @@ func (s *SchemaService) SpecializedCreateRow(record map[string]interface{}, tabl
 				s.Domain.CreateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), r)
 			}
 		}
-	}
-	for _, field := range s.Fields {
-		f := utils.ToMap(field)
-		f[ds.SchemaDBField] = schema.ID
-		field, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
-		if err != nil || len(field) == 0 {
-			continue
-		}
-		schema = schema.SetField(field[0])
 	}
 	if schema.Name != ds.DBDataAccess.Name {
 		if !slices.Contains([]string{ds.DBView.Name, ds.DBRequest.Name, ds.DBTask.Name,
@@ -172,26 +187,13 @@ func (s *SchemaService) SpecializedCreateRow(record map[string]interface{}, tabl
 }
 
 func (s *SchemaService) SpecializedUpdateRow(datas []map[string]interface{}, record map[string]interface{}) {
-	schema, err := schserv.GetSchema(utils.ToString(record[sm.NAMEKEY]))
+	_, err := schserv.GetSchema(utils.ToString(record[sm.NAMEKEY]))
 	if err != nil {
 		res, err := s.Domain.UpdateSuperCall(utils.GetTableTargetParameters(record[sm.NAMEKEY]).RootRaw(), record)
 		if err != nil || len(res) == 0 {
 			return
 		}
-		schema, err = schserv.SetSchema(res[0])
-		if err != nil {
-			return
-		}
-		for _, field := range s.Fields {
-			f := utils.ToMap(field)
-			f[ds.SchemaDBField] = schema.ID
-			if schema.HasField(utils.ToString(f[sm.NAMEKEY])) {
-				s.Domain.UpdateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
-			} else {
-				s.Domain.CreateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
-			}
-			schema = schema.SetField(f)
-		}
+		schserv.SetSchema(res[0])
 	}
 	UpdatePermissions(utils.Record{}, utils.ToString(record[sm.NAMEKEY]), []string{sm.LEVELOWN, sm.LEVELNORMAL}, s.Domain)
 	s.AbstractSpecializedService.SpecializedUpdateRow(datas, record)
