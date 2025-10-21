@@ -213,17 +213,16 @@ func (s *FilterService) HandleCreate(record map[string]interface{}) {
 	if schemaID := record[ds.SchemaDBField]; schemaID != nil {
 		schema, _ := schserv.GetSchemaByID(utils.ToInt64(schemaID))
 		if _, ok := record[ds.DBEntity.Name]; !ok {
-			s.HandleUserFilterNaming(record, schema, &name)
+			record[sm.NAMEKEY] = s.HandleUserFilterNaming(record, schema, name)
 		} else {
-			s.HandleEntityFilterNaming(record, schema, &name)
+			record[sm.NAMEKEY] = s.HandleEntityFilterNaming(record, schema, name)
 		}
 	}
-	record[sm.NAMEKEY] = name
 }
 
-func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, schema sm.SchemaModel, name *string) {
+func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, schema sm.SchemaModel, name string) string {
 	if s.Domain.GetAutoload() {
-		return
+		return name
 	}
 	record[ds.UserDBField] = s.Domain.GetUserID()
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
@@ -234,11 +233,13 @@ func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, sc
 		for _, r := range res {
 			ids = append(ids, fmt.Sprintf("%v", r[utils.SpecialIDParam]))
 		}
-		s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name)
+		fmt.Println("NAME", s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name))
+		return s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name)
 	}
+	return name
 }
 
-func (s *FilterService) HandleEntityFilterNaming(record map[string]interface{}, schema sm.SchemaModel, name *string) {
+func (s *FilterService) HandleEntityFilterNaming(record map[string]interface{}, schema sm.SchemaModel, name string) string {
 	s.Domain.GetDb().ClearQueryFilter()
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
 		ds.EntityDBField: utils.GetString(record, ds.EntityDBField),
@@ -248,18 +249,20 @@ func (s *FilterService) HandleEntityFilterNaming(record map[string]interface{}, 
 		for _, r := range res {
 			ids = append(ids, fmt.Sprintf("%v", r[utils.SpecialIDParam]))
 		}
-		s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name)
+		return s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name)
 	}
+	return name
 }
 
-func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []string, index int, name *string) {
+func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []string, index int, name string) string {
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
-		"name":               *name,
+		"name":               name,
 		utils.SpecialIDParam: ids,
 	}, false); err != nil && len(res) > 0 {
-		*name += fmt.Sprintf("%s n°%d", label, index)
-		s.RecursiveHandleEntityFilterNaming(label, ids, index+1, name)
+		name += fmt.Sprintf("%s n°%d", label, index)
+		return s.RecursiveHandleEntityFilterNaming(label, ids, index+1, name)
 	}
+	return name
 }
 
 func (s *FilterService) ProcessSelection(record map[string]interface{}) {
