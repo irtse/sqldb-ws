@@ -40,14 +40,14 @@ func NewPermDomainService(db *conn.Database, user string, isSuperAdmin bool, emp
 	}
 }
 
-var cachePerms = map[string]map[string]map[string]Perms{}
+var CachePerms = map[string]map[string]map[string]Perms{}
 
 func (p *PermDomainService) PermsBuilder(domain utils.DomainITF) {
 	if domain.GetUserID() == "" {
 		return
 	}
-	if cachePerms[domain.GetUserID()] != nil {
-		p.Perms = cachePerms[domain.GetUserID()]
+	if CachePerms[domain.GetUserID()] != nil {
+		p.Perms = CachePerms[domain.GetUserID()]
 		return
 	}
 	datas, _ := p.db.SelectQueryWithRestriction(ds.DBPermission.Name, []interface{}{
@@ -77,7 +77,7 @@ func (p *PermDomainService) PermsBuilder(domain utils.DomainITF) {
 	for _, record := range datas {
 		p.ProcessPermissionRecord(record)
 	}
-	cachePerms[domain.GetUserID()] = p.Perms
+	CachePerms[domain.GetUserID()] = p.Perms
 }
 
 func (p *PermDomainService) ProcessPermissionRecord(record map[string]interface{}) {

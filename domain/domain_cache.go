@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sqldb-ws/domain/domain_service/permission"
 	"sqldb-ws/domain/utils"
 	"strings"
 )
@@ -63,6 +64,7 @@ func deleteInCache(userID string, tableName string) {
 	}
 	if strings.Contains(tableName, "user") || strings.Contains(tableName, "role") || strings.Contains(tableName, "permission") || strings.Contains(tableName, "entity") {
 		cache = map[string]map[string]map[int]*string{}
+		delete(permission.CachePerms, userID)
 		return
 	}
 	if cache[userID][tableName] == nil {
