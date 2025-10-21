@@ -108,6 +108,11 @@ func GetResponse() {
 			time.Sleep(1 * time.Hour)
 			continue
 		}
+		if b["data"] == nil {
+			fmt.Println("Empty !")
+			time.Sleep(1 * time.Hour)
+			continue
+		}
 		datas := b["data"].(map[string]interface{})
 		go func() {
 			for code, data := range datas {

@@ -259,7 +259,7 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
 			now := time.Now().UTC()
 			rnow, _ := time.Parse("2006-01-02", now.Format("2006-01-02"))
-			return err == nil, time1, rnow
+			return err == nil, time1, rnow.UTC()
 		}
 		if strings.Contains(val2, "date") && record[val2] == nil {
 			if strings.Contains(operator, "<") {

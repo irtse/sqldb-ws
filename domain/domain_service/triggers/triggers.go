@@ -62,26 +62,33 @@ func (t *TriggerService) Trigger(fromSchema *sm.SchemaModel, record utils.Record
 	}
 	if res, err := t.GetTriggers("auto", method, fromSchema.ID); err == nil {
 		for _, r := range res {
-			typ := utils.GetString(r, "type")
-			switch typ {
-			case "mail":
-				t.triggerMail(record, fromSchema,
-					utils.GetInt(r, utils.SpecialIDParam),
-					utils.GetInt(record, ds.SchemaDBField),
-					utils.GetInt(record, ds.DestTableDBField))
-			case "sms":
-				break
-			case "teams notification":
-				break
-			case "data":
-				t.triggerData(record, fromSchema,
-					utils.GetInt(r, utils.SpecialIDParam),
-					utils.GetInt(record, ds.SchemaDBField),
-					utils.GetInt(record, ds.DestTableDBField))
+			if !ShouldExecLater(r) {
+				t.ExecTrigger(fromSchema, record, r)
+				ShouldExecJob(r)
 			}
 		}
 	}
 }
+func (t *TriggerService) ExecTrigger(fromSchema *sm.SchemaModel, record utils.Record, r map[string]interface{}) {
+	typ := utils.GetString(r, "type")
+	switch typ {
+	case "mail":
+		t.triggerMail(record, fromSchema,
+			utils.GetInt(r, utils.SpecialIDParam),
+			utils.GetInt(record, ds.SchemaDBField),
+			utils.GetInt(record, ds.DestTableDBField))
+	case "sms":
+		break
+	case "teams notification":
+		break
+	case "data":
+		t.triggerData(record, fromSchema,
+			utils.GetInt(r, utils.SpecialIDParam),
+			utils.GetInt(record, ds.SchemaDBField),
+			utils.GetInt(record, ds.DestTableDBField))
+	}
+}
+
 func (t *TriggerService) ParseMails(toSplit string) []map[string]interface{} {
 	splitted := ""
 	if len(strings.Split(toSplit, ";")) > 0 {

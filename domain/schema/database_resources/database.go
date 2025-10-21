@@ -201,6 +201,8 @@ var DBTrigger = models.SchemaModel{
 	Fields: []models.FieldModel{
 		{Name: models.NAMEKEY, Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: true, Index: 0},
 		{Name: "description", Type: models.TEXT.String(), Required: false, Readonly: true, Index: 0},
+		{Name: "job_duration", Type: models.INTEGER.String(), Readonly: false, Index: 1},
+		{Name: "job_start_date", Type: models.TIMESTAMP.String(), Readonly: false, Index: 1},
 		{Name: "type", Type: models.ENUMTRIGGER.String(), Required: true, Readonly: true, Index: 1},
 		{Name: "mode", Type: models.ENUMMODE.String(), Required: true, Readonly: true, Index: 1},
 		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template attached", Index: 3},
