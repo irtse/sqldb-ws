@@ -81,7 +81,7 @@ func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablena
 		}
 		record = SetClosureStatus(record) // check if task is already progressing
 		if rec, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
-			fmt.Println("VERIFY2")
+			fmt.Println("VERIFY2", record)
 			return s.AbstractSpecializedService.VerifyDataIntegrity(rec, tablename)
 		} else {
 			fmt.Println("VERIFY3")
