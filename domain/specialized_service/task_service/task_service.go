@@ -81,10 +81,8 @@ func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablena
 		}
 		record = SetClosureStatus(record) // check if task is already progressing
 		if rec, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
-			fmt.Println("VERIFY2", record)
 			return s.AbstractSpecializedService.VerifyDataIntegrity(rec, tablename)
 		} else {
-			fmt.Println("VERIFY3")
 			return record, err, false
 		}
 	}
@@ -100,7 +98,7 @@ func (s *TaskService) SpecializedDeleteRow(results []map[string]interface{}, tab
 }
 
 func (s *TaskService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
-	fmt.Println("UPDATE")
+	fmt.Println("UPDATE", record)
 	s.Write(results, record)
 	s.Redirect = true
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
