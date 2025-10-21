@@ -229,27 +229,36 @@ func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, sc
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
 		ds.UserDBField:   s.Domain.GetUserID(),
 		ds.SchemaDBField: schema.ID,
-	}, false); err == nil {
-		*name += fmt.Sprintf("%s filter n°%d", schema.Label, len(res)+1)
+	}, false); err == nil && len(res) > 0 {
+		ids := []string{}
+		for _, r := range res {
+			ids = append(ids, fmt.Sprintf("%v", r[utils.SpecialIDParam]))
+		}
+		s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name)
 	}
 }
 
 func (s *FilterService) HandleEntityFilterNaming(record map[string]interface{}, schema sm.SchemaModel, name *string) {
+	s.Domain.GetDb().ClearQueryFilter()
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
 		ds.EntityDBField: utils.GetString(record, ds.EntityDBField),
 		ds.SchemaDBField: schema.ID,
-	}, false); err == nil {
-		s.RecursiveHandleEntityFilterNaming(schema.Label, len(res)+1, name)
+	}, false); err == nil && len(res) > 0 {
+		ids := []string{}
+		for _, r := range res {
+			ids = append(ids, fmt.Sprintf("%v", r[utils.SpecialIDParam]))
+		}
+		s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name)
 	}
 }
 
-func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, index int, name *string) {
+func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []string, index int, name *string) {
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
-		"name": fmt.Sprintf("%s filter n°%d", label, index),
-	}, false); err == nil && len(res) == 0 {
-		*name += fmt.Sprintf("%s filter n°%d", label, index)
-	} else {
-		s.RecursiveHandleEntityFilterNaming(label, index+1, name)
+		"name":               *name,
+		utils.SpecialIDParam: ids,
+	}, false); err != nil && len(res) > 0 {
+		*name += fmt.Sprintf("%s n°%d", label, index)
+		s.RecursiveHandleEntityFilterNaming(label, ids, index+1, name)
 	}
 }
 

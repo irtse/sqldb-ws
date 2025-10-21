@@ -11,19 +11,25 @@ import (
 	"strings"
 )
 
-var params = []utils.Params{} // SHOULD add comparision. in params
+var params = map[string][]*utils.Params{} // SHOULD add comparision. in params
 
-func addParams(p utils.Params) (int, utils.Params) {
-	if i := checkParamsAlreadyExists(p); i != -1 {
-		return i, params[i]
+func addParams(tableName string, p utils.Params) (int, utils.Params) {
+	if i := checkParamsAlreadyExists(tableName, p); i != -1 {
+		return i, *params[tableName][i]
 	}
-	i := len(params)
-	params = append(params, p)
+	if params[tableName] == nil {
+		params[tableName] = []*utils.Params{}
+	}
+	i := len(params[tableName])
+	params[tableName] = append(params[tableName], &p)
 	return i, p
 }
 
-func checkParamsAlreadyExists(p utils.Params) int {
-	for i, pp := range params {
+func checkParamsAlreadyExists(tableName string, p utils.Params) int {
+	if params[tableName] == nil {
+		return -1
+	}
+	for i, pp := range params[tableName] {
 		if pp.Compare(p) {
 			return i
 		}
@@ -37,7 +43,7 @@ func AddInCache(userID string, tableName string, method utils.Method, params uti
 	if method != utils.SELECT {
 		return
 	}
-	i, _ := addParams(params)
+	i, _ := addParams(tableName, params)
 	if cache[userID] == nil {
 		cache[userID] = map[string]map[int]*string{}
 	}
@@ -73,7 +79,7 @@ func GetInCache(userID string, tableName string, method utils.Method, params uti
 	if cache[userID] == nil || cache[userID][tableName] == nil {
 		return false, utils.Results{}
 	}
-	i, _ := addParams(params)
+	i, _ := addParams(tableName, params)
 	if cache[userID][tableName][i] == nil {
 		return false, utils.Results{}
 	}

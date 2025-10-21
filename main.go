@@ -80,13 +80,13 @@ func VerifyData() {
 }
 
 func GetResponse() {
-	url := os.Getenv("RESPONSE_URL")
-	if url == "" {
+	host := os.Getenv("HOST")
+	if host == "" {
 		fmt.Println("No response URL to reach...")
 		return
 	}
 	for true {
-		resp, err := http.Get(url)
+		resp, err := http.Get(fmt.Sprintf("%s/v1/response", host))
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
@@ -100,6 +100,11 @@ func GetResponse() {
 		}
 		var b map[string]interface{}
 		json.Unmarshal(body, &b)
+		if b["error"] != nil {
+			fmt.Println(b["error"])
+			time.Sleep(1 * time.Hour)
+			continue
+		}
 		datas := b["data"].(map[string]interface{})
 		go func() {
 			for code, data := range datas {
