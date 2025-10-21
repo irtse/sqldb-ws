@@ -213,7 +213,7 @@ func (s *FilterService) HandleCreate(record map[string]interface{}) {
 	record[ds.UserDBField] = s.Domain.GetUserID()
 	if schemaID := record[ds.SchemaDBField]; schemaID != nil {
 		schema, _ := schserv.GetSchemaByID(utils.ToInt64(schemaID))
-		if e, ok := record[ds.DBEntity.Name]; !ok && (e != nil && e != "") {
+		if e, ok := record[ds.DBEntity.Name]; !ok || (e != nil && e != "") {
 			record[sm.NAMEKEY] = s.HandleUserFilterNaming(record, schema, name)
 		} else {
 			record[sm.NAMEKEY] = s.HandleEntityFilterNaming(record, schema, name)
@@ -225,6 +225,7 @@ func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, sc
 	if s.Domain.GetAutoload() {
 		return name
 	}
+	fmt.Println("NAME TO FOUND", record[ds.UserDBField], schema.ID)
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
 		ds.UserDBField:   record[ds.UserDBField],
 		ds.SchemaDBField: schema.ID,
