@@ -258,7 +258,7 @@ func (s *FilterService) HandleEntityFilterNaming(record map[string]interface{}, 
 func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []string, index int, name string) string {
 	rName := name
 	if index > 1 {
-		rName += fmt.Sprintf("%s n°%d", label, index)
+		rName += fmt.Sprintf(" n°%d", index)
 	}
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
 		"name":               connector.Quote(rName),
@@ -267,7 +267,7 @@ func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []st
 		return s.RecursiveHandleEntityFilterNaming(label, ids, index+1, name)
 	}
 	if index > 1 {
-		name += fmt.Sprintf("%s n°%d", label, index)
+		name += fmt.Sprintf(" n°%d", index)
 	}
 	return name
 }
