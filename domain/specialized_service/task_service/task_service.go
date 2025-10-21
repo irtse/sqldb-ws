@@ -2,6 +2,7 @@ package task_service
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -63,6 +64,7 @@ func (s *TaskService) SpecializedCreateRow(record map[string]interface{}, tableN
 func (s *TaskService) Entity() utils.SpecializedServiceInfo { return ds.DBTask }
 
 func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
+	fmt.Println("VERIFY")
 	switch s.Domain.GetMethod() {
 	case utils.CREATE:
 		record[ds.DBUser.Name] = s.Domain.GetUserID()
@@ -79,8 +81,10 @@ func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablena
 		}
 		record = SetClosureStatus(record) // check if task is already progressing
 		if rec, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
+			fmt.Println("VERIFY2")
 			return s.AbstractSpecializedService.VerifyDataIntegrity(rec, tablename)
 		} else {
+			fmt.Println("VERIFY3")
 			return record, err, false
 		}
 	}
@@ -96,6 +100,7 @@ func (s *TaskService) SpecializedDeleteRow(results []map[string]interface{}, tab
 }
 
 func (s *TaskService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
+	fmt.Println("UPDATE")
 	s.Write(results, record)
 	s.Redirect = true
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)

@@ -18,7 +18,6 @@ import (
 var namespaceV1 = map[string]beego.ControllerInterface{
 	"main":            &controllers.MainController{},
 	"auth":            &controllers.AuthController{},
-	"response":        &controllers.ExternalResponseController{},
 	utils.MAIN_PREFIX: &controllers.GenericController{},
 }
 
