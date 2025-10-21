@@ -56,11 +56,17 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 	if s.Domain.VerifyAuth(schema.Name, "", "", utils.DELETE) {
 		perms = 1
 	}
+	subrestr := []string{}
+	if schema.Name == ds.DBTask.Name {
+		subrestr := append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+			"!is_close": true,
+		}, true)+")")
+		return subrestr
+	}
 	k := "delete_access"
 	if isUpdate {
 		k = "update_access"
 	}
-	subrestr := []string{}
 	subrestr = append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"!0": perms,
 		"!0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
