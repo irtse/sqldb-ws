@@ -212,7 +212,7 @@ func (s *FilterService) HandleCreate(record map[string]interface{}) {
 	}
 	if schemaID := record[ds.SchemaDBField]; schemaID != nil {
 		schema, _ := schserv.GetSchemaByID(utils.ToInt64(schemaID))
-		if _, ok := record[ds.DBEntity.Name]; !ok {
+		if e, ok := record[ds.DBEntity.Name]; !ok && (e != nil && e != "") {
 			record[sm.NAMEKEY] = s.HandleUserFilterNaming(record, schema, name)
 		} else {
 			record[sm.NAMEKEY] = s.HandleEntityFilterNaming(record, schema, name)
