@@ -117,34 +117,32 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 	}
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
 	for _, rec := range results {
-		p := utils.AllParams(ds.DBNotification.Name)
-		p.Set(ds.UserDBField, utils.ToString(rec[ds.UserDBField]))
-		p.Set(ds.DestTableDBField, utils.ToString(rec[utils.SpecialIDParam]))
+		m := map[string]interface{}{
+			ds.UserDBField:      utils.ToString(rec[ds.UserDBField]),
+			ds.DestTableDBField: utils.ToString(rec[utils.SpecialIDParam]),
+		}
 		switch rec["state"] {
 		case "dismiss":
 		case "refused":
 			rec["state"] = "refused"
-			p.Set(sm.NAMEKEY, "Rejected "+utils.GetString(rec, sm.NAMEKEY))
-			p.Set("description", utils.GetString(rec, sm.NAMEKEY)+" is rejected and closed.")
+			m[sm.NAMEKEY] = "Rejected " + utils.GetString(rec, sm.NAMEKEY)
+			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is rejected and closed."
 		case "completed":
-			p.Set(sm.NAMEKEY, "Validated "+utils.GetString(rec, sm.NAMEKEY))
-			p.Set("description", utils.GetString(rec, sm.NAMEKEY)+" is accepted and closed.")
+			m[sm.NAMEKEY] = "Validated " + utils.GetString(rec, sm.NAMEKEY)
+			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is accepted and closed."
 		}
 		schema, err := schserv.GetSchema(ds.DBRequest.Name)
 		if err == nil && !utils.Compare(rec["is_meta"], true) && CheckStateIsEnded(rec["state"]) {
-			if t, err := s.Domain.SuperCall(p.RootRaw(), utils.Record{}, utils.SELECT, false); err == nil && len(t) > 0 {
+			if t, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBNotification.Name, m, false); err == nil && len(t) > 0 {
 				return
 			}
-			p.SimpleDelete(utils.RootTableParam)
-			p.SimpleDelete(utils.RootRowsParam)
-			rec := p.Anonymized()
-			rec["link_id"] = schema.ID
+			m["link_id"] = schema.ID
 			s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBNotification.Name, rec, func(s string) (string, bool) { return s, true })
 		}
 		if utils.Compare(rec["is_close"], true) {
-			p := utils.AllParams(ds.DBTask.Name)
-			p.Set("meta_"+ds.RequestDBField, utils.ToString(rec[utils.SpecialIDParam]))
-			res, err := s.Domain.SuperCall(p.RootRaw(), utils.Record{}, utils.SELECT, false)
+			res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				"meta_" + ds.RequestDBField: utils.ToString(rec[utils.SpecialIDParam]),
+			}, false)
 			if err == nil && len(res) > 0 {
 				for _, task := range res {
 					task := SetClosureStatus(task)
