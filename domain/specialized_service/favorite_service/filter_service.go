@@ -259,8 +259,10 @@ func (s *FilterService) RecursiveHandleEntityFilterNaming(label string, ids []st
 		"name":               name,
 		utils.SpecialIDParam: ids,
 	}, false); err != nil && len(res) > 0 {
-		name += fmt.Sprintf("%s n°%d", label, index)
 		return s.RecursiveHandleEntityFilterNaming(label, ids, index+1, name)
+	}
+	if index > 1 {
+		name += fmt.Sprintf("%s n°%d", label, index)
 	}
 	return name
 }
