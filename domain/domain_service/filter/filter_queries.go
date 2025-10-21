@@ -59,8 +59,9 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 	subrestr := []string{}
 	if schema.Name == ds.DBTask.Name {
 		subrestr := append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
-			"!is_close": true,
-		}, true)+")")
+			"!is_close":    true,
+			ds.UserDBField: s.Domain.GetUserID(),
+		}, false)+")")
 		return subrestr
 	}
 	k := "delete_access"
