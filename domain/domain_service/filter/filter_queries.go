@@ -111,6 +111,10 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 		return restr
 	}
 	subRestr := s.getFilterReadonly(schema, true)
+	if schema.Name == ds.DBTask.Name {
+		restr = append(restr, "("+strings.Join(subRestr, " OR ")+")")
+		return restr
+	}
 	subRestr = append(subRestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"!0": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 			utils.SpecialIDParam: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
