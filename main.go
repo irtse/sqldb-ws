@@ -96,6 +96,7 @@ func GetResponse() {
 		// Read response body
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
+			time.Sleep(1 * time.Hour)
 			continue
 		}
 		var b map[string]interface{}
