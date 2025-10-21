@@ -62,7 +62,8 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 			"!is_close": true,
 		}, false)+")")
 		subrestr = append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
-			ds.UserDBField: s.Domain.GetUserID(),
+			"binded_dbtask": "main.id",
+			ds.UserDBField:  s.Domain.GetUserID(),
 			ds.UserDBField + "_1": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
 				ds.UserDBField: s.Domain.GetUserID(),
 			}, false, "delegated_"+ds.UserDBField),
