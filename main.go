@@ -89,6 +89,7 @@ func GetResponse() {
 		resp, err := http.Get(fmt.Sprintf("%s/v1/response", host))
 		if err != nil {
 			fmt.Println("Error:", err)
+			time.Sleep(1 * time.Hour)
 			continue
 		}
 		defer resp.Body.Close() // always close the response body
@@ -96,6 +97,7 @@ func GetResponse() {
 		// Read response body
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
+			fmt.Println("Error:", err)
 			time.Sleep(1 * time.Hour)
 			continue
 		}
