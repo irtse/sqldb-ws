@@ -57,10 +57,8 @@ func Load(domainInstance utils.DomainITF) {
 
 func InitializeTables(domainInstance utils.DomainITF, bar *progressbar.ProgressBar) {
 	for _, table := range ds.NOAUTOLOADROOTTABLES {
-		if _, err := GetSchema(table.Name); err != nil {
-			bar.AddDetail("Creating table " + table.Name)
-			domainInstance.CreateSuperCall(utils.GetTableTargetParameters(table.Name).RootRaw(), table.ToSchemaRecord())
-		}
+		bar.AddDetail("Creating table " + table.Name)
+		domainInstance.CreateSuperCall(utils.GetTableTargetParameters(table.Name).RootRaw(), table.ToSchemaRecord())
 		bar.Add(1)
 	}
 }

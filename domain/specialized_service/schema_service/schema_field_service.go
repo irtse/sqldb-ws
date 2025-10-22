@@ -30,6 +30,11 @@ func (s *SchemaFields) VerifyDataIntegrity(record map[string]interface{}, tablen
 		}
 		return record, fmt.Errorf("cannot delete root schema field"), false
 	}
+	if s, err := sch.GetSchemaByID(utils.GetInt(record, ds.SchemaDBField)); err == nil {
+		if _, err := s.GetFieldByID(utils.GetInt(record, utils.SpecialIDParam)); err == nil {
+			return record, errors.New("already exists"), false
+		}
+	}
 	utils.Add(record, sm.TYPEKEY, record[sm.TYPEKEY],
 		func(i interface{}) bool { return i != nil && i != "" },
 		func(i interface{}) interface{} { return utils.PrepareEnum(utils.ToString(i)) })

@@ -1,6 +1,7 @@
 package schema_service
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"slices"
@@ -58,6 +59,7 @@ func (s *SchemaService) VerifyDataIntegrity(record map[string]interface{}, table
 					sch = sch.SetField(f)
 				}
 			}
+			return record, errors.New("already created"), false
 		}
 	}
 	return s.SpecializedService.VerifyDataIntegrity(record, tablename)
