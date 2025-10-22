@@ -133,7 +133,7 @@ func DataTypeList() []string {
 	}
 }
 
-func CompareList(operator string, typ string, val string, val2 []string, record utils.Record) (bool, error) {
+func CompareList(operator string, typ string, val string, val2 []string, record utils.Record, meth utils.Method) (bool, error) {
 	if len(val2) == 1 {
 		v := val2[0]
 		if record[v] != nil {
@@ -166,7 +166,7 @@ func CompareList(operator string, typ string, val string, val2 []string, record 
 	}
 }
 
-func Compare(operator string, typ string, val string, val2 string, record utils.Record) (bool, error) {
+func Compare(operator string, typ string, val string, val2 string, record utils.Record, meth utils.Method) (bool, error) {
 	if record[val2] != nil {
 		val2 = fmt.Sprintf("%v", record[val2])
 	}
@@ -253,11 +253,15 @@ func parseDate(input string) (time.Time, error) {
 	return time.Time{}, fmt.Errorf("unknown date format: %s", input)
 }
 
-func IsDateComparable(typ string, val string, val2 string, record utils.Record, operator string) (bool, time.Time, time.Time) {
+func IsDateComparable(typ string, val string, val2 string, record utils.Record, operator string, meth utils.Method) (bool, time.Time, time.Time) {
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := parseDate(val)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
+
 			now := time.Now().UTC()
+			if meth == utils.UPDATE {
+				now = now.Add(time.Duration(-175200) * time.Hour)
+			}
 			rnow, _ := time.Parse("2006-01-02", now.Format("2006-01-02"))
 			return err == nil, time1, rnow.UTC()
 		}

@@ -117,7 +117,7 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 		}, false, "COUNT(*)"),
 	}, true)+")")
 
-	subrestr = append(subrestr, "("+strings.Join(subSubRestr, " AND ")+")")
+	subrestr = append(subrestr, "("+strings.Join(subSubRestr, " OR ")+")")
 	return subrestr
 }
 
