@@ -67,33 +67,31 @@ func InitializeRootTables(domainInstance utils.DomainITF, demoTable []sm.SchemaM
 	var wfNew, viewNew bool
 	rootTables := append(ds.ROOTTABLES, demoTable...)
 	for _, table := range rootTables {
-		if _, err := GetSchema(table.Name); err != nil {
-			bar.AddDetail("Creating Schema " + table.Name)
-			r := table.ToRecord()
-			for _, field := range table.Fields {
+		bar.AddDetail("Creating Schema " + table.Name)
+		r := table.ToRecord()
+		for _, field := range table.Fields {
+			for _, f := range utils.ToList(r["fields"]) {
+				if utils.ToString(utils.ToMap(f)["name"]) == field.Name {
+					utils.ToMap(f)["foreign_table"] = field.ForeignTable
+				}
+			}
+			if schema, err := GetSchema(field.ForeignTable); err == nil {
 				for _, f := range utils.ToList(r["fields"]) {
 					if utils.ToString(utils.ToMap(f)["name"]) == field.Name {
-						utils.ToMap(f)["foreign_table"] = field.ForeignTable
-					}
-				}
-				if schema, err := GetSchema(field.ForeignTable); err == nil {
-					for _, f := range utils.ToList(r["fields"]) {
-						if utils.ToString(utils.ToMap(f)["name"]) == field.Name {
-							utils.ToMap(f)["link_id"] = schema.ID
-						}
+						utils.ToMap(f)["link_id"] = schema.ID
 					}
 				}
 			}
-			if CreateRootTable(domainInstance, r) {
-				wfNew = table.Name == ds.DBWorkflow.Name
-				viewNew = table.Name == ds.DBView.Name
-				if schema, err := GetSchema(table.Name); err == nil {
-					if wfNew {
-						CreateWorkflowView(domainInstance, schema, bar)
-					}
-					if viewNew {
-						CreateView(domainInstance, schema, bar)
-					}
+		}
+		if CreateRootTable(domainInstance, r) {
+			wfNew = table.Name == ds.DBWorkflow.Name
+			viewNew = table.Name == ds.DBView.Name
+			if schema, err := GetSchema(table.Name); err == nil {
+				if wfNew {
+					CreateWorkflowView(domainInstance, schema, bar)
+				}
+				if viewNew {
+					CreateView(domainInstance, schema, bar)
 				}
 			}
 		}
