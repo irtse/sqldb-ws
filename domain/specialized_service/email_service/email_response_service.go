@@ -125,7 +125,10 @@ func (s *EmailResponseService) SpecializedCreateRow(record map[string]interface{
 						if emailUser, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSendedUser.Name, map[string]interface{}{
 							ds.EmailSendedDBField: r[utils.SpecialIDParam],
 						}, false); err == nil && len(emailUser) > 0 {
-							dest["comment"] = utils.GetString(record, "comment")
+							if utils.GetString(record, "comment") != "" {
+								dest["comment"] = utils.GetString(record, "comment")
+							}
+
 							dest["from_email"] = utils.GetString(emailUser[0], "name")
 							rec, err := connector.ForgeMail(usr[0], usr[0],
 								utils.GetString(tmp, "subject"), utils.GetString(tmp, "template"),
