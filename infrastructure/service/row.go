@@ -106,7 +106,7 @@ func (t *TableRowService) Update(record map[string]interface{}, restriction ...s
 	}
 	t.EmptyCol.Name = t.Name
 	if query, err := t.DB.BuildUpdateRowQuery(t.Table.Name, record, t.EmptyCol.Verify); err == nil {
-		if strings.Contains(t.Name, "task") {
+		if strings.Contains(t.Name, "request") {
 			debug.PrintStack()
 			fmt.Println(query)
 		}
