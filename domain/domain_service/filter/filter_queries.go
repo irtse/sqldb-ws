@@ -570,7 +570,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 							for _, r := range res {
 								arr = append(arr, utils.GetString(r, k))
 							}
-							a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record)
+							a, err := sm.CompareList(op, typ, fmt.Sprintf("%v", record[k]), arr, record, t.Domain.GetMethod())
 							for _, a := range arr {
 								values = append(values, fmt.Sprintf("%v", a))
 							}
@@ -586,7 +586,7 @@ func (t *FilterService) GetFieldVerify(key string, operator string, fromSchema *
 						}
 						values = append(values, mmmm)
 					} else {
-						if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmmm, record); (err != nil || !ok) && !avoidVerif {
+						if ok, err := sm.Compare(op, typ, fmt.Sprintf("%v", record[k]), mmmm, record, t.Domain.GetMethod()); (err != nil || !ok) && !avoidVerif {
 							return false, []string{}, errors.New("can't validate this field assignment based on rules <" + k + "> " + mmmm + " " + fmt.Sprintf("%v", record[k]))
 						} else {
 							values = append(values, mmmm)

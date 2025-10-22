@@ -139,7 +139,7 @@ func CompareList(operator string, typ string, val string, val2 []string, record 
 		if record[v] != nil {
 			v = fmt.Sprintf("%v", record[fmt.Sprintf("%v", v)])
 		}
-		return Compare(operator, typ, val, v, record)
+		return Compare(operator, typ, val, v, record, meth)
 	} else {
 		found := false
 		if strings.ToUpper(typ) != "IN" {
@@ -150,7 +150,7 @@ func CompareList(operator string, typ string, val string, val2 []string, record 
 			if record[vv] != nil {
 				vv = fmt.Sprintf("%v", record[fmt.Sprintf("%v", vv)])
 			}
-			ok, _ := Compare(operator, typ, val, vv, record)
+			ok, _ := Compare(operator, typ, val, vv, record, meth)
 			if strings.ToUpper(typ) == "IN" && ok {
 				found = true
 			} else if strings.ToUpper(typ) == "NOT IN" && ok {
@@ -170,7 +170,7 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 	if record[val2] != nil {
 		val2 = fmt.Sprintf("%v", record[val2])
 	}
-	if ok, a, b := IsDateComparable(typ, val, val2, record, operator); ok {
+	if ok, a, b := IsDateComparable(typ, val, val2, record, operator, meth); ok {
 		switch operator {
 		case ">":
 			return a.After(b), nil
