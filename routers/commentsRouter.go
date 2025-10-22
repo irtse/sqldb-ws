@@ -34,15 +34,6 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["sqldb-ws/controllers:ExternalResponseController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:ExternalResponseController"],
-        beego.ControllerComments{
-            Method: "Post",
-            Router: `/:code`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
     beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"],
         beego.ControllerComments{
             Method: "Post",

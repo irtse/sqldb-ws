@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"plugin"
 	domain "sqldb-ws/domain"
@@ -121,7 +122,10 @@ func GetResponse() {
 					m[strings.ReplaceAll(code, "_str", "")] = map[string]interface{}{}
 				}
 				if strings.Contains(code, "_str") {
-					m[strings.ReplaceAll(code, "_str", "")]["comment"] = data
+					decoded, err := url.QueryUnescape(fmt.Sprintf("%v", data))
+					if err == nil {
+						m[strings.ReplaceAll(code, "_str", "")]["comment"] = decoded
+					}
 				} else {
 					m[strings.ReplaceAll(code, "_str", "")]["got_response"] = data
 				}
