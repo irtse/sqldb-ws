@@ -114,6 +114,24 @@ func (l *AuthController) Refresh() {
 	l.Response(response, err, "", "")
 }
 
+// @Title Get Maintenance
+// @Description Server Maintenance
+// @Success 200 {string} success !
+// @Failure 403 user does not exist
+// @Failure 402 user already connected
+// @router /maintenance [get]
+func (l *AuthController) GetMaintenance() {
+	_, superAdmin, err := l.IsAuthorized() // check if already connected
+	if err != nil {
+		l.Response(nil, err, "", "")
+	}
+	if superAdmin {
+		l.Response(utils.Results{utils.Record{"is_maintenance": domain.IsMaintenance}}, nil, "", "")
+		return
+	}
+	l.Response(utils.Results{}, errors.New("not allowed to get maintenance mode of the service"), "", "")
+}
+
 // @Title Maintenance
 // @Description Server Maintenance
 // @Param	body		body 	Credential	true		"Credentials"

@@ -36,6 +36,15 @@ func init() {
 
     beego.GlobalControllerRouter["sqldb-ws/controllers:AuthController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:AuthController"],
         beego.ControllerComments{
+            Method: "GetMaintenance",
+            Router: `/maintenance`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["sqldb-ws/controllers:AuthController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:AuthController"],
+        beego.ControllerComments{
             Method: "Maintenance",
             Router: `/maintenance`,
             AllowHTTPMethods: []string{"post"},

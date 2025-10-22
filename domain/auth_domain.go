@@ -14,7 +14,7 @@ import (
 var IsMaintenance = false
 
 func SetToken(superAdmin bool, user string, token interface{}) (utils.Results, error) {
-	if IsMaintenance {
+	if IsMaintenance && !superAdmin {
 		return utils.Results{}, errors.New("actually in maintenance... can't proceed")
 	}
 	return Domain(superAdmin, user, nil).Call( // replace token by a nil
@@ -22,7 +22,7 @@ func SetToken(superAdmin bool, user string, token interface{}) (utils.Results, e
 }
 
 func IsLogged(superAdmin bool, user string, token string) (utils.Results, error) {
-	if IsMaintenance {
+	if IsMaintenance && !superAdmin {
 		return utils.Results{}, errors.New("actually in maintenance... can't proceed")
 	}
 	domain := Domain(superAdmin, user, nil)
