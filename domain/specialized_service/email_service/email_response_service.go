@@ -126,7 +126,7 @@ func (s *EmailResponseService) SpecializedCreateRow(record map[string]interface{
 							ds.EmailSendedDBField: r[utils.SpecialIDParam],
 						}, false); err == nil && len(emailUser) > 0 {
 							if utils.GetString(record, "comment") != "" {
-								dest["comment"] = utils.GetString(record, "comment")
+								dest["comment"] = "`" + utils.GetString(record, "comment") + "`"
 							}
 
 							dest["from_email"] = utils.GetString(emailUser[0], "name")

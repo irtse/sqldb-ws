@@ -124,7 +124,7 @@ func GetResponse() {
 				if strings.Contains(code, "_str") {
 					decoded, err := url.QueryUnescape(fmt.Sprintf("%v", data))
 					if err == nil {
-						m[strings.ReplaceAll(code, "_str", "")]["comment"] = decoded
+						m[strings.ReplaceAll(code, "_str", "")]["comment"] = strings.ReplaceAll(decoded, "''", "'")
 					}
 				} else {
 					m[strings.ReplaceAll(code, "_str", "")]["got_response"] = data
