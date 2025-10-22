@@ -38,10 +38,12 @@ func (s *SchemaService) VerifyDataIntegrity(record map[string]interface{}, table
 		delete(record, "fields")
 		if sch, err := schserv.GetSchema(utils.GetString(record, "name")); err == nil {
 			if s.Domain.GetMethod() == utils.CREATE {
-				fmt.Println(s.Fields...)
-
 				for _, field := range s.Fields {
+
 					f := utils.ToMap(field)
+					if _, err := sch.GetField(utils.GetString(f, "name")); err == nil {
+						continue
+					}
 					f[ds.SchemaDBField] = sch.ID
 					field, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
 					if err != nil || len(field) == 0 {
