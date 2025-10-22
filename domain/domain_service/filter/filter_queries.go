@@ -57,7 +57,21 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 		perms = 1
 	}
 	subrestr := []string{}
-	if schema.Name == ds.DBTask.Name {
+	if schema.Name == ds.DBRequest.Name {
+		subrestr := append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+			"!is_close": true,
+			utils.SpecialIDParam: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				ds.UserDBField: s.Domain.GetUserID(),
+				ds.UserDBField + "_1": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+					ds.UserDBField: s.Domain.GetUserID(),
+				}, false, "delegated_"+ds.UserDBField),
+				ds.UserDBField + "_2": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+					"delegated_" + ds.UserDBField: s.Domain.GetUserID(),
+				}, false, ds.UserDBField),
+			}, true, ds.RequestDBField),
+		}, false)+")")
+		return subrestr
+	} else if schema.Name == ds.DBTask.Name {
 		subrestr := append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!is_close": true,
 		}, false)+")")
@@ -119,7 +133,7 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 		return restr
 	}
 	subRestr := s.getFilterReadonly(schema, true)
-	if schema.Name == ds.DBTask.Name {
+	if schema.Name == ds.DBTask.Name || schema.Name == ds.DBRequest.Name {
 		restr = append(restr, "("+strings.Join(subRestr, " OR ")+")")
 		return restr
 	}
