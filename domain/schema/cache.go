@@ -214,7 +214,7 @@ func ValidateBySchema(data utils.Record, tableName string, method utils.Method, 
 				}
 			}
 		}
-		if field.Readonly && method == utils.UPDATE {
+		if field.Readonly && method == utils.UPDATE && !domain.IsSuperAdmin() {
 			continue
 		}
 		if v, ok := data[field.Name]; ok {
