@@ -1,7 +1,6 @@
 package history
 
 import (
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -21,7 +20,6 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 				"binded_dbtask": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name,
 					map[string]interface{}{ds.UserDBField: id}, false, utils.SpecialIDParam),
 			}, true); err == nil {
-				fmt.Println("CREATE DELEGATED HISTORY", res)
 				for _, r := range res {
 					if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
 						ds.DBDataAccess.Name, map[string]interface{}{
@@ -31,7 +29,6 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 							ds.SchemaDBField:    schemaID,
 							ds.UserDBField:      id,
 						}, false); err == nil && len(res) == 0 {
-						fmt.Println("REAL CREATE DELEGATED HISTORY", res)
 						domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
 							utils.Record{
 								"write":             domain.GetMethod() == utils.CREATE,

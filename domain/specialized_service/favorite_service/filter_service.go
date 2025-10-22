@@ -225,7 +225,6 @@ func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, sc
 	if s.Domain.GetAutoload() {
 		return name
 	}
-	fmt.Println("NAME TO FOUND", record[ds.UserDBField], schema.ID)
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name, map[string]interface{}{
 		ds.UserDBField:   record[ds.UserDBField],
 		ds.SchemaDBField: schema.ID,
@@ -234,7 +233,6 @@ func (s *FilterService) HandleUserFilterNaming(record map[string]interface{}, sc
 		for _, r := range res {
 			ids = append(ids, fmt.Sprintf("%v", r[utils.SpecialIDParam]))
 		}
-		fmt.Println("NAME", s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name))
 		return s.RecursiveHandleEntityFilterNaming(schema.Label, ids, 1, name)
 	}
 	return name

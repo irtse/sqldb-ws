@@ -2,7 +2,6 @@ package task_service
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -64,7 +63,6 @@ func (s *TaskService) SpecializedCreateRow(record map[string]interface{}, tableN
 func (s *TaskService) Entity() utils.SpecializedServiceInfo { return ds.DBTask }
 
 func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
-	fmt.Println("VERIFY")
 	switch s.Domain.GetMethod() {
 	case utils.CREATE:
 		record[ds.DBUser.Name] = s.Domain.GetUserID()
