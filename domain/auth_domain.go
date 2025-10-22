@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -14,17 +13,11 @@ import (
 var IsMaintenance = false
 
 func SetToken(superAdmin bool, user string, token interface{}) (utils.Results, error) {
-	if IsMaintenance && !superAdmin {
-		return utils.Results{}, errors.New("actually in maintenance... can't proceed")
-	}
 	return Domain(superAdmin, user, nil).Call( // replace token by a nil
 		utils.AllParams(ds.DBUser.Name).RootRaw(), utils.Record{"token": token}, utils.UPDATE, GetQueryFilter(user))
 }
 
 func IsLogged(superAdmin bool, user string, token string) (utils.Results, error) {
-	if IsMaintenance && !superAdmin {
-		return utils.Results{}, errors.New("actually in maintenance... can't proceed")
-	}
 	domain := Domain(superAdmin, user, nil)
 
 	response, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
