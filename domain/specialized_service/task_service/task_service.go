@@ -109,9 +109,13 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if !CheckStateIsEnded(res["state"]) {
 			continue
 		}
-		s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
-			ds.DestTableDBField: res[utils.SpecialIDParam],
-		}, false)
+		if sch, err := schema.GetSchema(ds.DBTask.Name); err == nil {
+			s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
+				ds.DestTableDBField: res[utils.SpecialIDParam],
+				ds.SchemaDBField:    sch.ID,
+			}, false)
+		}
+
 		requests, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 			utils.SpecialIDParam: utils.GetInt(res, RequestDBField),
 		}, false)

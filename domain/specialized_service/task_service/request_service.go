@@ -125,10 +125,10 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 		case "dismiss":
 		case "refused":
 			rec["state"] = "refused"
-			m[sm.NAMEKEY] = "Rejected " + utils.GetString(rec, sm.NAMEKEY)
+			m[sm.NAMEKEY] = connector.Quote("Rejected " + utils.GetString(rec, sm.NAMEKEY))
 			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is rejected and closed."
 		case "completed":
-			m[sm.NAMEKEY] = "Validated " + utils.GetString(rec, sm.NAMEKEY)
+			m[sm.NAMEKEY] = connector.Quote("Validated " + utils.GetString(rec, sm.NAMEKEY))
 			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is accepted and closed."
 		}
 		schema, err := schserv.GetSchema(ds.DBRequest.Name)
