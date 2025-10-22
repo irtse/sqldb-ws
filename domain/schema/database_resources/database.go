@@ -680,13 +680,13 @@ var DBDelegation = models.SchemaModel{
 	Category: "users",
 	CanOwned: true,
 	Fields: []models.FieldModel{
-		{Name: "delegated_" + RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: true, Index: 0, Label: "delegated to user"},
+		{Name: "delegated_" + RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Readonly: true, Required: true, Index: 0, Label: "delegated to user"},
 		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Index: 1,
 			Level: models.LEVELADMIN, Label: "user with hierarchy"},
-		{Name: models.STARTKEY, Type: models.TIMESTAMP.String(), Required: false, Default: "CURRENT_TIMESTAMP", Index: 2},
-		{Name: models.ENDKEY, Type: models.TIMESTAMP.String(), Required: false, Index: 3},
-		{Name: RootID(DBTask.Name), Type: models.INTEGER.String(), ForeignTable: DBTask.Name, Required: false, Index: 4, Label: "task delegated"},
-		{Name: "all_tasks", Type: models.BOOLEAN.String(), Required: false, Index: 5, Label: "all tasks"},
+		{Name: models.STARTKEY, Type: models.TIMESTAMP.String(), Required: false, Readonly: true, Default: "CURRENT_TIMESTAMP", Index: 2},
+		{Name: models.ENDKEY, Type: models.TIMESTAMP.String(), Readonly: true, Required: false, Index: 3},
+		{Name: RootID(DBTask.Name), Type: models.INTEGER.String(), ForeignTable: DBTask.Name, Readonly: true, Required: false, Index: 4, Label: "task delegated"},
+		{Name: "all_tasks", Type: models.BOOLEAN.String(), Readonly: true, Required: false, Index: 5, Label: "all tasks"},
 	},
 }
 

@@ -39,7 +39,6 @@ func (s *SchemaService) VerifyDataIntegrity(record map[string]interface{}, table
 		if sch, err := schserv.GetSchema(utils.GetString(record, "name")); err == nil {
 			if s.Domain.GetMethod() == utils.CREATE {
 				for _, field := range s.Fields {
-
 					f := utils.ToMap(field)
 					if _, err := sch.GetField(utils.GetString(f, "name")); err == nil {
 						continue
@@ -50,17 +49,6 @@ func (s *SchemaService) VerifyDataIntegrity(record map[string]interface{}, table
 						continue
 					}
 					sch = sch.SetField(field[0])
-				}
-			} else if s.Domain.GetMethod() == utils.UPDATE {
-				for _, field := range s.Fields {
-					f := utils.ToMap(field)
-					f[ds.SchemaDBField] = sch.ID
-					if sch.HasField(utils.ToString(f[sm.NAMEKEY])) {
-						s.Domain.UpdateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
-					} else {
-						s.Domain.CreateSuperCall(utils.AllParams(ds.DBSchemaField.Name).RootRaw(), f)
-					}
-					sch = sch.SetField(f)
 				}
 			}
 			return record, errors.New("already created"), false
