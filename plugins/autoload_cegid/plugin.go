@@ -119,7 +119,7 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 	isNotFound := true
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 		for _, r := range res {
-			if strings.Contains(strings.ToUpper(utils.GetString(record, "major_conference_name")), strings.ToUpper(utils.GetString(r, "name"))) {
+			if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
 				ok = "yes"
 				isNotFound = false
 				break
@@ -156,7 +156,7 @@ func (s *PosterService) VerifyDataIntegrity(record map[string]interface{}, table
 	isNotFound := true
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 		for _, r := range res {
-			if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) {
+			if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
 				ok = "yes"
 				isNotFound = false
 				break
@@ -193,7 +193,7 @@ func (s *PresentationService) VerifyDataIntegrity(record map[string]interface{},
 	isNotFound := true
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 		for _, r := range res {
-			if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) {
+			if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
 				ok = "yes"
 				isNotFound = false
 				break
@@ -230,7 +230,7 @@ func (s *ConferenceService) VerifyDataIntegrity(record map[string]interface{}, t
 	isNotFound := true
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 		for _, r := range res {
-			if strings.Contains(strings.ToUpper(utils.GetString(record, "major_conference_name")), strings.ToUpper(utils.GetString(r, "name"))) {
+			if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
 				ok = "yes"
 				isNotFound = false
 				break
