@@ -114,6 +114,29 @@ func (l *AuthController) Refresh() {
 	l.Response(response, err, "", "")
 }
 
+// @Title Maintenance
+// @Description Server Maintenance
+// @Param	body		body 	Credential	true		"Credentials"
+// @Success 200 {string} success !
+// @Failure 403 user does not exist
+// @Failure 402 user already connected
+// @router /maintenance [post]
+func (l *AuthController) Maintenance() {
+	_, superAdmin, err := l.IsAuthorized() // check if already connected
+	if err != nil {
+		l.Response(nil, err, "", "")
+	}
+	if superAdmin {
+		body := l.Body(false) // extracting body
+		if log, ok := body["is_maintenance"]; ok {
+			domain.IsMaintenance = utils.Compare(log, true)
+			l.Response(utils.Results{}, nil, "", "")
+			return
+		}
+	}
+	l.Response(utils.Results{}, errors.New("not allowed to change maintenance mode of the service"), "", "")
+}
+
 func decrypt(encryptedBase64 string, key []byte, iv []byte) (s string, e error) {
 	defer func() {
 		if r := recover(); r != nil {

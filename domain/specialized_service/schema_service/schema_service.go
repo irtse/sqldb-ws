@@ -38,6 +38,8 @@ func (s *SchemaService) VerifyDataIntegrity(record map[string]interface{}, table
 		delete(record, "fields")
 		if sch, err := schserv.GetSchema(utils.GetString(record, "name")); err == nil {
 			if s.Domain.GetMethod() == utils.CREATE {
+				fmt.Println(s.Fields...)
+
 				for _, field := range s.Fields {
 					f := utils.ToMap(field)
 					f[ds.SchemaDBField] = sch.ID

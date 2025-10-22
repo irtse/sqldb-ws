@@ -114,6 +114,9 @@ func (d *SpecializedDomain) SuperCall(params utils.Params, record utils.Record, 
 
 // Infra func caller with current option view and user rights.
 func (d *SpecializedDomain) Call(params utils.Params, record utils.Record, method utils.Method, args ...interface{}) (utils.Results, error) {
+	if !IsMaintenance {
+		return utils.Results{}, errors.New("actually in maintenance... can't proceed")
+	}
 	return d.call(params, record, method, args...)
 }
 
