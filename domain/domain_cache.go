@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"sqldb-ws/domain/domain_service/permission"
+	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/utils"
 	"strings"
 )
@@ -70,6 +71,7 @@ func deleteInCache(userID string, tableName string) {
 	if cache[userID][tableName] == nil {
 		return
 	}
+	delete(cache[userID], ds.DBView.Name)
 	delete(cache[userID], tableName)
 }
 
