@@ -311,6 +311,9 @@ func UpdateDelegated(task utils.Record, request utils.Record, domain utils.Domai
 	}, false); err == nil && len(res) > 0 {
 		m["binded_dbtask"] = id
 		for _, r := range res {
+			domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
+				ds.DestTableDBField: r[utils.SpecialIDParam],
+			}, false)
 			domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, m, map[string]interface{}{
 				utils.SpecialIDParam: r[utils.SpecialIDParam],
 			}, false)

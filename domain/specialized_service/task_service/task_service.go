@@ -98,7 +98,6 @@ func (s *TaskService) SpecializedDeleteRow(results []map[string]interface{}, tab
 }
 
 func (s *TaskService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
-	fmt.Println("UPDATE", record)
 	s.Write(results, record)
 	s.Redirect = true
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
@@ -112,12 +111,16 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if !CheckStateIsEnded(res["state"]) {
 			continue
 		}
+		s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
+			ds.DestTableDBField: res[utils.SpecialIDParam],
+		}, false)
 		requests, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 			utils.SpecialIDParam: utils.GetInt(res, RequestDBField),
 		}, false)
 		if err != nil || len(requests) == 0 {
 			continue
 		}
+
 		UpdateDelegated(res, requests[0], s.Domain)
 
 		order := requests[0]["current_index"]
