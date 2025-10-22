@@ -115,18 +115,27 @@ func GetResponse() {
 		}
 		datas := b["data"].(map[string]interface{})
 		go func() {
+			m := map[string]map[string]interface{}{}
 			for code, data := range datas {
-				d := domain.Domain(true, "", nil)
+				if m[strings.ReplaceAll(code, "_str", "")] == nil {
+					m[strings.ReplaceAll(code, "_str", "")] = map[string]interface{}{}
+				}
+				if strings.Contains(code, "_str") {
+					m[strings.ReplaceAll(code, "_str", "")]["comment"] = data
+				} else {
+					m[strings.ReplaceAll(code, "_str", "")]["got_response"] = data
+				}
+			}
+			d := domain.Domain(true, "", nil)
+			for code, data := range m {
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
 					"code": connector.Quote(code),
 				}, false); err == nil && len(res) > 0 {
 					emailRelated := res[0]
+					data[ds.EmailSendedDBField] = emailRelated[utils.SpecialIDParam]
 					d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
 						"code": code,
-					}).RootRaw(), map[string]interface{}{
-						"got_response":        data,
-						ds.EmailSendedDBField: emailRelated[utils.SpecialIDParam],
-					})
+					}).RootRaw(), data)
 				}
 			}
 		}()
