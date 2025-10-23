@@ -185,7 +185,7 @@ func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.Sche
 					}, false, "COUNT(id)"),
 				}, true)+")")
 			}
-			if f, err := schema.GetFieldByID(utils.GetInt(field, ds.SchemaFieldDBField)); err == nil {
+			if f, err := sch.GetFieldByID(utils.GetInt(field, ds.SchemaFieldDBField)); err == nil {
 				if utils.GetBool(field, "is_own") && len(s.RestrictionByEntityUser(schema, orFilter, true)) > 0 {
 					if field["separator"] == "or" {
 						orFilter = append(orFilter, s.RestrictionByEntityUser(schema, orFilter, true)...)
