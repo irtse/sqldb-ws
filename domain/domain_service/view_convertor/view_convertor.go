@@ -711,7 +711,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 					"shared_" + ds.UserDBField: d.GetDomainID(),
 					ds.DestTableDBField:        record[utils.SpecialIDParam],
 					ds.SchemaDBField:           sch.ID,
-					"read_access":              true,
+					"update_access":            true,
 				}, false); err == nil && len(res) > 0 {
 					return false
 				}
