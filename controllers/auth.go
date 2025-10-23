@@ -43,7 +43,7 @@ func (l *AuthController) Login() {
 		}
 		valid := false
 		if domain.IsMaintenance && utils.GetString(response[0], "name") != "root" {
-			l.Response(utils.Results{}, errors.New("actually in maintenance... can't proceed"), "", "")
+			l.Response(utils.Results{}, errors.New("in maintenance... can't proceed. sorry :)"), "", "")
 		}
 		// if no problem check if logger is authorized to work on API and properly registered
 		if os.Getenv("AUTH_MODE") == "ldap" && utils.GetString(response[0], "name") != "root" {
@@ -113,7 +113,7 @@ func (l *AuthController) Refresh() {
 		l.Response(nil, err, "", "")
 	}
 	if domain.IsMaintenance && !superAdmin {
-		l.Response(utils.Results{}, errors.New("actually in maintenance... can't proceed"), "", "")
+		l.Response(utils.Results{}, errors.New("in maintenance... can't proceed. sorry :)"), "", "")
 	}
 	token := l.MySession(login, superAdmin, false) // update session variables
 	response, err := domain.IsLogged(true, login, token)
