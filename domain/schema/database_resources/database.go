@@ -543,8 +543,8 @@ var DBDashboard = models.SchemaModel{
 	Fields: []models.FieldModel{
 		{Name: models.NAMEKEY, Type: models.VARCHAR.String(), Required: true, Index: 0},
 		{Name: "description", Type: models.BIGVARCHAR.String(), Required: false, Index: 1},
-		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Index: 2},
-		{Name: RootID(DBEntity.Name), Type: models.INTEGER.String(), ForeignTable: DBEntity.Name, Required: false, Index: 3},
+		//{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Index: 2},
+		//{Name: RootID(DBEntity.Name), Type: models.INTEGER.String(), ForeignTable: DBEntity.Name, Required: false, Index: 3},
 		{Name: "is_selected", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 4},
 		{Name: "url", Type: models.VARCHAR.String(), Required: false, Default: false, Index: 5},
 	},
