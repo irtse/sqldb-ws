@@ -115,9 +115,13 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 			ds.SchemaDBField:    schema.ID,
 			"is_close":          false,
 		}, false, "COUNT(*)"),
+		"0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+			ds.DestTableDBField: "main.id",
+			ds.SchemaDBField:    schema.ID,
+		}, false, "COUNT(*)"),
 	}, true)+")")
 
-	subrestr = append(subrestr, "("+strings.Join(subSubRestr, " OR ")+")")
+	subrestr = append(subrestr, "("+strings.Join(subSubRestr, " AND ")+")")
 	return subrestr
 }
 

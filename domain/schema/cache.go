@@ -163,6 +163,8 @@ func ValidateBySchema(data utils.Record, tableName string, method utils.Method, 
 		return data, errors.New("no schema corresponding to reference")
 	}
 	order := []string{}
+	ignoreReadonly := []string{}
+
 	if method == utils.CREATE {
 		// test wf
 		if fields, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilterField.Name, map[string]interface{}{
@@ -192,6 +194,9 @@ func ValidateBySchema(data utils.Record, tableName string, method utils.Method, 
 			for _, f := range fields {
 				if field, err := schema.GetFieldByID(utils.GetInt(f, ds.SchemaFieldDBField)); err == nil {
 					order = append(order, field.Name)
+					if utils.GetBool(f, "force_not_readonly") {
+						ignoreReadonly = append(ignoreReadonly, field.Name)
+					}
 				}
 			}
 		}
@@ -214,7 +219,7 @@ func ValidateBySchema(data utils.Record, tableName string, method utils.Method, 
 				}
 			}
 		}
-		if field.Readonly && method == utils.UPDATE && !domain.IsSuperAdmin() {
+		if field.Readonly && method == utils.UPDATE && !domain.IsSuperAdmin() && !slices.Contains(ignoreReadonly, field.Name) { // TODO ! on force_Readonly
 			continue
 		}
 		if v, ok := data[field.Name]; ok {
