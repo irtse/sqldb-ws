@@ -695,6 +695,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 					}, false, ds.RequestDBField),
 				}, false, utils.SpecialIDParam)
 			}
+			// MISSING SHARED
 			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ // then if there is request in run it should not be readonly
 				"is_close":           false,
 				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMap, true, utils.SpecialIDParam),
@@ -702,10 +703,18 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				return false
 			} else if rr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ //then no request are active, if there some closed protecting data, then readonly
 				"is_close":           true,
-				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMapTrue, false, utils.SpecialIDParam),
+				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMapTrue, true, utils.SpecialIDParam),
 			}, false); err != nil || len(rr) > 0 {
 				return true // if a request about this data is end up, only one
 			} else { // in case of no request at all !
+				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+					"shared_" + ds.UserDBField: d.GetDomainID(),
+					ds.DestTableDBField:        record[utils.SpecialIDParam],
+					ds.SchemaDBField:           sch.ID,
+					"read_access":              true,
+				}, false); err == nil && len(res) > 0 {
+					return false
+				}
 				for k, _ := range d.GetParams().Values {
 					if sch.HasField(k) { // a method to override per params
 						return false
