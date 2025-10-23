@@ -233,7 +233,7 @@ func (d *SpecializedDomain) GetRowResults(
 			}
 			AddInCache(d.UserID, tb, meth, cp, res)
 			p, _ = d.Params.Get(utils.RootRawView)
-			if p != "enable" && err == nil && !d.IsSuperAdmin() && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
+			if p != "enable" && err == nil && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
 				res = specializedService.TransformToGenericView(res, d.TableName, d.Params.GetAsArgs(utils.RootDestIDParam)...)
 				d.Redirections = append(d.Redirections, d.GetRedirections(res)...)
 			}
