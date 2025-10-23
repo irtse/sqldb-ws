@@ -659,16 +659,40 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				return false // if its my task and currently working allow it
 			}
 		} else { // if no task then follow this
-			subMap := map[string]interface{}{
+			subMapTrue := map[string]interface{}{
 				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 					ds.DestTableDBField: record[utils.SpecialIDParam],
 					ds.SchemaDBField:    sch.ID,
 				}, false, utils.SpecialIDParam),
 			}
+			subMap := map[string]interface{}{
+				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+					ds.DestTableDBField: record[utils.SpecialIDParam],
+					ds.SchemaDBField:    sch.ID,
+					utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+						"is_close":     false,
+						ds.UserDBField: d.GetUserID(),
+						ds.EntityDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+							ds.UserDBField: d.GetUserID(),
+						}, false, ds.EntityDBField),
+					}, false, ds.RequestDBField),
+				}, false, utils.SpecialIDParam),
+			}
 			if record[ds.DestTableDBField] != nil {
+				subMapTrue[utils.SpecialIDParam+"_1"] = d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+					ds.DestTableDBField: record[ds.DestTableDBField],
+					ds.SchemaDBField:    record[ds.SchemaDBField],
+				}, false, utils.SpecialIDParam)
 				subMap[utils.SpecialIDParam+"_1"] = d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 					ds.DestTableDBField: record[ds.DestTableDBField],
 					ds.SchemaDBField:    record[ds.SchemaDBField],
+					utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+						"is_close":     false,
+						ds.UserDBField: d.GetUserID(),
+						ds.EntityDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+							ds.UserDBField: d.GetUserID(),
+						}, false, ds.EntityDBField),
+					}, false, ds.RequestDBField),
 				}, false, utils.SpecialIDParam)
 			}
 			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ // then if there is request in run it should not be readonly
@@ -678,7 +702,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				return false
 			} else if rr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{ //then no request are active, if there some closed protecting data, then readonly
 				"is_close":           true,
-				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMap, true, utils.SpecialIDParam),
+				utils.SpecialIDParam: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, subMapTrue, false, utils.SpecialIDParam),
 			}, false); err != nil || len(rr) > 0 {
 				return true // if a request about this data is end up, only one
 			} else { // in case of no request at all !
