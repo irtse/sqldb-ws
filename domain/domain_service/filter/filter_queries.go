@@ -61,6 +61,19 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 		subrestr := append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!is_close": true,
 			utils.SpecialIDParam: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+				ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+					ds.UserDBField: s.Domain.GetUserID(),
+				}, false, ds.EntityDBField),
+				ds.EntityDBField + "_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+					ds.UserDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+						ds.UserDBField: s.Domain.GetUserID(),
+					}, false, "delegated_"+ds.UserDBField),
+				}, false, ds.EntityDBField),
+				ds.EntityDBField + "_2": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+					ds.UserDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+						"delegated_" + ds.UserDBField: s.Domain.GetUserID(),
+					}, false, ds.UserDBField),
+				}, false, ds.EntityDBField),
 				ds.UserDBField: s.Domain.GetUserID(),
 				ds.UserDBField + "_1": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
 					ds.UserDBField: s.Domain.GetUserID(),
@@ -76,6 +89,19 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 			"!is_close": true,
 		}, false)+")")
 		subrestr = append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+			ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+				ds.UserDBField: s.Domain.GetUserID(),
+			}, false, ds.EntityDBField),
+			ds.EntityDBField + "_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+				ds.UserDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+					ds.UserDBField: s.Domain.GetUserID(),
+				}, false, "delegated_"+ds.UserDBField),
+			}, false, ds.EntityDBField),
+			ds.EntityDBField + "_2": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+				ds.UserDBField: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+					"delegated_" + ds.UserDBField: s.Domain.GetUserID(),
+				}, false, ds.UserDBField),
+			}, false, ds.EntityDBField),
 			ds.UserDBField: s.Domain.GetUserID(),
 			ds.UserDBField + "_1": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
 				ds.UserDBField: s.Domain.GetUserID(),
