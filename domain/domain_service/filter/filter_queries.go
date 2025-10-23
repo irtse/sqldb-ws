@@ -125,7 +125,6 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 			k:                          true,
 		}, false, "COUNT(*)"),
 	}, true)+")")
-
 	subSubRestr := []string{}
 	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
@@ -146,7 +145,14 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 			ds.SchemaDBField:    schema.ID,
 		}, false, "COUNT(*)"),
 	}, true)+")")
-
+	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("",
+		map[string]interface{}{
+			"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchemaField.Name, map[string]interface{}{
+				ds.SchemaDBField: schema.ID,
+				"hidden":         false,
+				"readonly":       false,
+			}, false, "COUNT(*)"),
+		}, false)+")")
 	subrestr = append(subrestr, "("+strings.Join(subSubRestr, " AND ")+")")
 	return subrestr
 }

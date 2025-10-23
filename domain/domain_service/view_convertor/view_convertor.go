@@ -653,6 +653,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 	if d.GetEmpty() || utils.GetBool(record, "is_draft") {
 		return false
 	}
+	// TODO when no field readable
 	if sch, err := scheme.GetSchema(tableName); err == nil {
 		if tableName == ds.DBTask.Name {
 			if !utils.GetBool(record, "is_close") && (utils.GetString(record, ds.UserDBField) == d.GetUserID()) || slices.Contains(createdIds, record.GetString(utils.SpecialIDParam)) {
@@ -714,6 +715,13 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 					"update_access":            true,
 				}, false); err == nil && len(res) > 0 {
 					return false
+				}
+				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBSchemaField.Name, map[string]interface{}{
+					ds.SchemaDBField: sch.ID,
+					"hidden":         false,
+					"readonly":       false,
+				}, false); err == nil && len(res) == 0 {
+					return true
 				}
 				for k, _ := range d.GetParams().Values {
 					if sch.HasField(k) { // a method to override per params

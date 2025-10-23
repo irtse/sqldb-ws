@@ -67,7 +67,7 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 	isAnd := false
 	if kind == reflect.Map && len(restrictions.(map[string]interface{})) > 0 {
 		if t := FormatSQLRestrictionWhereByMap("", restrictions.(map[string]interface{}), isOr); t != "" {
-			query += t
+			query += t + " AND (active=true)"
 			isAnd = true
 		}
 	} else if (kind == reflect.Array || kind == reflect.Slice) && len(restrictions.([]interface{})) > 0 {
@@ -75,7 +75,7 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 			if isAnd {
 				query += " AND "
 			}
-			query += t
+			query += t + " AND (active=true)"
 			isAnd = true
 		}
 	}
