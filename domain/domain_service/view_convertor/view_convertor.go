@@ -708,7 +708,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				return true // if a request about this data is end up, only one
 			} else { // in case of no request at all !
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-					"shared_" + ds.UserDBField: d.GetDomainID(),
+					"shared_" + ds.UserDBField: d.GetUserID(),
 					ds.DestTableDBField:        record[utils.SpecialIDParam],
 					ds.SchemaDBField:           sch.ID,
 					"update_access":            true,
