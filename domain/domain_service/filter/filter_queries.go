@@ -192,6 +192,18 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 		}, false, "COUNT(*)"),
 	}, false))
 	restr = append(restr, "("+strings.Join(subRestr, " OR ")+")")
+	restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+		"!0": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			ds.DestTableDBField: "main.id",
+			ds.SchemaDBField:    schema.ID,
+			"is_close":          false,
+			ds.UserDBField:      s.Domain.GetUserID(),
+		}, false, "COUNT(*)"),
+		"0": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
+			ds.DestTableDBField: "main.id",
+			ds.SchemaDBField:    schema.ID,
+		}, false, "COUNT(*)"),
+	}, true)+")")
 	return restr
 }
 
