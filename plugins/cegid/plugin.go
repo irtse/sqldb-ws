@@ -335,7 +335,7 @@ func ImportUserHierachy() {
 		userID := ""
 		hierarchyID := ""
 		for i, _ := range headers {
-			if i == 1 && data[i] != "" {
+			if i == 5 && data[i] != "" {
 				if res, err := d.Db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"email": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
