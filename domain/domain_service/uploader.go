@@ -72,28 +72,37 @@ func (u *Uploader) deleteBeforeUpload(storage string, fileName string) {
 func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (string, error) {
 	defer file.Close()
 
+	// Determine storage path
 	storage := os.Getenv("STORAGE_PATH")
 	if storage == "" {
 		storage = "/mnt/files"
 	}
 	os.MkdirAll(storage, os.ModePerm)
 
-	compressedName := fmt.Sprintf("%s.gz", handler.Filename)
-	u.deleteBeforeUpload(storage, compressedName)
+	// Remove existing versions before uploading
+	fileNameParts := strings.Split(handler.Filename, ".")
+	baseName := fileNameParts[0]
+	u.deleteBeforeUpload(storage, baseName)
 
-	path := filepath.Join(storage, compressedName)
-	dst, err := os.Create(path)
+	// Define compressed filename
+	compressedPath := filepath.Join(storage, handler.Filename+".gz")
+
+	// Create destination file (compressed)
+	dst, err := os.Create(compressedPath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create destination: %w", err)
 	}
 	defer dst.Close()
 
-	// 🧩 Gzip writer
-	gzipWriter := gzip.NewWriter(dst)
-	defer gzipWriter.Close()
-	// Compress contents
-	if _, err := io.Copy(gzipWriter, file); err != nil {
-		return path, err
+	// Create gzip writer
+	gw := gzip.NewWriter(dst)
+	gw.Name = handler.Filename // keep original name metadata
+	defer gw.Close()
+
+	// Copy uploaded content → gzip writer → file
+	if _, err := io.Copy(gw, file); err != nil {
+		return "", fmt.Errorf("failed to compress: %w", err)
 	}
-	return path, nil
+
+	return compressedPath, nil
 }

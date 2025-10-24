@@ -135,9 +135,9 @@ func (t *AbstractController) Body(hashed bool) utils.Record {
 	return res
 }
 
-func (t *AbstractController) UncompressGzip(path string) (string, error) {
+func (t *AbstractController) UncompressGzip(uncompressedPath string) (string, error) {
 	// Ensure the file exists
-	inFile, err := os.Open(path)
+	inFile, err := os.Open(fmt.Sprintf("%v.gz", uncompressedPath))
 	if err != nil {
 		return "", fmt.Errorf("failed to open gzip file: %w", err)
 	}
@@ -149,9 +149,6 @@ func (t *AbstractController) UncompressGzip(path string) (string, error) {
 		return "", fmt.Errorf("failed to create gzip reader: %w", err)
 	}
 	defer gzipReader.Close()
-
-	// Determine output path (remove `.gz`)
-	uncompressedPath := strings.TrimSuffix(path, ".gz")
 
 	// Create destination file
 	outFile, err := os.Create(uncompressedPath)
