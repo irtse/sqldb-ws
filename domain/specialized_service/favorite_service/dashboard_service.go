@@ -197,7 +197,7 @@ func (d *DashboardService) GetFilterRestrictionAndOrder(filt interface{}, elemen
 		return "", "", fmt.Errorf("failed to get schema: %v", err)
 	}
 
-	restriction = f.ProcessFilterRestriction(utils.ToString(filt), sch)
+	_, restriction = f.ProcessFilterRestriction(utils.ToString(filt), sch)
 
 	if orderID, exists := element["order_by_"+ds.SchemaDBField]; exists {
 		if i, err := strconv.Atoi(utils.ToString(orderID)); err == nil {

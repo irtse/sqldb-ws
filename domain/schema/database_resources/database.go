@@ -531,6 +531,7 @@ var DBFilterField = models.SchemaModel{
 		{Name: "force_not_readonly", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 7},
 
 		{Name: "is_task_concerned", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 8},
+		{Name: "is_hierarch_concerned", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 8},
 		{Name: RootID(DBFilter.Name), Type: models.INTEGER.String(), ForeignTable: DBFilter.Name, Required: false, Index: 9},
 	},
 }

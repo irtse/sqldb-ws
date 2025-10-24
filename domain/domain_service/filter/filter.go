@@ -3,7 +3,6 @@ package filter
 import (
 	"net/url"
 	"slices"
-	"sqldb-ws/domain/domain_service/history"
 	sch "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -29,7 +28,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	var SQLview, SQLrestriction, SQLOrder []string = []string{}, []string{}, []string{}
 	var SQLLimit string
 
-	restr, view, order, dir, state := f.GetFilterForQuery("", "", schema, domainParams)
+	restr, view, order, dir, state, hierarchy := f.GetFilterForQuery("", "", schema, domainParams)
 	if restr != "" && !f.Domain.IsSuperAdmin() {
 		SQLrestriction = append(SQLrestriction, restr)
 	}
@@ -82,7 +81,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 			SQLrestriction = append(SQLrestriction, "id="+id)
 		}
 		if f.Domain.GetMethod() != utils.DELETE && !avoidUser && !schema.IsAssociated {
-			SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
+			SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false, hierarchy) // admin can see all on admin view
 		}
 	}
 	SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
@@ -161,37 +160,40 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 	return restr
 }
 
-func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []string, overrideOwn bool) []string {
+func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []string, overrideOwn bool, hierarch bool) []string {
 	if s.Domain.GetMethod() == utils.UPDATE || s.Domain.GetMethod() == utils.DELETE {
 		return restr
 	}
 	newRestr := map[string]interface{}{}
 	restrictions := map[string]interface{}{}
-	if s.Domain.IsOwn(false, false, s.Domain.GetMethod()) || overrideOwn {
-		ids := history.GetCreatedAccessData(schema.ID, s.Domain)
-		if len(ids) > 0 {
-			newRestr[utils.SpecialIDParam] = ids
-		} else {
-			newRestr[utils.SpecialIDParam] = nil
-		}
-	} else if !s.Domain.IsShallowed() {
-		restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
-			"is_draft": false,
-			utils.SpecialIDParam + "_10": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d",
+	if !s.Domain.IsShallowed() {
+		m := map[string]interface{}{
+			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d",
 				map[string]interface{}{
 					"d." + ds.SchemaDBField:    schema.ID,
 					"d." + ds.DestTableDBField: "main.id",
 					"d." + ds.UserDBField:      s.Domain.GetUserID(),
 					"d.write":                  true,
 				}, false, ds.DestTableDBField),
-		}, true)+")")
+		}
+		if hierarch {
+			m[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d",
+				map[string]interface{}{
+					"d." + ds.SchemaDBField:    schema.ID,
+					"d." + ds.DestTableDBField: "main.id",
+					"d." + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+						"parent_" + ds.UserDBField: s.Domain.GetUserID(),
+					}, false, ds.UserDBField),
+					"d.write": true,
+				}, false, ds.DestTableDBField)
+		}
+		restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", m, true)+")")
 	} else {
 		if slices.Contains(ds.OWNPERMISSIONEXCEPTION, schema.Name) {
 			newRestr["is_draft"] = false
 		} else {
 			restr = append(restr, "is_draft=false")
 		}
-
 	}
 	isUser := false
 	isUser = (schema.HasField(ds.UserDBField) || s.Domain.GetTable() == ds.DBUser.Name)
@@ -207,7 +209,17 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 						"parent_" + ds.UserDBField: s.Domain.GetUserID(),
 					}, true, ds.UserDBField)
 				} else {
-					restrictions[key] = s.Domain.GetUserID()
+					if hierarch {
+						restrictions[key] = connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+							ds.UserDBField: s.Domain.GetUserID(),
+							ds.UserDBField + "_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+								"parent_" + ds.UserDBField: s.Domain.GetUserID(),
+							}, false, ds.UserDBField),
+						}, true)
+					} else {
+						restrictions[key] = s.Domain.GetUserID()
+					}
+
 				}
 			}
 		}

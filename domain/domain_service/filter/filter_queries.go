@@ -36,9 +36,9 @@ func (s *FilterService) GetFilterFields(viewfilterID string, schemaID string) []
 	return []map[string]interface{}{}
 }
 
-func (s *FilterService) GetFilterForQuery(filterID string, viewfilterID string, schema sm.SchemaModel, domainParams utils.Params) (string, string, string, string, string) {
+func (s *FilterService) GetFilterForQuery(filterID string, viewfilterID string, schema sm.SchemaModel, domainParams utils.Params) (string, string, string, string, string, bool) {
 	view, order, dir := s.ProcessViewAndOrder(viewfilterID, schema.ID, domainParams)
-	filter := s.ProcessFilterRestriction(filterID, schema)
+	hierarch, filter := s.ProcessFilterRestriction(filterID, schema)
 	state := ""
 	if filterID != "" {
 		if fils, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilter.Name,
@@ -48,7 +48,7 @@ func (s *FilterService) GetFilterForQuery(filterID string, viewfilterID string, 
 			state = utils.ToString(fils[0]["elder"]) // get elder filter
 		}
 	}
-	return filter, view, order, dir, state
+	return filter, view, order, dir, state, hierarch
 }
 
 func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) []string {
@@ -207,19 +207,23 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 	return restr
 }
 
-func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.SchemaModel) string {
+func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.SchemaModel) (bool, string) {
 	if filterID == "" {
-		return ""
+		return false, ""
 	}
 	var filter []string
 	var orFilter []string
 	restriction := map[string]interface{}{
 		ds.FilterDBField: filterID,
 	}
+	hierarch := false
 	s.Domain.GetDb().ClearQueryFilter()
 	fields, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilterField.Name, restriction, true)
 	if err == nil && len(fields) > 0 {
 		for _, field := range fields {
+			if utils.GetBool(field, "is_hierarch_concerned") {
+				hierarch = true
+			}
 			if utils.GetBool(field, "is_task_concerned") {
 				filter = append(filter, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 					"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
@@ -235,11 +239,11 @@ func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.Sche
 				}, true)+")")
 			}
 			if f, err := sch.GetFieldByID(utils.GetInt(field, ds.SchemaFieldDBField)); err == nil {
-				if utils.GetBool(field, "is_own") && len(s.RestrictionByEntityUser(schema, orFilter, true)) > 0 {
+				if utils.GetBool(field, "is_own") && len(s.RestrictionByEntityUser(schema, orFilter, true, hierarch)) > 0 {
 					if field["separator"] == "or" {
-						orFilter = append(orFilter, s.RestrictionByEntityUser(schema, orFilter, true)...)
+						orFilter = append(orFilter, s.RestrictionByEntityUser(schema, orFilter, true, hierarch)...)
 					} else {
-						filter = append(filter, s.RestrictionByEntityUser(schema, filter, true)...)
+						filter = append(filter, s.RestrictionByEntityUser(schema, filter, true, hierarch)...)
 					}
 				} else if connector.FormatOperatorSQLRestriction(field["operator"], field["separator"], f.Name, field["value"], f.Type) != "" {
 					if field["separator"] == "or" {
@@ -257,7 +261,7 @@ func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.Sche
 	if len(orFilter) > 0 {
 		filter = append(filter, "("+strings.Join(orFilter, " OR ")+")")
 	}
-	return strings.Join(filter, " AND ")
+	return hierarch, strings.Join(filter, " AND ")
 }
 
 func (s *FilterService) ProcessViewAndOrder(viewfilterID string, schemaID string, domainParams utils.Params) (string, string, string) {

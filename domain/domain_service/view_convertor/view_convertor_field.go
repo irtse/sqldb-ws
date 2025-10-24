@@ -89,7 +89,7 @@ func (s *ViewConvertor) GetFieldInfo(f *sm.FieldModel, from string) (interface{}
 					value = s.Domain.GetUserID()
 				} else {
 					if rr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schFrom.Name,
-						utils.ToListAnonymized(filter.NewFilterService(s.Domain).RestrictionByEntityUser(schFrom, []string{}, true)), false); err == nil && len(rr) > 0 {
+						utils.ToListAnonymized(filter.NewFilterService(s.Domain).RestrictionByEntityUser(schFrom, []string{}, true, false)), false); err == nil && len(rr) > 0 {
 						value = s.fromITF(rr[0][ff.Name])
 						operator = utils.GetString(rr[0], "operator")
 					}
@@ -99,7 +99,7 @@ func (s *ViewConvertor) GetFieldInfo(f *sm.FieldModel, from string) (interface{}
 					value = s.Domain.GetUserID()
 				} else {
 					if rr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schFrom.Name,
-						utils.ToListAnonymized(filter.NewFilterService(s.Domain).RestrictionByEntityUser(schFrom, []string{}, true)),
+						utils.ToListAnonymized(filter.NewFilterService(s.Domain).RestrictionByEntityUser(schFrom, []string{}, true, false)),
 						false); err == nil && len(rr) > 0 {
 						value = s.fromITF(rr[0][utils.SpecialIDParam])
 						operator = utils.GetString(rr[0], "operator")
