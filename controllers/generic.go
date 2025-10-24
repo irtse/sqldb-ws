@@ -44,6 +44,11 @@ func (l *MainController) Download() {
 	if !strings.Contains(filePath, "/mnt/files/") {
 		filePath = "/mnt/files/" + filePath
 	}
+	if _, err := os.Stat(filePath); err == nil {
+		fmt.Printf("File exists\n")
+	} else {
+		fmt.Printf("File does not exist\n")
+	}
 	uncompressedP, err := l.UncompressGzip(filePath)
 	fmt.Println(uncompressedP)
 	if err != nil {
@@ -53,6 +58,7 @@ func (l *MainController) Download() {
 	}
 	// Open the file
 	file, err := os.Open(uncompressedP)
+
 	if err != nil {
 		l.Ctx.Output.SetStatus(http.StatusNotFound)
 		l.Ctx.Output.Body([]byte("File not found"))
