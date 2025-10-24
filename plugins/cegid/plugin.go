@@ -342,7 +342,7 @@ func ImportUserHierachy() {
 					userID = utils.GetString(res[0], utils.SpecialIDParam)
 				}
 			}
-			if i == 12 && data[i] != "" {
+			if i == 11 && data[i] != "" {
 				if res, err := d.Db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"code": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
