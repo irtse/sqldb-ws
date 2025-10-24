@@ -78,8 +78,7 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 	}
 	os.MkdirAll(storage, os.ModePerm)
 
-	fileName := strings.Split(handler.Filename, ".")
-	compressedName := fmt.Sprintf("%s.gz", fileName)
+	compressedName := fmt.Sprintf("%s.gz", handler.Filename)
 	u.deleteBeforeUpload(storage, compressedName)
 
 	path := filepath.Join(storage, compressedName)
