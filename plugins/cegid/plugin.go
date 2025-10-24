@@ -335,14 +335,14 @@ func ImportUserHierachy() {
 		userID := ""
 		hierarchyID := ""
 		for i, _ := range headers {
-			if i == 5 && data[i] != "" {
+			if i == 1 && data[i] != "" {
 				if res, err := d.Db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"email": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
 					userID = utils.GetString(res[0], utils.SpecialIDParam)
 				}
 			}
-			if i == 1 && data[i] != "" {
+			if i == 12 && data[i] != "" {
 				if res, err := d.Db.ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"code": connector.Quote(data[i]),
 				}, false); err == nil && len(res) > 0 {
@@ -350,10 +350,9 @@ func ImportUserHierachy() {
 				}
 			}
 		}
-		if userID != "" && hierarchyID != "" {
+		if userID != "" && hierarchyID != "" && hierarchyID != userID {
 			d.GetDb().DeleteQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
-				ds.UserDBField:             userID,
-				"parent_" + ds.UserDBField: hierarchyID,
+				ds.UserDBField: userID,
 			}, false)
 			d.GetDb().CreateQuery(ds.DBHierarchy.Name, map[string]interface{}{
 				"parent_" + ds.UserDBField: hierarchyID,
