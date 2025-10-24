@@ -45,7 +45,7 @@ func (l *MainController) Download() {
 		filePath = "/mnt/files/" + filePath
 	}
 	fmt.Println(fmt.Sprintf("%v.gz", strings.Trim(filePath, " ")))
-	if _, err := os.Stat(filePath); err == nil {
+	if _, err := os.Stat(fmt.Sprintf("%v.gz", strings.Trim(filePath, " "))); err == nil {
 		fmt.Printf("File exists\n")
 	} else {
 		fmt.Printf("File does not exist\n")
