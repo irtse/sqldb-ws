@@ -65,9 +65,6 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		}
 	}
 
-	if f.Domain.IsSuperAdmin() && !f.Domain.IsOwn(false, true, f.Domain.GetMethod()) {
-		return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
-	}
 	if s, ok := domainParams.Get(utils.RootFilterNewState); ok && s != "" {
 		state = s
 	}
@@ -78,17 +75,18 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	if state != "" {
 		SQLrestriction = f.LifeCycleRestriction(tableName, SQLrestriction, state)
 	}
-	if id, _ := f.Domain.GetParams().Get(utils.SpecialIDParam); id != "" && f.Domain.GetTable() != ds.DBView.Name {
-		SQLrestriction = append(SQLrestriction, "id="+id)
-	} else if id, _ := domainParams.Get(utils.SpecialIDParam); id != "" {
-		SQLrestriction = append(SQLrestriction, "id="+id)
+	if !(f.Domain.IsSuperAdmin() && !f.Domain.IsOwn(false, true, f.Domain.GetMethod())) {
+		if id, _ := f.Domain.GetParams().Get(utils.SpecialIDParam); id != "" && f.Domain.GetTable() != ds.DBView.Name {
+			SQLrestriction = append(SQLrestriction, "id="+id)
+		} else if id, _ := domainParams.Get(utils.SpecialIDParam); id != "" {
+			SQLrestriction = append(SQLrestriction, "id="+id)
+		}
+		if f.Domain.GetMethod() != utils.DELETE && !avoidUser && !schema.IsAssociated {
+			SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
+		}
+		SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
+		SQLrestriction = f.GetFilterDelete(SQLrestriction, schema)
 	}
-	if f.Domain.GetMethod() != utils.DELETE && !avoidUser && !schema.IsAssociated {
-		SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false) // admin can see all on admin view
-	}
-	SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
-	SQLrestriction = f.GetFilterDelete(SQLrestriction, schema)
-
 	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
 }
 
