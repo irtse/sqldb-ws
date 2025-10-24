@@ -78,10 +78,9 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 	}
 	os.MkdirAll(storage, os.ModePerm)
 
-	fileBase := strings.TrimSuffix(handler.Filename, filepath.Ext(handler.Filename))
-	fileExt := filepath.Ext(handler.Filename)
-	compressedName := fmt.Sprintf("%s%s.gz", fileBase, fileExt)
-	u.deleteBeforeUpload(storage, fileBase)
+	fileName := strings.Split(handler.Filename, ".")
+	compressedName := fmt.Sprintf("%s.gz", fileName)
+	u.deleteBeforeUpload(storage, compressedName)
 
 	path := filepath.Join(storage, compressedName)
 	dst, err := os.Create(path)
@@ -93,14 +92,9 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 	// 🧩 Gzip writer
 	gzipWriter := gzip.NewWriter(dst)
 	defer gzipWriter.Close()
-
-	// Optional: store original filename in header
-	gzipWriter.Name = handler.Filename
-
 	// Compress contents
 	if _, err := io.Copy(gzipWriter, file); err != nil {
 		return path, err
 	}
-
 	return path, nil
 }
