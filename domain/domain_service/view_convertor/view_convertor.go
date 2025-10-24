@@ -59,6 +59,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	}
 
 	view := sm.NewView(id, schema.Name, schema.Label, schema, schema.Name, 0, []sm.ManualTriggerModel{})
+	view.SchemaNew = GetNewSchema(schema, v.Domain)
 	view.Redirection = getRedirection(v.Domain.GetDomainID())
 	view.Order, view.Schema = CompareOrder(schema, order, schemes, results, v.Domain)
 	sort.SliceStable(view.Order, func(i, j int) bool {

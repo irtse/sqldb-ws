@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"sqldb-ws/domain"
 	"sqldb-ws/domain/utils"
 	"strings"
@@ -130,4 +133,44 @@ func (t *AbstractController) Body(hashed bool) utils.Record {
 		}
 	}
 	return res
+}
+
+func (t *AbstractController) UncompressGzip(path string) (string, error) {
+	// Ensure the file exists
+	inFile, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to open gzip file: %w", err)
+	}
+	defer inFile.Close()
+
+	// Create a gzip reader
+	gzipReader, err := gzip.NewReader(inFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to create gzip reader: %w", err)
+	}
+	defer gzipReader.Close()
+
+	// Determine output path (remove `.gz`)
+	uncompressedPath := strings.TrimSuffix(path, ".gz")
+
+	// Create destination file
+	outFile, err := os.Create(uncompressedPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to create uncompressed file: %w", err)
+	}
+	defer outFile.Close()
+
+	// Copy data from gzip -> destination file
+	if _, err := io.Copy(outFile, gzipReader); err != nil {
+		return "", fmt.Errorf("failed to decompress: %w", err)
+	}
+
+	return uncompressedPath, nil
+}
+
+func (t *AbstractController) DeleteUncompressed(path string) error {
+	if err := os.Remove(path); err != nil {
+		return fmt.Errorf("failed to delete temp file: %w", err)
+	}
+	return nil
 }

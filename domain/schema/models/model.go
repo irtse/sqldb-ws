@@ -287,6 +287,7 @@ type ViewModel struct { // lightest struct based on SchemaModel dedicate to view
 	Description   string                   `json:"description"`
 	Path          string                   `json:"link_path"`
 	Order         []string                 `json:"order"`
+	SchemaNew     utils.Record             `json:"schema_new"`
 	Schema        utils.Record             `json:"schema"`
 	Items         []ViewItemModel          `json:"items"`
 	Actions       []string                 `json:"actions"`

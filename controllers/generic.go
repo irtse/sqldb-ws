@@ -43,8 +43,14 @@ func (l *MainController) Download() {
 	if !strings.Contains(filePath, "/mnt/files/") {
 		filePath = "/mnt/files/" + filePath
 	}
+	uncompressedP, err := l.UncompressGzip(filePath)
+	if err != nil {
+		l.Ctx.Output.SetStatus(http.StatusNoContent)
+		l.Ctx.Output.Body([]byte(err.Error()))
+		return
+	}
 	// Open the file
-	file, err := os.Open(filePath)
+	file, err := os.Open(uncompressedP)
 	if err != nil {
 		l.Ctx.Output.SetStatus(http.StatusNotFound)
 		l.Ctx.Output.Body([]byte("File not found"))
@@ -64,7 +70,7 @@ func (l *MainController) Download() {
 	l.Ctx.Output.Header("Content-Disposition", "attachment; filename="+stat.Name())
 	l.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	l.Ctx.Output.Header("Content-Length", string(rune(stat.Size())))
-
+	l.DeleteUncompressed(uncompressedP)
 	// Serve the file
 	http.ServeFile(l.Ctx.ResponseWriter, l.Ctx.Request, filePath)
 }

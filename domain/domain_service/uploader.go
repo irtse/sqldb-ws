@@ -1,6 +1,7 @@
 package domain_service
 
 import (
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
@@ -70,23 +71,36 @@ func (u *Uploader) deleteBeforeUpload(storage string, fileName string) {
 
 func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (string, error) {
 	defer file.Close()
+
 	storage := os.Getenv("STORAGE_PATH")
 	if storage == "" {
 		storage = "/mnt/files"
 	}
-	os.MkdirAll(storage, os.ModePerm) // Ensure uploads dir exists
-	// Save the uploaded file
-	fileName := strings.Split(handler.Filename, ".")
-	u.deleteBeforeUpload(storage, fileName[0])
-	path := filepath.Join(storage, handler.Filename)
+	os.MkdirAll(storage, os.ModePerm)
+
+	fileBase := strings.TrimSuffix(handler.Filename, filepath.Ext(handler.Filename))
+	fileExt := filepath.Ext(handler.Filename)
+	compressedName := fmt.Sprintf("%s_compressed%s.gz", fileBase, fileExt)
+	u.deleteBeforeUpload(storage, fileBase)
+
+	path := filepath.Join(storage, compressedName)
 	dst, err := os.Create(path)
 	if err != nil {
 		return "", err
 	}
 	defer dst.Close()
-	_, err = io.Copy(dst, file)
-	if err != nil {
+
+	// 🧩 Gzip writer
+	gzipWriter := gzip.NewWriter(dst)
+	defer gzipWriter.Close()
+
+	// Optional: store original filename in header
+	gzipWriter.Name = handler.Filename
+
+	// Compress contents
+	if _, err := io.Copy(gzipWriter, file); err != nil {
 		return path, err
 	}
+
 	return path, nil
 }

@@ -9,6 +9,37 @@ import (
 	"sqldb-ws/domain/utils"
 )
 
+func GetNewSchema(schema *sm.SchemaModel, domain utils.DomainITF) map[string]interface{} {
+	if schema != nil {
+		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+			ds.SchemaDBField: schema.ID,
+		}, false); err == nil && len(res) > 0 {
+			return GetNewSchemaByWF(res[0], schema.ToRecord(), domain)
+		}
+	}
+	return map[string]interface{}{}
+}
+
+func GetNewSchemaByWF(workflow map[string]interface{}, schema map[string]interface{}, domain utils.DomainITF) map[string]interface{} {
+	newSchema := map[string]interface{}{}
+	if i, ok := workflow["view_"+ds.FilterDBField]; ok && i != nil {
+		if fields, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBSchemaField.Name,
+			map[string]interface{}{
+				utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBFilterField.Name,
+					map[string]interface{}{
+						ds.FilterDBField: i,
+					}, false, ds.SchemaFieldDBField),
+			}, false); err == nil {
+			for _, f := range fields {
+				newSchema[utils.GetString(f, "name")] = schema[utils.GetString(f, "name")]
+			}
+		}
+	} else {
+		return schema
+	}
+	return newSchema
+}
+
 func CompareOrder(schema *sm.SchemaModel, order []string, schemes map[string]interface{}, results []utils.Record, domain utils.DomainITF) ([]string, map[string]interface{}) {
 	newOrder := []string{}
 	if res, err := GetFilterFields(schema, results, domain); err == nil && len(res) > 0 {

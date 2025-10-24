@@ -31,22 +31,7 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 	rr := view_convertor.NewViewConvertor(s.Domain).TransformToView(res, tableName, true, s.Domain.GetParams().Copy())
 	if _, ok := s.Domain.GetParams().Get(utils.SpecialIDParam); ok && len(results) == 1 && len(rr) == 1 {
 		r := results[0]
-		if i, ok := r["view_"+ds.FilterDBField]; ok && i != nil {
-			schema := rr[0]["schema"].(map[string]interface{})
-			newSchema := map[string]interface{}{}
-			if fields, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBSchemaField.Name,
-				map[string]interface{}{
-					utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBFilterField.Name,
-						map[string]interface{}{
-							ds.FilterDBField: i,
-						}, false, ds.SchemaFieldDBField),
-				}, false); err == nil {
-				for _, f := range fields {
-					newSchema[utils.GetString(f, "name")] = schema[utils.GetString(f, "name")]
-				}
-			}
-			rr[0]["schema"] = newSchema
-		}
+		rr[0]["schema"] = view_convertor.GetNewSchemaByWF(r, rr[0]["schema"].(map[string]interface{}), s.Domain)
 	}
 	vc := view_convertor.NewViewConvertor(s.Domain)
 	for _, r := range rr {

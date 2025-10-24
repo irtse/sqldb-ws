@@ -146,6 +146,7 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 }
 
 func notify(task utils.Record, i int64, domain utils.DomainITF) {
+
 	if schema, err := schserv.GetSchema(ds.DBTask.Name); err == nil {
 		name := utils.GetString(task, "name")
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schema.Name, map[string]interface{}{
@@ -167,6 +168,15 @@ func notify(task utils.Record, i int64, domain utils.DomainITF) {
 			}, false); err == nil && len(res) > 0 {
 				notif[sm.NAMEKEY] = utils.GetString(res[0], "name")
 			}
+		}
+		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
+			"name":              connector.Quote(utils.GetString(task, "name")),
+			ds.DestTableDBField: notif[ds.DestTableDBField],
+			"link_id":           schema.ID,
+			ds.UserDBField:      task[ds.UserDBField],
+			ds.EntityDBField:    task[ds.EntityDBField],
+		}, false); err == nil && len(res) > 0 {
+			return
 		}
 		domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBNotification.Name, notif, func(s string) (string, bool) {
 			return "", true
