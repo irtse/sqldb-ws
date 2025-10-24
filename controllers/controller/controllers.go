@@ -137,7 +137,7 @@ func (t *AbstractController) Body(hashed bool) utils.Record {
 
 func (t *AbstractController) UncompressGzip(uncompressedPath string) (string, error) {
 	// Ensure the file exists
-	inFile, err := os.Open(fmt.Sprintf("%v.gz", uncompressedPath))
+	inFile, err := os.Open(fmt.Sprintf("%v.gz", strings.Trim(uncompressedPath, " ")))
 	if err != nil {
 		return "", fmt.Errorf("failed to open gzip file: %w", err)
 	}

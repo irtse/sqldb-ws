@@ -85,7 +85,7 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 	u.deleteBeforeUpload(storage, baseName)
 
 	// Define compressed filename
-	compressedPath := filepath.Join(storage, handler.Filename+".gz")
+	compressedPath := filepath.Join(storage, strings.Trim(handler.Filename, " ")+".gz")
 
 	// Create destination file (compressed)
 	dst, err := os.Create(compressedPath)
