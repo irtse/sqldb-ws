@@ -53,7 +53,13 @@ func (s *FilterService) GetFilterForQuery(filterID string, viewfilterID string, 
 
 func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) []string {
 	perms := 0
-	if s.Domain.VerifyAuth(schema.Name, "", "", utils.DELETE) {
+	action := utils.DELETE
+	if isUpdate {
+		action = utils.UPDATE
+	}
+
+	fmt.Println(s.Domain.IsSuperAdmin(), s.Domain.VerifyAuth(schema.Name, "", "", action))
+	if s.Domain.VerifyAuth(schema.Name, "", "", action) {
 		perms = 1
 	}
 	subrestr := []string{}
