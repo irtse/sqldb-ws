@@ -80,7 +80,7 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 
 	fileBase := strings.TrimSuffix(handler.Filename, filepath.Ext(handler.Filename))
 	fileExt := filepath.Ext(handler.Filename)
-	compressedName := fmt.Sprintf("%s_compressed%s.gz", fileBase, fileExt)
+	compressedName := fmt.Sprintf("%s%s.gz", fileBase, fileExt)
 	u.deleteBeforeUpload(storage, fileBase)
 
 	path := filepath.Join(storage, compressedName)
