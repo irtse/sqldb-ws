@@ -9,12 +9,12 @@ import (
 	"sqldb-ws/domain/utils"
 )
 
-func GetNewSchema(schema *sm.SchemaModel, domain utils.DomainITF) map[string]interface{} {
+func GetNewSchema(schemaID int64, schema map[string]interface{}, domain utils.DomainITF) map[string]interface{} {
 	if schema != nil {
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
-			ds.SchemaDBField: schema.ID,
+			ds.SchemaDBField: schemaID,
 		}, false); err == nil && len(res) > 0 {
-			return GetNewSchemaByWF(res[0], schema.ToRecord(), domain)
+			return GetNewSchemaByWF(res[0], schema, domain)
 		}
 	}
 	return map[string]interface{}{}
