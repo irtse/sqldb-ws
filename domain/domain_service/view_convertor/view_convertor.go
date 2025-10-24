@@ -214,6 +214,7 @@ func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel
 		}
 		vals[utils.SpecialIDParam] = record.GetString(utils.SpecialIDParam)
 	}
+	fmt.Println("1", record["is_draft"])
 	for _, field := range schema.Fields {
 		if d, s, ok := d.HandleDBSchemaField(record, field, shallowVals); ok && d != "" {
 			datapath = d
@@ -236,6 +237,7 @@ func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel
 		view.Order = newOrder
 	}
 	vals = d.GetFieldsFill(schema, vals)
+	fmt.Println(record["is_draft"])
 	channel <- sm.ViewItemModel{
 		Values:        vals,
 		DataPaths:     datapath,
