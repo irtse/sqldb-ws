@@ -3,6 +3,7 @@ package filter
 import (
 	"net/url"
 	"slices"
+	"sqldb-ws/domain/domain_service/history"
 	sch "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -166,7 +167,14 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 	}
 	newRestr := map[string]interface{}{}
 	restrictions := map[string]interface{}{}
-	if !s.Domain.IsShallowed() {
+	if s.Domain.IsOwn(false, false, s.Domain.GetMethod()) || overrideOwn {
+		ids := history.GetCreatedAccessData(schema.ID, s.Domain)
+		if len(ids) > 0 {
+			newRestr[utils.SpecialIDParam] = ids
+		} else {
+			newRestr[utils.SpecialIDParam] = nil
+		}
+	} else if !s.Domain.IsShallowed() {
 		m := map[string]interface{}{
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d",
 				map[string]interface{}{
