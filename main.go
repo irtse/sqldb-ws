@@ -59,7 +59,7 @@ func main() {
 					go launchFunc()
 				}
 			} else {
-				fmt.Println(err)
+				fmt.Println("PLUGIN ERROR :", err)
 			}
 		}
 	}
@@ -89,7 +89,7 @@ func GetResponse() {
 	for true {
 		resp, err := http.Get(fmt.Sprintf("%s/v1/response", host))
 		if err != nil {
-			fmt.Println("Error:", err)
+			fmt.Println("GetResponse Error:", err)
 			time.Sleep(1 * time.Hour)
 			continue
 		}
@@ -98,19 +98,19 @@ func GetResponse() {
 		// Read response body
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println("Error:", err)
+			fmt.Println("GetResponse", "Error:", err)
 			time.Sleep(1 * time.Hour)
 			continue
 		}
 		var b map[string]interface{}
 		json.Unmarshal(body, &b)
 		if b["error"] != nil {
-			fmt.Println(b["error"])
+			fmt.Println("GetResponse", b["error"])
 			time.Sleep(1 * time.Hour)
 			continue
 		}
 		if b["data"] == nil {
-			fmt.Println("Empty !")
+			fmt.Println("GetResponse", "Empty !")
 			time.Sleep(1 * time.Hour)
 			continue
 		}
