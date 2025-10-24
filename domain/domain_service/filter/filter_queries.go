@@ -203,7 +203,7 @@ func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.Sche
 	fields, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilterField.Name, restriction, true)
 	if err == nil && len(fields) > 0 {
 		for _, field := range fields {
-			if utils.GetBool(field, "is_task_concerned") && s.Domain.GetMode() != "edit" && s.Domain.GetMode() != "delete" && s.Domain.GetMethod() != utils.UPDATE && s.Domain.GetMethod() != utils.DELETE {
+			if utils.GetBool(field, "is_task_concerned") {
 				filter = append(filter, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 					"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 						"is_close":          false,

@@ -16,7 +16,6 @@ import (
 	"sqldb-ws/infrastructure/service"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type AbstractSpecializedService struct {
@@ -73,26 +72,6 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 
 func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]interface{}, tablename string) {
 	if sch, err := schema.GetSchema(tablename); err == nil {
-		if !utils.GetBool(record, "is_draft") {
-			go func() {
-				time.Sleep(time.Duration(10) * time.Second) // set up a delay... before
-				if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
-					ds.SchemaDBField: sch.ID,
-					"0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
-						ds.DestTableDBField: record[utils.SpecialIDParam],
-						ds.SchemaDBField:    sch.ID,
-						ds.WorkflowDBField:  "main.id",
-					}, false, "COUNT(*)"),
-				}, false); err == nil && len(res) > 0 {
-					newReq := utils.Record{
-						ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
-						ds.DestTableDBField: record[utils.SpecialIDParam],
-						ds.SchemaDBField:    utils.ToInt64(sch.ID),
-					}
-					s.Domain.CreateSuperCall(utils.AllParams(ds.DBRequest.Name), newReq)
-				}
-			}()
-		}
 		for schemaName, mm := range s.ManyToMany {
 			field, err := sch.GetField(schemaName)
 			if err != nil {
