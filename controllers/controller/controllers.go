@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bufio"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -142,7 +143,8 @@ func (t *AbstractController) UncompressGzip(uncompressedPath string) (string, er
 		return "", fmt.Errorf("failed to open gzip file: %w", err)
 	}
 	defer inFile.Close()
-
+	br := bufio.NewReader(inFile)
+	fmt.Println(br.ReadByte())
 	// Create a gzip reader
 	gzipReader, err := gzip.NewReader(inFile)
 	if err != nil {

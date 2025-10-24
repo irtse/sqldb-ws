@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"sqldb-ws/controllers/controller"
@@ -44,6 +45,7 @@ func (l *MainController) Download() {
 		filePath = "/mnt/files/" + filePath
 	}
 	uncompressedP, err := l.UncompressGzip(filePath)
+	fmt.Println(uncompressedP)
 	if err != nil {
 		l.Ctx.Output.SetStatus(http.StatusNoContent)
 		l.Ctx.Output.Body([]byte(err.Error()))

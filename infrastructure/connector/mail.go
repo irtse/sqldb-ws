@@ -180,7 +180,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 	if isValidButton {
 		host := os.Getenv("HOST")
 		if host == "" {
-			host = "http://capitalisation.irt-aese.local"
+			host = ""
 		}
 		writeLine(fmt.Sprintf(`
 			<div style="display:flex;justify-content:center;align-items:center;">

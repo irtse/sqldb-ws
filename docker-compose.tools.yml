@@ -17,6 +17,8 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
+      - GF_SECURITY_ADMIN_USER=${DBUSER:-test}
+      - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-test}
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
