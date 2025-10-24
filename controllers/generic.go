@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"sqldb-ws/controllers/controller"
@@ -9,6 +8,7 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
+	"time"
 )
 
 type MainController struct{ controller.AbstractController }
@@ -44,14 +44,7 @@ func (l *MainController) Download() {
 	if !strings.Contains(filePath, "/mnt/files/") {
 		filePath = "/mnt/files/" + filePath
 	}
-	fmt.Println(fmt.Sprintf("%v.gz", strings.Trim(filePath, " ")))
-	if _, err := os.Stat(fmt.Sprintf("%v.gz", strings.Trim(filePath, " "))); err == nil {
-		fmt.Printf("File exists\n")
-	} else {
-		fmt.Printf("File does not exist\n")
-	}
 	uncompressedP, err := l.UncompressGzip(filePath)
-	fmt.Println(uncompressedP)
 	if err != nil {
 		l.Ctx.Output.SetStatus(http.StatusNoContent)
 		l.Ctx.Output.Body([]byte(err.Error()))
@@ -59,7 +52,6 @@ func (l *MainController) Download() {
 	}
 	// Open the file
 	file, err := os.Open(uncompressedP)
-
 	if err != nil {
 		l.Ctx.Output.SetStatus(http.StatusNotFound)
 		l.Ctx.Output.Body([]byte("File not found"))
@@ -79,7 +71,10 @@ func (l *MainController) Download() {
 	l.Ctx.Output.Header("Content-Disposition", "attachment; filename="+stat.Name())
 	l.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	l.Ctx.Output.Header("Content-Length", string(rune(stat.Size())))
-	l.DeleteUncompressed(uncompressedP)
+	go func() {
+		time.Sleep(60)
+		l.DeleteUncompressed(uncompressedP)
+	}()
 	// Serve the file
 	http.ServeFile(l.Ctx.ResponseWriter, l.Ctx.Request, filePath)
 }

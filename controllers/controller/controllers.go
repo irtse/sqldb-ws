@@ -142,16 +142,12 @@ func (t *AbstractController) UncompressGzip(uncompressedPath string) (string, er
 		return "", fmt.Errorf("failed to open gzip file: %w", err)
 	}
 	defer inFile.Close()
-	fmt.Println("<" + fmt.Sprintf("%v.gz", strings.Trim(uncompressedPath, " ")) + ">")
 	// Create a gzip reader
 	gzipReader, err := gzip.NewReader(inFile)
 	if err != nil {
 		return "", fmt.Errorf("failed to create gzip reader: %w", err)
 	}
 	defer gzipReader.Close()
-	data, err := io.ReadAll(gzipReader)
-	fmt.Printf("Decompressed %v bytes\n", data)
-
 	// Create destination file
 	outFile, err := os.Create(uncompressedPath)
 	if err != nil {
