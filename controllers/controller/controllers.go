@@ -144,6 +144,7 @@ func (t *AbstractController) UncompressGzip(uncompressedPath string) (string, er
 	}
 	defer inFile.Close()
 	br := bufio.NewReader(inFile)
+	fmt.Println(fmt.Sprintf("%v.gz", strings.Trim(uncompressedPath, " ")))
 	fmt.Println(br.ReadByte())
 	// Create a gzip reader
 	gzipReader, err := gzip.NewReader(inFile)
