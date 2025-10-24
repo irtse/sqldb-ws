@@ -3,7 +3,6 @@ package filter
 import (
 	"net/url"
 	"slices"
-	"sqldb-ws/domain/domain_service/history"
 	sch "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -167,14 +166,7 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 	}
 	newRestr := map[string]interface{}{}
 	restrictions := map[string]interface{}{}
-	if s.Domain.IsOwn(false, false, s.Domain.GetMethod()) || overrideOwn {
-		ids := history.GetCreatedAccessData(schema.ID, s.Domain)
-		if len(ids) > 0 {
-			newRestr[utils.SpecialIDParam] = ids
-		} else {
-			newRestr[utils.SpecialIDParam] = nil
-		}
-	} else if !s.Domain.IsShallowed() {
+	if !s.Domain.IsShallowed() && ds.DBView.Name != schema.Name {
 		m := map[string]interface{}{
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d",
 				map[string]interface{}{
@@ -185,11 +177,11 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 				}, false, ds.DestTableDBField),
 		}
 		if hierarch {
-			m[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d",
+			m[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d1",
 				map[string]interface{}{
-					"d." + ds.SchemaDBField:    schema.ID,
-					"d." + ds.DestTableDBField: "main.id",
-					"d." + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+					"d1." + ds.SchemaDBField:    schema.ID,
+					"d1." + ds.DestTableDBField: "main.id",
+					"d1." + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
 						"parent_" + ds.UserDBField: s.Domain.GetUserID(),
 					}, false, ds.UserDBField),
 					"d.write": true,
