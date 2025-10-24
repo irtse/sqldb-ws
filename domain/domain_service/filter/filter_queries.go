@@ -57,6 +57,7 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 	if isUpdate {
 		action = utils.UPDATE
 	}
+	fmt.Println(action, s.Domain.VerifyAuth(schema.Name, "", "", action), s.Domain.IsSuperAdmin())
 	if s.Domain.VerifyAuth(schema.Name, "", "", action) {
 		perms = 1
 	}

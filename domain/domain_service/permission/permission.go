@@ -154,7 +154,7 @@ func (p *PermDomainService) LocalPermsCheck(tableName string, colName string, le
 	}
 	// Retrieve permissions
 	p.mutexPerms.Lock()
-	perms := p.getPermissions(tableName, colName)
+	perms := p.getPermissions(tableName, colName, domain)
 	p.mutexPerms.Unlock()
 	// Handle SELECT method permissions
 	schema, err := schserv.GetSchema(tableName)
@@ -181,7 +181,10 @@ func (p *PermDomainService) LocalPermsCheck(tableName string, colName string, le
 	return accesGranted
 }
 
-func (p *PermDomainService) getPermissions(tableName, colName string) Perms {
+func (p *PermDomainService) getPermissions(tableName, colName string, domain utils.DomainITF) Perms {
+	if CachePerms[domain.GetUserID()] != nil {
+		p.Perms = CachePerms[domain.GetUserID()]
+	}
 	if tPerms, ok := p.Perms[tableName]; ok {
 		if cPerms, ok2 := tPerms[colName]; ok2 && colName != "" {
 			return cPerms
