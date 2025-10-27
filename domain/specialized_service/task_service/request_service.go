@@ -127,7 +127,7 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 		case "dismiss":
 		case "refused":
 			rec["state"] = "refused"
-			m[sm.NAMEKEY] ="Rejected " + utils.GetString(rec, sm.NAMEKEY)
+			m[sm.NAMEKEY] = "Rejected " + utils.GetString(rec, sm.NAMEKEY)
 			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is rejected and closed."
 		case "completed":
 			m[sm.NAMEKEY] = "Validated " + utils.GetString(rec, sm.NAMEKEY)
@@ -138,8 +138,8 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 			if t, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
 				ds.UserDBField:      utils.ToString(rec[ds.UserDBField]),
 				ds.DestTableDBField: utils.ToString(rec[utils.SpecialIDParam]),
-				"link_id": schema.ID,
-				"name": connector.Quote(m["name"])
+				"link_id":           schema.ID,
+				"name":              connector.Quote(utils.GetString(m, "name")),
 			}, false); err == nil && len(t) > 0 {
 				return
 			}
