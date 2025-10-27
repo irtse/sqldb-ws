@@ -1,7 +1,6 @@
 package view_convertor
 
 import (
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
@@ -109,7 +108,6 @@ func (s *ViewConvertor) GetFieldInfo(f *sm.FieldModel, from string) (interface{}
 			}
 		}
 	}
-	fmt.Println(f.Name, from, value, operator)
 	return value, operator
 }
 

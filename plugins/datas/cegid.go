@@ -134,7 +134,7 @@ var ConferenceFR = models.SchemaModel{
 		{Name: "major_conference", Translatable: false, Label: "la conférence visée est-elle incontournable dans ton domaine scientifique ?", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false, Readonly: false, Index: -8},
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: ConferenceAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "yes", Required: false, Readonly: false, Index: 9},
-		{Name: "conference_acronym", Translatable: false, Label: "accronyme de la conférence ", Type: models.VARCHAR.String(), Required: true, Readonly: false, Index: 10},
+		{Name: "conference_acronym", Translatable: false, Label: "acronyme de la conférence ", Type: models.VARCHAR.String(), Required: true, Readonly: false, Index: 10},
 		{Name: "conference_name", Translatable: false, Label: "nom de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 11},
 		{Name: "cp_start_date", Label: "date objective de publication", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 		{Name: "cp_end_date", Label: "commentaires", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 13},
@@ -182,7 +182,7 @@ var PresentationFR = models.SchemaModel{
 
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: PresentationAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "no", Required: false, Readonly: false, Index: 9},
-		{Name: "conference_acronym", Translatable: false, Label: "nom de la conférence (acronyme)", Type: models.VARCHAR.String(), Required: true, Readonly: false, Index: 10},
+		{Name: "conference_acronym", Translatable: false, Label: "acronyme de la conférence", Type: models.VARCHAR.String(), Required: true, Readonly: false, Index: 10},
 		{Name: "conference_name", Translatable: false, Label: "nom de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 12},
 		{Name: "meeting_name", Translatable: false, Label: "nom du meeting", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 12},
 		{Name: "meeting_date", Label: "date du meeting", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 13},
@@ -228,7 +228,7 @@ var PosterFR = models.SchemaModel{
 
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: PosterAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "no", Required: false, Readonly: false, Index: 9},
-		{Name: "conference_acronym", Label: "nom de la conférence (acronyme)", Translatable: false, Type: models.VARCHAR.String(), Required: true, Readonly: false, Index: 10},
+		{Name: "conference_acronym", Label: "acronyme de la conférence", Translatable: false, Type: models.VARCHAR.String(), Required: true, Readonly: false, Index: 10},
 		{Name: "conference_name", Translatable: false, Label: "nom de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 11},
 		{Name: "conference_start_date", Label: "date objective de publication", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 		{Name: "conference_city", Translatable: false, Label: "ville de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 14},
