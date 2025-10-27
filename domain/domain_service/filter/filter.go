@@ -193,7 +193,7 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 			restr = append(restr, "is_draft=false")
 		}
 	} else {
-		if (slices.Contains(ds.PERMISSIONEXCEPTION, schema.Name) && s.Domain.GetMethod() == utils.SELECT) || (slices.Contains(ds.AllPERMISSIONEXCEPTION, schema.Name)) || s.Domain.IsShallowed() {
+		if (slices.Contains(ds.PERMISSIONEXCEPTION, schema.Name) && s.Domain.GetMethod() == utils.SELECT) || (slices.Contains(ds.AllPERMISSIONEXCEPTION, schema.Name)) || (s.Domain.IsShallowed() && s.Domain.GetMethod() == utils.SELECT) {
 			return restr
 		}
 	}
