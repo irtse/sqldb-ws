@@ -127,19 +127,24 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 		case "dismiss":
 		case "refused":
 			rec["state"] = "refused"
-			m[sm.NAMEKEY] = connector.Quote("Rejected " + utils.GetString(rec, sm.NAMEKEY))
+			m[sm.NAMEKEY] ="Rejected " + utils.GetString(rec, sm.NAMEKEY)
 			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is rejected and closed."
 		case "completed":
-			m[sm.NAMEKEY] = connector.Quote("Validated " + utils.GetString(rec, sm.NAMEKEY))
+			m[sm.NAMEKEY] = "Validated " + utils.GetString(rec, sm.NAMEKEY)
 			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is accepted and closed."
 		}
 		schema, err := schserv.GetSchema(ds.DBRequest.Name)
 		if err == nil && !utils.Compare(rec["is_meta"], true) && CheckStateIsEnded(rec["state"]) {
-			if t, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBNotification.Name, m, false); err == nil && len(t) > 0 {
+			if t, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
+				ds.UserDBField:      utils.ToString(rec[ds.UserDBField]),
+				ds.DestTableDBField: utils.ToString(rec[utils.SpecialIDParam]),
+				"link_id": schema.ID,
+				"name": connector.Quote(m["name"])
+			}, false); err == nil && len(t) > 0 {
 				return
 			}
 			m["link_id"] = schema.ID
-			s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBNotification.Name, rec, func(s string) (string, bool) { return s, true })
+			s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBNotification.Name, m, func(s string) (string, bool) { return s, true })
 		}
 		if utils.Compare(rec["is_close"], true) {
 			res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
