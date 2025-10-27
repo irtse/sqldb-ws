@@ -32,9 +32,6 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(name, "trigger") {
-		fmt.Println(q)
-	}
 	return db.QueryAssociativeArray(q)
 }
 
@@ -173,9 +170,6 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 	if strings.Contains(q, "main.") {
 		name = name + " as main "
 		q = db.BuildDeleteQuery(name, colName)
-	}
-	if strings.Contains(name, "delegation") {
-		fmt.Println(q)
 	}
 	return db.Query(q)
 }
