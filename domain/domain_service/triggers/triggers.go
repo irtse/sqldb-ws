@@ -62,7 +62,6 @@ func (t *TriggerService) Trigger(fromSchema *sm.SchemaModel, record utils.Record
 	}
 	if res, err := t.GetTriggers("auto", method, fromSchema.ID); err == nil {
 		for _, r := range res {
-			fmt.Println("TR", r, ShouldExecLater(r))
 			if !ShouldExecLater(r) {
 				t.ExecTrigger(fromSchema, record, r)
 				ShouldExecJob(r)
@@ -219,17 +218,20 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 
 	rules := t.GetTriggerRules(triggerID, fromSchema, toSchemaID, record)
 	for _, r := range rules {
+		fmt.Println("TR", r, toSchemaID, utils.GetInt(r, "to_"+ds.SchemaDBField))
 		if toSchemaID != utils.GetInt(r, "to_"+ds.SchemaDBField) {
 			continue
 		}
 
 		toSchema, err := schema.GetSchemaByID(toSchemaID)
 		if err != nil {
+			fmt.Println("ERR", err)
 			continue
 		}
 
 		field, err := toSchema.GetFieldByID(utils.GetInt(r, "to_"+ds.SchemaFieldDBField))
 		if err != nil {
+			fmt.Println("ERR2", err)
 			continue
 		}
 
@@ -237,6 +239,11 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		if value == "" {
 			value = utils.GetString(record, field.Name)
 		}
+		fmt.Println("UPDATE", map[string]interface{}{
+			field.Name: value,
+		}, map[string]interface{}{
+			utils.SpecialIDParam: destID,
+		})
 		t.Domain.GetDb().ClearQueryFilter().UpdateQuery(toSchema.Name, map[string]interface{}{
 			field.Name: value,
 		}, map[string]interface{}{
