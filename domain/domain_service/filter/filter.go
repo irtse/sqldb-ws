@@ -190,11 +190,11 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 			}
 			restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", m, true)+")")
 		} else {
-			if slices.Contains(ds.OWNPERMISSIONEXCEPTION, schema.Name) {
-				newRestr["is_draft"] = false
-			} else {
-				restr = append(restr, "is_draft=false")
-			}
+			restr = append(restr, "is_draft=false")
+		}
+	} else {
+		if (slices.Contains(ds.PERMISSIONEXCEPTION, schema.Name) && s.Domain.GetMethod() == utils.SELECT) || (slices.Contains(ds.AllPERMISSIONEXCEPTION, schema.Name)) || s.Domain.IsShallowed() {
+			return restr
 		}
 	}
 
