@@ -21,12 +21,12 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-imnotthepwd}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.adminer.entrypoints=websecure"
-      - "traefik.http.routers.adminer.tls=true"
-      - "traefik.http.routers.adminer.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/grafana`)"
-      - "traefik.http.services.adminer.loadbalancer.server.port=3000"
-      - "traefik.http.middlewares.adminer-strip-prefix.stripprefix.prefixes=/db"
-      - "traefik.http.routers.adminer.middlewares=adminer-strip-prefix"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/grafana`)"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.grafana-strip-prefix.stripprefix.prefixes=/db"
+      - "traefik.http.routers.grafana.middlewares=grafana-strip-prefix"
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
