@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"os"
 	"sqldb-ws/controllers/controller"
 	"sqldb-ws/domain"
@@ -52,8 +53,7 @@ func (l *AuthController) Login() {
 				l.Response(response, err, "", "")
 				return
 			}
-			valid = controller.CheckLdap(utils.GetString(response[0], "name"), plain)
-			if !valid {
+			if valid = controller.CheckLdap(utils.GetString(response[0], "name"), plain); !valid {
 				valid = controller.CheckLdap(utils.GetString(response[0], "name"), utils.GetString(body, "password"))
 			}
 		} else {
@@ -64,6 +64,7 @@ func (l *AuthController) Login() {
 				return
 			}
 			pwd, ok1 := response[0]["password"]
+			fmt.Println(pwd, ok1, pass, plain, err)
 			if ok && ok1 {
 				valid, _ = argon2.VerifyEncoded([]byte(utils.ToString(plain)), []byte(utils.ToString(pwd)))
 				if !valid {
