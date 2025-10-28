@@ -19,6 +19,12 @@ services:
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
     ports:
       - '8080:3000'
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.grafana.entrypoints=websecure"
+        - "traefik.http.routers.grafana.rule=Host(`${HOST_SHORT:-opps.irt-aese.local}`) && PathPrefix(`/grafana`)"
+        - "traefik.http.services.grafana.loadbalancer.server.port=8080"
+        - "traefik.http.routers.grafana.tls=true"
     # adding the mount volume point which we create earlier
     volumes:
       - '$PWD/data:/var/lib/grafana'
