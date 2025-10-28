@@ -19,6 +19,7 @@ services:
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=imnotthepwd
+      - GF_AUTH_LDAP_ENABLED=false
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
