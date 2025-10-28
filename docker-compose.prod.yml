@@ -17,8 +17,16 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
-      - GF_SECURITY_ADMIN_USER=${DBUSER:-opps-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-test}
+      - GF_SECURITY_ADMIN_USER=${DBUSER:-opps}
+      - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-imnotthepwd}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls=true"
+      - "traefik.http.routers.adminer.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/grafana`)"
+      - "traefik.http.services.adminer.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.adminer-strip-prefix.stripprefix.prefixes=/db"
+      - "traefik.http.routers.adminer.middlewares=adminer-strip-prefix"
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
@@ -38,8 +46,8 @@ services:
       - sqldb
     environment:
       POSTGRES_DB: ${DBNAME:-opps}
-      POSTGRES_USER: ${DBUSER:-opps-admin}
-      POSTGRES_PASSWORD: ${DBPWD:-test}
+      POSTGRES_USER: ${DBUSER:-opps}
+      POSTGRES_PASSWORD: ${DBPWD:-imnotthepwd}
     ports: 
       - 5432:5432
 
@@ -92,7 +100,7 @@ services:
       DBDRIVER : ${DBDRIVER:-postgres}
       DBHOST : ${DBHOST:-sqldb-ws-pg}
       DBPORT : ${DBPORT:-5432}
-      DBUSER : ${DBUSER:-opps-admin}
+      DBUSER : ${DBUSER:-opps}
       DBPWD : ${DBPWD:-imnotthepwd}
       DBNAME: ${DBNAME:-opps}
       DBSSL: ${DBSSL:-disable}
