@@ -82,7 +82,7 @@ services:
       SUPERADMIN_NAME: ${SUPERADMIN_NAME:-root}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-pro.morgane.roques@gmail.com}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-imnotthepwd}
-      AUTH_MODE: ${AUTH_MODE:-ldap}ff2emcad1u9dsd
+      AUTH_MODE: ${AUTH_MODE:-ldap}
       DBDRIVER : ${DBDRIVER:-postgres}
       DBHOST : ${DBHOST:-sqldb-ws-pg}
       DBPORT : ${DBPORT:-5432}
