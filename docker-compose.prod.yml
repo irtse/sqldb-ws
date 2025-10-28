@@ -25,7 +25,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.grafana.entrypoints=websecure"
         - "traefik.http.routers.grafana.rule=Host(`${HOST_SHORT:-opps.irt-aese.local}`) && PathPrefix(`/grafana`)"
-        - "traefik.http.services.grafana.loadbalancer.server.port=8080"
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
         - "traefik.http.routers.grafana.tls=true"
     # adding the mount volume point which we create earlier
     volumes:
