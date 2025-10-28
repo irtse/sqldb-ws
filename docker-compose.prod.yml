@@ -17,6 +17,8 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
+      - GF_SERVER_ROOT_URL=${HOST_SHORT:-opps.irt-aese.local}/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     ports:
       - '8080:3000'
     labels:
