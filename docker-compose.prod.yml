@@ -29,6 +29,7 @@ services:
   pg:
     image: postgres:alpine
     container_name: ${DBHOST:-sqldb-ws-pg}
+    hostname: ${DBHOST:-sqldb-ws-pg}
     restart: always
     volumes:
       - ./db/autoload:/docker-entrypoint-initdb.d
