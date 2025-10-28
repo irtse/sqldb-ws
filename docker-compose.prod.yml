@@ -73,7 +73,7 @@ services:
         - "traefik.http.services.sqldb.loadbalancer.server.port=8080"
         - "traefik.http.routers.sqldb.tls=true"
     environment:
-      LDAP_ADDR: ${LDAP_ADDR:-ldap://irt00v001.irt-aese.local:389}
+      LDAP_ADDR: ${LDAP_ADDR:-ldap://ldap.irt-aese.local:389}
       LDAP_USR: ${LDAP_USR:-CN=read only,OU=Utilisateurs,OU=YZ - Technique,OU=AD - IRT-AESE,DC=IRT-AESE,DC=local}
       LDAP_OU: ${LDAP_USR:-OU=AD - IRT-AESE,DC=IRT-AESE,DC=local}
       LDAP_PWD: ${LDAP_PWD:-IRT@2015}
