@@ -25,7 +25,7 @@ services:
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/grafana`)"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-      - "traefik.http.middlewares.grafana-strip-prefix.stripprefix.prefixes=/db"
+      - "traefik.http.middlewares.grafana-strip-prefix.stripprefix.prefixes=/grafana"
       - "traefik.http.routers.grafana.middlewares=grafana-strip-prefix"
     ports:
       - '8080:3000'
