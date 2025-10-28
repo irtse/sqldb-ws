@@ -1,6 +1,54 @@
 version: '3.1'
 
 services:
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    # if you are running as root then set it to 0
+    # else find the right id with the id -u command
+    user: '0'
+    networks:
+      - sqldb
+    environment:
+      - GF_DEFAULT_LANGUAGE=fr
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+      - GF_SECURITY_ADMIN_USER=${DBUSER:-opps-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-test}
+    ports:
+      - '8080:3000'
+    # adding the mount volume point which we create earlier
+    volumes:
+      - '$PWD/data:/var/lib/grafana'
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/fr.json:/usr/share/grafana/public/locales/fr.json
+  pg:
+    image: postgres:alpine
+    container_name: ${DBHOST:-sqldb-ws-pg}
+    restart: always
+    volumes:
+      - ./db/autoload:/docker-entrypoint-initdb.d
+      - /opt/data/containers/sqldb/pgdata:/var/lib/postgresql/data
+    networks:
+      - sqldb
+    environment:
+      POSTGRES_DB: ${DBNAME:-opps}
+      POSTGRES_USER: ${DBUSER:-opps-admin}
+      POSTGRES_PASSWORD: ${DBPWD:-test}
+    ports: 
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - sqldb
+    ports:
+      - 8443:8080
   sqldb-ws:
     image: irtse/sqldb-ws:latest
     restart: always
@@ -19,8 +67,8 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.sqldb.entrypoints=websecure"
         - "traefik.http.routers.sqldb.rule=Host(`${HOST_SHORT:-opps.irt-aese.local}`) && PathPrefix(`/v1`)"
-        - "traefik.http.routers.sqldb.tls.certresolver=mytlsresolver"
         - "traefik.http.services.sqldb.loadbalancer.server.port=8080"
+        - "traefik.http.routers.sqldb.tls=true"
     environment:
       LDAP_ADDR: ${LDAP_ADDR:-ldap://irt00v001.irt-aese.local:389}
       LDAP_USR: ${LDAP_USR:-CN=read only,OU=Utilisateurs,OU=YZ - Technique,OU=AD - IRT-AESE,DC=IRT-AESE,DC=local}
@@ -30,14 +78,14 @@ services:
       SMTP_PORT: ${SMTP_PORT:-25}
       SUPERADMIN_NAME: ${SUPERADMIN_NAME:-root}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-pro.morgane.roques@gmail.com}
-      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-admin}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-imnotthepwd}
       AUTH_MODE: ${AUTH_MODE:-ldap}
       DBDRIVER : ${DBDRIVER:-postgres}
       DBHOST : ${DBHOST:-sqldb-ws-pg}
       DBPORT : ${DBPORT:-5432}
-      DBUSER : ${DBUSER:-test}
-      DBPWD : ${DBPWD:-test}
-      DBNAME: ${DBNAME:-test}
+      DBUSER : ${DBUSER:-opps-admin}
+      DBPWD : ${DBPWD:-imnotthepwd}
+      DBNAME: ${DBNAME:-opps}
       DBSSL: ${DBSSL:-disable}
       HOST: ${HOST:-https://opps.irt-saintexupery.com}
       USER_FILE_PATH: ${USER_FILE_PATH:-Salarié.csv}

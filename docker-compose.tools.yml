@@ -17,7 +17,7 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
-      - GF_SECURITY_ADMIN_USER=${DBUSER:-test}
+      - GF_SECURITY_ADMIN_USER=${DBUSER:-opps-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-test}
     ports:
       - '8080:3000'
@@ -36,8 +36,8 @@ services:
     networks:
       - sqldb
     environment:
-      POSTGRES_DB: ${DBNAME:-test}
-      POSTGRES_USER: ${DBUSER:-test}
+      POSTGRES_DB: ${DBNAME:-opps-db}
+      POSTGRES_USER: ${DBUSER:-opps-admin}
       POSTGRES_PASSWORD: ${DBPWD:-test}
     ports: 
       - 5432:5432
