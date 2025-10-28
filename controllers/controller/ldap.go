@@ -143,11 +143,13 @@ func CheckLdap(user string, password string) bool {
 	}
 	conn, err := ConnectToLDAPServer(address, username, pwd)
 	if err != nil {
+		fmt.Println("LDAP ERR : ", err)
 		return false
 	}
 	defer conn.Close()
 
 	if users, err := ListAllUsers(conn, ou, 500); err != nil || len(users) == 0 {
+		fmt.Println("LDAP2 ERR : ", err)
 		return false
 	}
 	return CheckUserCredentials(conn, ou, user, password)
