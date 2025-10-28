@@ -19,18 +19,6 @@ services:
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_SECURITY_ADMIN_USER=${DBUSER:-opps}
       - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-imnotthepwd}
-      - GF_SERVER_ROOT_URL=https://${HOST:-opps.irt-aese.local}/grafana
-      - GF_SERVER_SERVE_FROM_SUB_PATH=false
-      - GF_SERVER_PROTOCOL=https
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grafana.entrypoints=websecure"
-      - "traefik.http.routers.grafana.tls=true"
-      - "traefik.http.routers.grafana.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/grafana`)"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-      - "traefik.http.middlewares.grafana-strip-prefix.stripprefix.prefixes=/grafana"
-      - "traefik.http.routers.grafana.middlewares=grafana-strip-prefix"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
@@ -66,14 +54,6 @@ services:
     environment:
       ADMINER_DEFAULT_DRIVER: pgsql
       ADMINER_DEFAULT_SERVER: sqldb-ws-pg
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.adminer.entrypoints=websecure"
-      - "traefik.http.routers.adminer.tls=true"
-      - "traefik.http.routers.adminer.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/db`)"
-      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.adminer-strip-prefix.stripprefix.prefixes=/db"
-      - "traefik.http.routers.adminer.middlewares=adminer-strip-prefix"
   sqldb-ws:
     image: irtse/sqldb-ws:latest
     restart: always
