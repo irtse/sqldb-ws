@@ -69,10 +69,10 @@ services:
       - "traefik.http.routers.adminer.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/db`)"
       - "traefik.http.services.adminer.loadbalancer.server.port=8080"
       - "traefik.http.middlewares.adminer-strip-prefix.stripprefix.prefixes=/db"
-      - "traefik.http.routers.adminer.middlewares=adminer-strip-prefix"
 
       - "traefik.http.middlewares.adminer-add-slash.redirectregex.regex=^https://${HOST:-opps.irt-aese.local}/db$$"
       - "traefik.http.middlewares.adminer-add-slash.redirectregex.replacement=https://${HOST:-opps.irt-aese.local}/db/"
+
       - "traefik.http.routers.adminer.middlewares=adminer-strip-prefix@docker,adminer-add-slash@docker"
   sqldb-ws:
     image: irtse/sqldb-ws:latest
