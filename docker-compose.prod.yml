@@ -32,7 +32,7 @@ services:
     restart: always
     volumes:
       - ./db/autoload:/docker-entrypoint-initdb.d
-      - /opt/data/containers/sqldb/pgdata:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     networks:
       - sqldb
     environment:
@@ -102,3 +102,5 @@ services:
 networks:
   sqldb:
     external: true
+volumes:
+  pg_data:
