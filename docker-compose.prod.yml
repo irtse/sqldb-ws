@@ -42,12 +42,17 @@ services:
     volumes:
       - ./db/autoload:/docker-entrypoint-initdb.d
       - pg_data:/var/lib/postgresql/data
+      - "./certs:/certs"
     networks:
       - sqldb
     environment:
       POSTGRES_DB: ${DBNAME:-opps}
       POSTGRES_USER: ${DBUSER:-opps}
       POSTGRES_PASSWORD: ${DBPWD:-imnotthepwd}
+    command: >
+      postgres -c ssl=on
+               -c ssl_cert_file=/certs/opps.irt-aese.local.crt
+               -c ssl_key_file=/certs/opps.irt-aese.local.key
     ports: 
       - 5432:5432
 
