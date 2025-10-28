@@ -21,6 +21,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-imnotthepwd}
       - GF_SERVER_ROOT_URL=https://${HOST:-opps.irt-aese.local}/grafana/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SERVER_PROTOCOL=https
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.entrypoints=websecure"
