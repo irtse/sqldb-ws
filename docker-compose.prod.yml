@@ -19,6 +19,8 @@ services:
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_SECURITY_ADMIN_USER=${DBUSER:-opps}
       - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-imnotthepwd}
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.entrypoints=websecure"
@@ -69,11 +71,7 @@ services:
       - "traefik.http.routers.adminer.rule=Host(`${HOST:-opps.irt-aese.local}`) && PathPrefix(`/db`)"
       - "traefik.http.services.adminer.loadbalancer.server.port=8080"
       - "traefik.http.middlewares.adminer-strip-prefix.stripprefix.prefixes=/db"
-
-      - "traefik.http.middlewares.adminer-add-slash.redirectregex.regex=^https://${HOST:-opps.irt-aese.local}/db$$"
-      - "traefik.http.middlewares.adminer-add-slash.redirectregex.replacement=https://${HOST:-opps.irt-aese.local}/db/"
-
-      - "traefik.http.routers.adminer.middlewares=adminer-strip-prefix@docker,adminer-add-slash@docker"
+      - "traefik.http.routers.adminer.middlewares=adminer-strip-prefix"
   sqldb-ws:
     image: irtse/sqldb-ws:latest
     restart: always
