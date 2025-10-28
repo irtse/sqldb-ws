@@ -82,14 +82,14 @@ services:
       SUPERADMIN_NAME: ${SUPERADMIN_NAME:-root}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-pro.morgane.roques@gmail.com}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-imnotthepwd}
-      AUTH_MODE: ${AUTH_MODE:-ldap}
+      AUTH_MODE: ${AUTH_MODE:-ldap}ff2emcad1u9dsd
       DBDRIVER : ${DBDRIVER:-postgres}
       DBHOST : ${DBHOST:-sqldb-ws-pg}
       DBPORT : ${DBPORT:-5432}
       DBUSER : ${DBUSER:-opps}
       DBPWD : ${DBPWD:-imnotthepwd}
       DBNAME: ${DBNAME:-opps}
-      DBSSL: ${DBSSL:-enable}
+      DBSSL: ${DBSSL:-disable}
       HOST: ${HOST:-https://opps.irt-saintexupery.com}
       USER_FILE_PATH: ${USER_FILE_PATH:-Salarié.csv}
       PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-Projets.csv}
