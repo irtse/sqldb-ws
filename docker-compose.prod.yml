@@ -19,8 +19,6 @@ services:
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=imnotthepwd
-      - GF_SERVER_ROOT_URL=http://${HOST:-https://opps.irt-saintexupery.com}:8080/
-      - GF_SERVER_SERVE_FROM_SUB_PATH=false
       - GF_AUTH_LDAP_ENABLED=false
     ports:
       - '8080:3000'
