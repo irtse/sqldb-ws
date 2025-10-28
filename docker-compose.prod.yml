@@ -30,6 +30,7 @@ services:
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "traefik.http.middlewares.grafana-strip-prefix.stripprefix.prefixes=/grafana"
       - "traefik.http.routers.grafana.middlewares=grafana-strip-prefix"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
