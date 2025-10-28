@@ -17,7 +17,6 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
-      - GF_AUTH_LDAP_ENABLED=false
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
