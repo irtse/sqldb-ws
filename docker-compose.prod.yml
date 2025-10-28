@@ -19,7 +19,7 @@ services:
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_SECURITY_ADMIN_USER=${DBUSER:-opps}
       - GF_SECURITY_ADMIN_PASSWORD=${DBPWD:-imnotthepwd}
-      - GF_SERVER_ROOT_URL=htts://${HOST:-opps.irt-aese.local}/grafana/
+      - GF_SERVER_ROOT_URL=https://${HOST:-opps.irt-aese.local}/grafana/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     labels:
       - "traefik.enable=true"
