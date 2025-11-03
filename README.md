@@ -17,6 +17,7 @@ Launch tools before  :
     `docker compose -f docker-compose.tools.yml`
 
 then api :
+    `docker build -t irtse/sqldb-ws`
     `docker compose -f docker-compose.yml`
 
 Super Admin SQLDB-WS Default
