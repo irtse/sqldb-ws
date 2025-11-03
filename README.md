@@ -1,28 +1,5 @@
 Generic database webservice layer
 =================================
-
-WARNING : THIS IS A DEVELOPMENT VERSION OF THE SERVICE "LIB" MUST BE EXTERNALIZE OR PARSED INTO MULTIPLE LIB ACTUALLY EMBEDDED.
-THIS VERSION IS NOT AT ITS FINEST (only full generic accessor revised to give access to table, rows, columns level in DB)
-Actually those are the features implemented (but not confirmed) :
-- Generic accessor on DB table at level : Schema (Table), Column & Rows
-    Those level are invoke by presence of query params such as : "rows" : to invoke the overhidde rows Manager , "columns" : to manage columns. Basic param to those is "all" 
-    exemples : 
-        - table params will focus on a particular table. 
-        - rows="all" (POST.PUT.DELETE or GET ALL), rows=1 (GET row id=1). Row alway overhide columns
-        - columns="all" (POST.PUT.DELETE or GET ALL), columns=name (Manage name column). With rows, columns will refine the results.
-- High Query filter : any field of a table could be use in query params to filter results. 
-- Alternative Token Authentication.
-- DB integrity protection.
-- Auto generated docs depending on schemas...
-- Basic permission on table. 
-- DBschema (elder DBform) will automatically generate a new table, DBschema_field (elder DBformfield) will automatically generate a new row in table. 
-- And so on but i'm bored to continue... 
-"COMING SOON FOR NEXT"
-
-This code publishes automatically CRUD REST web services for all tables available in a SQL database.  
-Some special tables can be used for defining database access restrictions based on an RBAC model.
-
-> export GOPRIVATE=forge.redroom.link
 before doing go mod tidy.
 
 To build :
@@ -31,28 +8,18 @@ To build :
     bee run -gendoc=true -downdoc=true
 
 RUN GO PROJECT 
-`go run main.go` OR `authmode=token go run main.go`
+`go run main.go`
+ 
+# DEV DOCKER LAUNCH
 
-RUN DB
 Prerequisite : Get docker on your local machine. 
+Launch tools before  : 
+    `docker compose -f docker-compose.tools.yml`
 
-- `cd ./db`
-(Optionnal) - `cp <my file path> ./db/autoload` 
-- `<sudo> docker-compose up`
+then api :
+    `docker compose -f docker-compose.yml`
 
-You can add any sql file in ./db/autoload and db will start with your SQL at run. 
-
-Raw DB config.
-    Type : PostgresSQL
-    Host: db_pg_1
-    Database: test
-    User : test
-    Password : test
-
-Adminer : localhost:8888
-SQLDB-WS SWAGGER : [localhost:8080/swagger](http://localhost:8080/swagger)
-
-Super Admin SQLDB-WS
+Super Admin SQLDB-WS Default
 username : root
 password : admin
 
@@ -60,3 +27,36 @@ password : admin
   "login": "root",
   "password": "admin"
 }
+
+Super Admin DB Default
+    Type : PostgresSQL
+    Host: sqldb-ws-pg
+    Database: test
+    User : test
+    Password : test
+
+Grafana wait for first conn.
+
+# PROD DOCKER LAUNCH
+
+Prerequisite : Get docker on your local machine. 
+Launch api PROD :
+    `docker compose -f docker-compose.prod.yml`
+
+Super Admin SQLDB-WS Default
+username : root
+password : imnotthepwd
+
+{
+  "login": "root",  (can be change at first start : SUPERADMIN_NAME)
+  "password": "imnotthepwd"  (can be change at first start : SUPERADMIN_PASSWORD)
+}
+
+Super Admin DB Default
+    Type : PostgresSQL
+    Host: sqldb-ws-pg
+    Database: opps (can be change at first start : DBNAME)
+    User : opps (can be change at first start : DBUSER)
+    Password : imnotthepwd (can be change at first start : DBPWD)
+
+Grafana wait for first conn.
