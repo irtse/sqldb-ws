@@ -275,7 +275,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				return record, errors.New("can't update this record"), false
 			}
 		}
-		fmt.Println("VERIFY")
+		fmt.Println("VERIFY", record)
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
@@ -321,6 +321,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				}
 			}
 		}
+		fmt.Println("VERIFY 2", record)
 		if ok, err := filter.NewFilterService(s.Domain).GetFieldVerification(sch, record); !ok || err != nil {
 			return record, err, false
 		}
