@@ -311,7 +311,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							}, false); err == nil && len(res) > 0 {
 								l = append(l, map[string]interface{}{utils.SpecialIDParam: res[0][utils.SpecialIDParam]})
 							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
-								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
+								"name": utils.GetString(utils.ToMap(n), "name"),
 							}, func(s string) (string, bool) { return "", true }); err == nil {
 								l = append(l, map[string]interface{}{utils.SpecialIDParam: i})
 							}
