@@ -93,7 +93,7 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 		fmt.Println("qsd", db.QueryLen(queryConst))
 		if i := db.QueryLen(queryConst); i > 0 {
 			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
-				"LOWER(name::text) LIKE LOWER('" + fmt.Sprintf("%v", record["name"]) + "')",
+				"LOWER(name::text) = LOWER('" + fmt.Sprintf("%v", record["name"]) + "')",
 			}, false); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) != "0" {
 				return 0, errors.New("we found a <name> already existing, it should be unique !")
 			}
