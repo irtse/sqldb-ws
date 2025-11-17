@@ -279,21 +279,19 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
 			for _, field := range sch.Fields {
-				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.LINKADD.String())) && record[field.Name] != nil {
+				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper("add")) && record[field.Name] != nil {
 					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
 						continue
 					}
 					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-						i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
-							"name": utils.GetString(record, field.Name),
-						}, func(s string) (string, bool) { return "", true })
-						fmt.Println("I", i, err)
-						if err == nil {
-							record[field.Name] = i
-						} else if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+						if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 							"name": connector.Quote(utils.GetString(record, field.Name)),
 						}, false); err == nil && len(res) > 0 {
 							record[field.Name] = res[0][utils.SpecialIDParam]
+						} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
+							"name": utils.GetString(record, field.Name),
+						}, func(s string) (string, bool) { return "", true }); err == nil {
+							record[field.Name] = i
 						} else {
 							delete(record, field.Name)
 						}
