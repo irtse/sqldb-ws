@@ -218,7 +218,6 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 
 	rules := t.GetTriggerRules(triggerID, fromSchema, toSchemaID, record)
 	for _, r := range rules {
-		fmt.Println("TR", r, toSchemaID, utils.GetInt(r, "to_"+ds.SchemaDBField))
 		if toSchemaID != utils.GetInt(r, "to_"+ds.SchemaDBField) {
 			continue
 		}
@@ -239,11 +238,6 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		if value == "" {
 			value = utils.GetString(record, field.Name)
 		}
-		fmt.Println("UPDATE", map[string]interface{}{
-			field.Name: value,
-		}, map[string]interface{}{
-			utils.SpecialIDParam: destID,
-		})
 		t.Domain.GetDb().ClearQueryFilter().UpdateQuery(toSchema.Name, map[string]interface{}{
 			field.Name: value,
 		}, map[string]interface{}{

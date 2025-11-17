@@ -304,16 +304,16 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						continue
 					}
 					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-						l := utils.ToList(record[field.Name])
+						l := []map[string]interface{}{}
 						for _, n := range utils.ToList(record[field.Name]) {
 							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-								"name": connector.Quote(utils.ToString(n)),
+								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
 							}, false); err == nil && len(res) > 0 {
-								l = append(l, res[0][utils.SpecialIDParam])
+								l = append(l, map[string]interface{}{utils.SpecialIDParam: res[0][utils.SpecialIDParam]})
 							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
-								"name": utils.ToString(n),
+								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
 							}, func(s string) (string, bool) { return "", true }); err == nil {
-								l = append(l, i)
+								l = append(l, map[string]interface{}{utils.SpecialIDParam: i})
 							}
 						}
 						record[field.Name] = l
