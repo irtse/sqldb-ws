@@ -304,7 +304,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						continue
 					}
 					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-						l := []map[string]interface{}{}
+						l := []interface{}{}
 						for _, n := range utils.ToList(record[field.Name]) {
 							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
