@@ -97,6 +97,7 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 						}
 					}
 					m[ds.RootID(tablename)] = record[utils.SpecialIDParam]
+					fmt.Println("NEW", m)
 					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 				}
 			}
