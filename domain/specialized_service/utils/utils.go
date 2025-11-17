@@ -78,21 +78,11 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 			if err != nil {
 				continue
 			}
-			for _, m := range mm {
-				if m[utils.SpecialIDParam] != nil {
-					fmt.Println(schemaName, record[utils.SpecialIDParam], m[utils.SpecialIDParam])
-					s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
-						ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-					}, map[string]interface{}{
-						utils.SpecialIDParam: m[utils.SpecialIDParam],
-					}, false)
-				}
-			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 				for _, m := range mm {
 					if m[utils.SpecialIDParam] != nil {
 						fmt.Println(schemaName, record[utils.SpecialIDParam], m[utils.SpecialIDParam])
-						s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
+						s.Domain.GetDb().UpdateQuery(ff.Name, map[string]interface{}{
 							ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
 						}, map[string]interface{}{
 							utils.SpecialIDParam: m[utils.SpecialIDParam],
@@ -143,19 +133,17 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 			if err != nil {
 				continue
 			}
-			for _, m := range mm {
-				if m[utils.SpecialIDParam] != nil {
-					fmt.Println(schemaName, record[utils.SpecialIDParam], m[utils.SpecialIDParam])
-					s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
-						ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-					}, map[string]interface{}{
-						utils.SpecialIDParam: m[utils.SpecialIDParam],
-					}, false)
-				}
-			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 				s.delete(&ff, s.Domain.GetTable(), ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range mm {
+					if m[utils.SpecialIDParam] != nil {
+						fmt.Println(schemaName, record[utils.SpecialIDParam], m[utils.SpecialIDParam])
+						s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
+							ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
+						}, map[string]interface{}{
+							utils.SpecialIDParam: m[utils.SpecialIDParam],
+						}, false)
+					}
 					if ff.HasField(ds.RootID(ff.Name)) {
 						if m[utils.SpecialIDParam] != nil {
 							m[ds.RootID(ff.Name)] = m[utils.SpecialIDParam]
