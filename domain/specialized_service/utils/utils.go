@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -73,14 +72,11 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 
 func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]interface{}, tablename string) {
 	if sch, err := schema.GetSchema(tablename); err == nil {
-		fmt.Println("MTOM", s.ManyToMany)
 		for schemaName, mm := range s.ManyToMany {
 			field, err := sch.GetField(schemaName)
-			fmt.Println("MTOME", err)
 			if err != nil {
 				continue
 			}
-			fmt.Println(fmt.Println("MTOME", err))
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 				for _, m := range mm {
 					if ff.HasField(ds.RootID(ff.Name)) {
@@ -100,7 +96,6 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 						}
 					}
 					m[ds.RootID(tablename)] = record[utils.SpecialIDParam]
-					fmt.Println("NEW", m)
 					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 				}
 			}
@@ -150,7 +145,6 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 					}
 					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
 					delete(m, utils.SpecialIDParam)
-					fmt.Println("NEW", m)
 					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 				}
 			}
@@ -272,12 +266,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 		return record, nil, true
 	}
 
-	if s.Domain.GetMethod() != utils.DELETE {
-		rec, err := schema.ValidateBySchema(record, tablename, s.Domain.GetMethod(), s.Domain, s.Domain.VerifyAuth)
-		if err != nil {
-			return rec, err, err == nil
-		}
-	}
 	if sch, err := schema.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
@@ -361,6 +349,12 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 				}
 			}
+		}
+	}
+	if s.Domain.GetMethod() != utils.DELETE {
+		rec, err := schema.ValidateBySchema(record, tablename, s.Domain.GetMethod(), s.Domain, s.Domain.VerifyAuth)
+		if err != nil {
+			return rec, err, false
 		}
 	}
 	return record, nil, true
