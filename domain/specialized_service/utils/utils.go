@@ -280,12 +280,11 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
 			for _, field := range sch.Fields {
-				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper("_add")) && !strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
+				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.LINKADD.String())) && record[field.Name] != nil {
 					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
 						continue
 					}
 					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-						fmt.Println(sch.Name, record)
 						if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 							"name": connector.Quote(utils.GetString(record, field.Name)),
 						}, false); err == nil && len(res) > 0 {
@@ -297,6 +296,27 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						} else {
 							delete(record, field.Name)
 						}
+					}
+				}
+
+				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANYADD.String())) && record[field.Name] != nil {
+					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
+						continue
+					}
+					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+						l := utils.ToList(record[field.Name])
+						for _, n := range utils.ToList(record[field.Name]) {
+							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+								"name": connector.Quote(utils.ToString(n)),
+							}, false); err == nil && len(res) > 0 {
+								l = append(l, res[0][utils.SpecialIDParam])
+							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
+								"name": utils.ToString(n),
+							}, func(s string) (string, bool) { return "", true }); err == nil {
+								l = append(l, i)
+							}
+						}
+						record[field.Name] = l
 					}
 				}
 
