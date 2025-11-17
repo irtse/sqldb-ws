@@ -128,6 +128,12 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 				s.delete(&ff, s.Domain.GetTable(), ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range mm {
+					if m[utils.SpecialIDParam] != nil {
+						s.Domain.UpdateSuperCall(utils.AllParams(schemaName).RootRaw(), map[string]interface{}{
+							utils.SpecialIDParam:           m[utils.SpecialIDParam],
+							ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
+						})
+					}
 					if ff.HasField(ds.RootID(ff.Name)) {
 						if m[utils.SpecialIDParam] != nil {
 							m[ds.RootID(ff.Name)] = m[utils.SpecialIDParam]
