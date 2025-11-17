@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -265,7 +266,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 	if s.Domain.GetAutoload() {
 		return record, nil, true
 	}
-
 	if sch, err := schema.GetSchema(tablename); err != nil {
 		return record, errors.New("no schema found"), false
 	} else {
@@ -275,9 +275,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				return record, errors.New("can't update this record"), false
 			}
 		}
-		if ok, err := filter.NewFilterService(s.Domain).GetFieldVerification(sch, record); !ok || err != nil {
-			return record, err, false
-		}
+		fmt.Println("VERIFY")
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
@@ -322,6 +320,9 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					record[ds.EntityDBField] = res
 				}
 			}
+		}
+		if ok, err := filter.NewFilterService(s.Domain).GetFieldVerification(sch, record); !ok || err != nil {
+			return record, err, false
 		}
 
 		for k, v := range record {
