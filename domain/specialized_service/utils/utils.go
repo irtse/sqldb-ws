@@ -286,9 +286,11 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						continue
 					}
 					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-						if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
+						i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
 							"name": utils.GetString(record, field.Name),
-						}, func(s string) (string, bool) { return "", true }); err == nil {
+						}, func(s string) (string, bool) { return "", true })
+						fmt.Println("I", i, err)
+						if err == nil {
 							fmt.Println("LINKADD CREATE", field.Name, i, err)
 							record[field.Name] = i
 						} else if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
@@ -297,7 +299,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							fmt.Println("LINKADD RETRIEVE", field.Name, res[0][utils.SpecialIDParam], err)
 							record[field.Name] = res[0][utils.SpecialIDParam]
 						} else {
-							fmt.Println("LINKADD DELETE", field.Name, res[0][utils.SpecialIDParam], err)
+							fmt.Println("LINKADD DELETE", field.Name, err)
 							delete(record, field.Name)
 						}
 					}
