@@ -146,7 +146,8 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 					}
 					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
 					delete(m, utils.SpecialIDParam)
-					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
+					_, err := s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
+					fmt.Println(ff.Name, m, err)
 				}
 			}
 		}
