@@ -275,14 +275,12 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				return record, errors.New("can't update this record"), false
 			}
 		}
-		fmt.Println("VERIFY", record)
 		if s.Domain.GetMethod() == utils.CREATE || s.Domain.GetMethod() == utils.UPDATE { // stock oneToMany and ManyToMany
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
 			for _, field := range sch.Fields {
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.LINKADD.String())) && record[field.Name] != nil {
 					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
-						fmt.Println("LINKADD", field.Name, i, err)
 						continue
 					}
 					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
@@ -291,15 +289,12 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						}, func(s string) (string, bool) { return "", true })
 						fmt.Println("I", i, err)
 						if err == nil {
-							fmt.Println("LINKADD CREATE", field.Name, i, err)
 							record[field.Name] = i
 						} else if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 							"name": connector.Quote(utils.GetString(record, field.Name)),
 						}, false); err == nil && len(res) > 0 {
-							fmt.Println("LINKADD RETRIEVE", field.Name, res[0][utils.SpecialIDParam], err)
 							record[field.Name] = res[0][utils.SpecialIDParam]
 						} else {
-							fmt.Println("LINKADD DELETE", field.Name, err)
 							delete(record, field.Name)
 						}
 					}

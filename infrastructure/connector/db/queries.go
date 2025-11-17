@@ -90,7 +90,6 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 	}
 	queryConst := "SELECT tc.constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.table_name = '" + name + "' AND ccu.column_name = 'name';"
 	if record["name"] != nil && record["name"] != "" {
-		fmt.Println("qsd", db.QueryLen(queryConst))
 		if i := db.QueryLen(queryConst); i > 0 {
 			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
 				"LOWER(REPLACE(name::text, ' ', '')) = LOWER(REPLACE('" + fmt.Sprintf("%v", record["name"]) + "', ' ', ''))",
@@ -151,7 +150,6 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 		defer db.Close()
 	}
 	if record["name"] != nil && record["name"] != "" {
-		fmt.Println("qsd", restriction)
 		if i := db.QueryLen("SELECT tc.constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.table_name = '" + name + "' AND ccu.column_name = 'name';"); i > 0 {
 			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
 				"id=" + fmt.Sprintf("%v", restriction["id"]),
