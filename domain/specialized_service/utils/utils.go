@@ -81,10 +81,12 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 				for _, m := range mm {
 					if m[utils.SpecialIDParam] != nil {
-						s.Domain.UpdateSuperCall(utils.AllParams(schemaName).RootRaw(), map[string]interface{}{
-							utils.SpecialIDParam:           m[utils.SpecialIDParam],
+						fmt.Println(schemaName, record[utils.SpecialIDParam], m[utils.SpecialIDParam])
+						s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
 							ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-						})
+						}, map[string]interface{}{
+							utils.SpecialIDParam: m[utils.SpecialIDParam],
+						}, false)
 					}
 					if ff.HasField(ds.RootID(ff.Name)) {
 						if m[utils.SpecialIDParam] != nil {
@@ -135,10 +137,12 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				s.delete(&ff, s.Domain.GetTable(), ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range mm {
 					if m[utils.SpecialIDParam] != nil {
-						s.Domain.UpdateSuperCall(utils.AllParams(schemaName).RootRaw(), map[string]interface{}{
-							utils.SpecialIDParam:           m[utils.SpecialIDParam],
+						fmt.Println(schemaName, record[utils.SpecialIDParam], m[utils.SpecialIDParam])
+						s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
 							ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-						})
+						}, map[string]interface{}{
+							utils.SpecialIDParam: m[utils.SpecialIDParam],
+						}, false)
 					}
 					if ff.HasField(ds.RootID(ff.Name)) {
 						if m[utils.SpecialIDParam] != nil {
