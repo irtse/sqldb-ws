@@ -67,7 +67,10 @@ func (t *AbstractController) download(d utils.DomainITF, col string, colsCmd str
 	t.Ctx.ResponseWriter.Header().Set("Content-Type", "text/"+format)
 	t.Ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename="+name+"_"+strings.Replace(time.Now().Format(time.RFC3339), " ", "_", -1)+"."+format)
 	if format == "csv" {
-		csv.NewWriter(t.Ctx.ResponseWriter).WriteAll(t.csv(d, lastLine, mapping, cols, results))
+		t.Ctx.ResponseWriter.Write([]byte{0xEF, 0xBB, 0xBF})
+		w := csv.NewWriter(t.Ctx.ResponseWriter)
+		w.Comma = ';'
+		w.WriteAll(t.csv(d, lastLine, mapping, cols, results))
 	} else if format == "json" {
 		t.json(d, lastLine, mapping, cols, results)
 	} else {

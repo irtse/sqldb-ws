@@ -88,6 +88,16 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 	for key, element := range record {
 		_, columns, values = db.BuildUpdateQuery(name, key, element, "", columns, values, false, verify)
 	}
+	queryConst := "SELECT tc.constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.table_name = '" + name + "' AND ccu.column_name = 'name';"
+	if record["name"] != nil && record["name"] != "" {
+		if i, _ := db.QueryLen(queryConst); i > 0 {
+			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
+				"LOWER(name::text) LIKE LOWER('%" + fmt.Sprintf("%v", record["name"]) + "%')",
+			}, false); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) == "0" {
+				return 0, errors.New("we found a <name> already existing, it should be unique !")
+			}
+		}
+	}
 	for _, query := range db.BuildCreateQueries(name, strings.Join(values, ","), strings.Join(columns, ","), "") {
 		if db.GetDriver() == PostgresDriver {
 			i, err := db.QueryRow(query)
@@ -139,7 +149,16 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 		db = Open(db)
 		defer db.Close()
 	}
-
+	if record["name"] != nil && record["name"] != "" {
+		if i, _ := db.QueryLen("SELECT tc.constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.table_name = '" + name + "' AND ccu.column_name = 'name';"); i > 0 {
+			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
+				"id=" + fmt.Sprintf("%v", restriction["id"]),
+				"LOWER(name::text) LIKE LOWER('%" + fmt.Sprintf("%v", record["name"]) + "%')",
+			}, false); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) == "0" {
+				return errors.New("we found a <name> already existing, it should be unique !")
+			}
+		}
+	}
 	q, err := db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
 	if strings.Contains(q, "main.") {
 		name = name + " as main "
@@ -214,6 +233,22 @@ func (db *Database) Query(query string) error {
 		return err
 	}
 	return rows.Close()
+}
+
+func (db *Database) QueryLen(query string) (int, error) {
+	if db == nil || db.Conn == nil {
+		db = Open(db)
+		defer db.Close()
+	}
+	rows, err := db.Conn.Query(query)
+	if err != nil {
+		return 0, err
+	}
+	count := 0
+	for rows.Next() {
+		count++
+	}
+	return count, rows.Close()
 }
 
 /*
