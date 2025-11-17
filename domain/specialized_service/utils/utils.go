@@ -279,7 +279,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 			s.ManyToMany = map[string][]map[string]interface{}{}
 			s.OneToMany = map[string][]map[string]interface{}{}
 			for _, field := range sch.Fields {
-				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper("add")) && !strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
+				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper("_add")) && !strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
 					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
 						continue
 					}
