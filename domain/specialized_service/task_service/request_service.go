@@ -2,7 +2,6 @@ package task_service
 
 import (
 	"errors"
-	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
@@ -116,7 +115,6 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 	if _, ok := record["is_draft"]; ok && utils.GetBool(record, "is_draft") {
 		return
 	}
-	fmt.Println("REQ", results)
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
 	for _, rec := range results {
 		m := map[string]interface{}{

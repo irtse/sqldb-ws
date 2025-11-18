@@ -255,7 +255,6 @@ func (t *TriggerService) GetTriggerRules(triggerID int64, fromSchema *sm.SchemaM
 				return []map[string]interface{}{}
 			}
 			f, err := fromSchema.GetFieldByID(utils.GetInt(cond, ds.SchemaFieldDBField))
-			fmt.Println(record, f.Name, cond, utils.GetString(record, f.Name), utils.GetString(cond, "value"))
 			if err != nil || (record[f.Name] == nil && utils.GetBool(cond, "not_null")) || utils.GetString(record, f.Name) != utils.GetString(cond, "value") {
 				return []map[string]interface{}{}
 			}

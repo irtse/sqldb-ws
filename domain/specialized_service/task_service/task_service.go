@@ -2,7 +2,6 @@ package task_service
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -81,9 +80,7 @@ func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablena
 				return record, errors.New("task is already closed, you cannot change its state"), false
 			}
 		}
-		fmt.Println("VERIFY TASK", record)
 		record = SetClosureStatus(record) // check if task is already progressing
-		fmt.Println("VERIFY TASK2", record)
 		if rec, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
 			return s.AbstractSpecializedService.VerifyDataIntegrity(rec, tablename)
 		} else {
@@ -136,7 +133,6 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 				RequestDBField: utils.ToString(res[RequestDBField]),
 				"state":        []string{"'pending'", "'progressing'"},
 			}, false); err == nil && len(otherPendingTasks) > 0 {
-			fmt.Println("OTHER BINDED", otherPendingTasks, utils.GetString(res, "name"))
 			continue
 		}
 		beforeSchemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
