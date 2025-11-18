@@ -2,6 +2,7 @@ package task_service
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -73,8 +74,10 @@ func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablena
 		}
 	case utils.UPDATE:
 		// check if task is already closed
-		if elder, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{utils.SpecialIDParam: record[utils.SpecialIDParam]},
-			false); len(elder) > 0 && CheckStateIsEnded(utils.ToString(elder[0]["state"])) {
+		fmt.Println("TASK ID", record[utils.SpecialIDParam])
+		if elder, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			utils.SpecialIDParam: record[utils.SpecialIDParam],
+		}, false); len(elder) > 0 && CheckStateIsEnded(utils.ToString(elder[0]["state"])) {
 			return record, errors.New("task is already closed, you cannot change its state"), false
 		}
 		record = SetClosureStatus(record) // check if task is already progressing
