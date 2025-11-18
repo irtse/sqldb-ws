@@ -2,6 +2,7 @@ package task_service
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -106,10 +107,7 @@ func (s *TaskService) SpecializedUpdateRow(results []map[string]interface{}, rec
 
 func (s *TaskService) Write(results []map[string]interface{}, record map[string]interface{}) {
 	for _, res := range results {
-		if _, ok := res["is_draft"]; ok && utils.GetBool(res, "is_draft") {
-			continue
-		}
-		if !CheckStateIsEnded(res["state"]) {
+		if _, ok := res["is_draft"]; (ok && utils.GetBool(res, "is_draft")) || !CheckStateIsEnded(res["state"]) {
 			continue
 		}
 		if sch, err := schema.GetSchema(ds.DBTask.Name); err == nil {
@@ -131,18 +129,12 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		order := requests[0]["current_index"]
 		if otherPendingTasks, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
 			map[string]interface{}{ // delete all notif
-				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name,
-					map[string]interface{}{
-						ds.UserDBField: s.Domain.GetUserID(),
-						ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name,
-							map[string]interface{}{
-								ds.UserDBField: s.Domain.GetUserID(),
-							}, false, ds.EntityDBField),
-					}, true, utils.SpecialIDParam),
+				"!name":         res["name"],
 				RequestDBField:  utils.ToString(res[RequestDBField]),
 				"state":         []string{"'pending'", "'progressing'"},
 				"binded_dbtask": nil,
 			}, false); err == nil && len(otherPendingTasks) > 0 {
+			fmt.Println("OTHER BINDED")
 			continue
 		}
 		beforeSchemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
