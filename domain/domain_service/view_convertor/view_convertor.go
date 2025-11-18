@@ -57,10 +57,10 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 			ds.DestTableDBField: utils.GetInt(results[0], utils.SpecialIDParam),
 		}
 	}
-
+	readOnly := true
 	view := sm.NewView(id, schema.Name, schema.Label, schema, schema.Name, 0, []sm.ManualTriggerModel{})
 	view.Redirection = getRedirection(v.Domain.GetDomainID())
-	view.Order, view.Schema = CompareOrder(schema, order, schemes, results, v.Domain)
+	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
 	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
 
 	sort.SliceStable(view.Order, func(i, j int) bool {
@@ -72,8 +72,10 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	view.Consents = v.getConsent(schema.ID, results)
 	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
 	// if there is only one item in the view, we can set the view readonly to the item readonly
-	if len(view.Items) == 1 {
+	if len(view.Items) == 1 && readOnly {
 		view.Readonly = view.Items[0].Readonly
+	} else if !slices.Contains(view.Actions, "put") {
+		view.Actions = append(view.Actions, "put")
 	}
 	idParamsOk := len(v.Domain.GetParams().GetAsArgs(utils.SpecialSubIDParam)) > 0
 	if idParamsOk && slices.Contains(ds.PUPERMISSIONEXCEPTION, schema.Name) {
@@ -162,7 +164,7 @@ func (v *ViewConvertor) transformShallowedView(results utils.Results, tableName 
 		newView.Actions = addAction
 		if sch.Name != tableName {
 			newView.SchemaID = id
-			newView.Order, newView.Schema = CompareOrder(&sch, order, scheme, results, v.Domain)
+			newView.Order, newView.Schema, newView.Readonly = CompareOrder(&sch, order, scheme, results, newView.Readonly, v.Domain)
 			sort.SliceStable(newView.Order, func(i, j int) bool {
 				return utils.ToInt64(utils.ToMap(newView.Schema[newView.Order[i]])["index"]) <= utils.ToInt64(utils.ToMap(newView.Schema[newView.Order[j]])["index"])
 			})
