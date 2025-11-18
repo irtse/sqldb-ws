@@ -88,6 +88,7 @@ func (s *TaskService) VerifyDataIntegrity(record map[string]interface{}, tablena
 			return record, err, false
 		}
 	}
+	fmt.Println("VERIFY TASK", record)
 	return record, nil, true
 }
 
