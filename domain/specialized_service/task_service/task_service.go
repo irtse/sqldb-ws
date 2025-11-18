@@ -130,7 +130,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		order := requests[0]["current_index"]
 		if otherPendingTasks, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
 			map[string]interface{}{ // delete all notif
-				"!name":         res["name"],
+				"!name":         conn.Quote(utils.GetString(res, "name")),
 				RequestDBField:  utils.ToString(res[RequestDBField]),
 				"state":         []string{"'pending'", "'progressing'"},
 				"binded_dbtask": nil,
