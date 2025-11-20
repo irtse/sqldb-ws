@@ -123,14 +123,9 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 				key: true,
 			}, false); err == nil && len(templs) > 0 {
 				tmp := templs[0]
-				usrID := r["from_email"]
-				if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
-					"is_default": true,
-				}, false); err == nil && len(res) > 0 {
-					usrID = l[0][ds.UserDBField]
-				}
+
 				if usr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-					utils.SpecialIDParam: usrID,
+					utils.SpecialIDParam: r["from_email"],
 				}, false); err == nil && len(usr) > 0 {
 					schMapped, _ := schema.GetSchemaByID(utils.GetInt(r, "mapped_withdbschema_id"))
 					if dests, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schMapped.Name, map[string]interface{}{
@@ -151,8 +146,16 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 								dest, s.Domain, utils.GetInt(tmp, utils.SpecialIDParam),
 								utils.ToInt64(sch.ID), -1, -1, "", "")
 							if err == nil {
+								usrFrom := usr[0]
+								if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+									utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
+										"is_default": true,
+									}, false, ds.UserDBField),
+								}, false); err == nil && len(res) > 0 {
+									usrFrom = l[0]
+								}
 								go connector.SendMailSafe(
-									utils.GetString(usr[0], "email"), utils.GetString(usr[0], "email"), rec, false)
+									utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec, false)
 							}
 						}
 					}
