@@ -89,6 +89,16 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	}
 	if view.Readonly { // if the view is readonly, we remove the actions
 		view.Actions = []string{"get"}
+	} else {
+		for _, record := range results {
+			if !utils.GetBool(record, "is_draft") && !view.Readonly {
+				view.Triggers = append(view.Triggers, triggers.NewTrigger(v.Domain).GetViewTriggers(
+					record.Copy(), v.Domain.GetMethod(), schema,
+					utils.GetInt(record, ds.SchemaDBField),
+					utils.GetInt(record, ds.DestTableDBField))...,
+				)
+			}
+		}
 	}
 	sort.SliceStable(view.Items, func(i, j int) bool { return view.Items[i].Sort < view.Items[j].Sort })
 	if len(results) == 1 {
@@ -119,13 +129,6 @@ func (v *ViewConvertor) ProcessResultsConcurrently(results utils.Results, schema
 	}()
 	createdIds := history.GetCreatedAccessData(schema.ID, v.Domain)
 	for index, record := range results {
-		if !utils.GetBool(record, "is_draft") && !view.Readonly {
-			view.Triggers = append(view.Triggers, triggers.NewTrigger(v.Domain).GetViewTriggers(
-				record.Copy(), v.Domain.GetMethod(), schema,
-				utils.GetInt(record, ds.SchemaDBField),
-				utils.GetInt(record, ds.DestTableDBField))...,
-			)
-		}
 		go v.ConvertRecordToView(len(results), index, view, channel, record, schema, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
 	}
 	for range results {
