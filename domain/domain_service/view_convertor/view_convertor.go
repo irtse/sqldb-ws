@@ -116,7 +116,7 @@ func (v *ViewConvertor) ProcessResultsConcurrently(results utils.Results, schema
 	}()
 	createdIds := history.GetCreatedAccessData(schema.ID, v.Domain)
 	for index, record := range results {
-		if !utils.GetBool(record, "is_draft") {
+		if !utils.GetBool(record, "is_draft") && !view.Readonly {
 			view.Triggers = append(view.Triggers, triggers.NewTrigger(v.Domain).GetViewTriggers(
 				record.Copy(), v.Domain.GetMethod(), schema,
 				utils.GetInt(record, ds.SchemaDBField),
@@ -169,7 +169,7 @@ func (v *ViewConvertor) transformShallowedView(results utils.Results, tableName 
 				return utils.ToInt64(utils.ToMap(newView.Schema[newView.Order[i]])["index"]) <= utils.ToInt64(utils.ToMap(newView.Schema[newView.Order[j]])["index"])
 			})
 			newView.Consents = v.getConsent(utils.ToString(id), []utils.Record{record})
-			if !utils.GetBool(record, "is_draft") {
+			if !utils.GetBool(record, "is_draft") && !newView.Readonly {
 				newView.Triggers = triggers.NewTrigger(v.Domain).GetViewTriggers(
 					record, v.Domain.GetMethod(), &sch, utils.GetInt(record, ds.SchemaDBField), utils.GetInt(record, ds.DestTableDBField))
 			}
