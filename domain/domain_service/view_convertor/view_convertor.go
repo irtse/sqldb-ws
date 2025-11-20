@@ -76,20 +76,8 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	}
 	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
 	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
-	if !view.Readonly {
-		for _, record := range results {
-			if !utils.GetBool(record, "is_draft") && !view.Readonly {
-				view.Triggers = append(view.Triggers, triggers.NewTrigger(v.Domain).GetViewTriggers(
-					record.Copy(), v.Domain.GetMethod(), schema,
-					utils.GetInt(record, ds.SchemaDBField),
-					utils.GetInt(record, ds.DestTableDBField))...,
-				)
-			}
-		}
-	}
 	if !readOnly && !slices.Contains(view.Actions, "put") {
 		view.Actions = append(view.Actions, "put")
-		view.Readonly = false
 	}
 	idParamsOk := len(v.Domain.GetParams().GetAsArgs(utils.SpecialSubIDParam)) > 0
 	if idParamsOk && slices.Contains(ds.PUPERMISSIONEXCEPTION, schema.Name) {
@@ -100,6 +88,14 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	}
 	if view.Readonly { // if the view is readonly, we remove the actions
 		view.Actions = []string{"get"}
+	} else {
+		for _, record := range results {
+			view.Triggers = append(view.Triggers, triggers.NewTrigger(v.Domain).GetViewTriggers(
+				record.Copy(), v.Domain.GetMethod(), schema,
+				utils.GetInt(record, ds.SchemaDBField),
+				utils.GetInt(record, ds.DestTableDBField))...,
+			)
+		}
 	}
 	sort.SliceStable(view.Items, func(i, j int) bool { return view.Items[i].Sort < view.Items[j].Sort })
 	if len(results) == 1 {
