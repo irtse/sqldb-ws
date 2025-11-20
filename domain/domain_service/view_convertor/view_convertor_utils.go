@@ -129,7 +129,6 @@ func GetFilterFields(schema *sm.SchemaModel, results []utils.Record, domain util
 			}, false, "view_"+ds.FilterDBField)
 		}
 	}
-	fmt.Println("FILTER", m)
 	field := []map[string]interface{}{}
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBFilterField.Name, m, false); err == nil {
 		for _, r := range res {
