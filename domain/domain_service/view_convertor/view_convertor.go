@@ -60,8 +60,6 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	readOnly := true
 	view := sm.NewView(id, schema.Name, schema.Label, schema, schema.Name, 0, []sm.ManualTriggerModel{})
 	view.Redirection = getRedirection(v.Domain.GetDomainID())
-	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
-	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
 
 	sort.SliceStable(view.Order, func(i, j int) bool {
 		return utils.ToInt64(utils.ToMap(schemes[view.Order[i]])["index"]) <= utils.ToInt64(utils.ToMap(schemes[view.Order[j]])["index"])
@@ -73,9 +71,13 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
 	// if there is only one item in the view, we can set the view readonly to the item readonly
 	fmt.Println("FILTER", view.Actions, view.Readonly, readOnly)
-	if len(view.Items) == 1 && readOnly {
+	if len(view.Items) == 1 {
 		view.Readonly = view.Items[0].Readonly
-	} else if !slices.Contains(view.Actions, "put") {
+	}
+	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
+	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
+
+	if !readOnly && !slices.Contains(view.Actions, "put") {
 		view.Actions = append(view.Actions, "put")
 	}
 	idParamsOk := len(v.Domain.GetParams().GetAsArgs(utils.SpecialSubIDParam)) > 0
