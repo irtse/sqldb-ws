@@ -190,6 +190,7 @@ var DBEmailList = models.SchemaModel{
 	Category: "email",
 	Fields: []models.FieldModel{
 		{Name: models.NAMEKEY, Type: models.VARCHAR.String(), Required: false, Readonly: true, Index: 0},
+		{Name: "is_default", Type: models.BOOLEAN.String(), Required: false, Readonly: true, Default: false, Index: 1},
 		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Readonly: false, Index: 2},
 	},
 }

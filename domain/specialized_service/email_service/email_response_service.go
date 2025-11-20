@@ -50,6 +50,16 @@ func (s *EmailResponseService) VerifyDataIntegrity(record map[string]interface{}
 }
 
 func (s *EmailResponseService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
+	s.Write(record, tableName)
+}
+
+func (s *EmailResponseService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
+	for _, r := range results {
+		s.Write(r, s.Domain.GetTable())
+	}
+}
+
+func (s *EmailResponseService) Write(record map[string]interface{}, tableName string) {
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
 		utils.SpecialIDParam: utils.GetString(record, ds.EmailSendedDBField),
 	}, false); err == nil {
@@ -113,8 +123,14 @@ func (s *EmailResponseService) SpecializedCreateRow(record map[string]interface{
 				key: true,
 			}, false); err == nil && len(templs) > 0 {
 				tmp := templs[0]
+				usrID := r["from_email"]
+				if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
+					"is_default": true,
+				}, false); err == nil && len(res) > 0 {
+					usrID = l[0][ds.UserDBField]
+				}
 				if usr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-					utils.SpecialIDParam: r["from_email"],
+					utils.SpecialIDParam: usrID,
 				}, false); err == nil && len(usr) > 0 {
 					schMapped, _ := schema.GetSchemaByID(utils.GetInt(r, "mapped_withdbschema_id"))
 					if dests, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schMapped.Name, map[string]interface{}{
