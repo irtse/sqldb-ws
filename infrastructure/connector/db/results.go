@@ -44,6 +44,9 @@ func (db *Database) ParseColumnValue(colType string, val *interface{}) interface
 		}
 		return fmt.Sprintf("%v", v)
 	case "TIMESTAMP", "DATE":
+		if len(fmt.Sprintf("%v", *val)) > 10 {
+			return fmt.Sprintf("%v", v)[:19]
+		}
 		return fmt.Sprintf("%v", v)
 	default:
 		return v
