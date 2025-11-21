@@ -136,6 +136,7 @@ func SearchInFile(filename string, searchTerm string) bool {
 	}
 	text, err := readFileAsText(filePath)
 	if err != nil {
+		fmt.Println("can't read file as text", filePath, err)
 		return false
 	}
 

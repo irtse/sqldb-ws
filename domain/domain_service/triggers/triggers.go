@@ -29,6 +29,14 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 	}
 	if utils.UPDATE == method && t.Domain.GetIsDraftToPublished() {
 		method = utils.CREATE
+		restr := []interface{}{
+			ds.SchemaDBField + "=" + fromSchema.ID,
+			ds.DestTableDBField + "=" + utils.GetString(record, utils.SpecialIDParam),
+			"current_index > 1",
+		}
+		if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, restr, false); err == nil && len(res) > 0 {
+			return []sm.ManualTriggerModel{}
+		}
 	}
 	mt := []sm.ManualTriggerModel{}
 	if res, err := t.GetTriggers("manual", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
@@ -52,7 +60,7 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		restr := []interface{}{
 			ds.SchemaDBField + "=" + fromSchemaID,
 			ds.DestTableDBField + "=" + recordID,
-			"current_index <= 1",
+			"current_index > 1",
 		}
 		if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, restr, false); err == nil && len(res) > 0 {
 			return []map[string]interface{}{}, errors.New("can't select a trigger create on a upper after first task of request's workflow")

@@ -149,14 +149,16 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 			ds.SchemaDBField:    schema.ID,
 		}, false, "COUNT(*)"),
 	}, true)+")")
-	subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("",
-		map[string]interface{}{
-			"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchemaField.Name, map[string]interface{}{
-				ds.SchemaDBField: schema.ID,
-				"hidden":         false,
-				"readonly":       false,
-			}, false, "COUNT(*)"),
-		}, false)+")")
+	if isUpdate {
+		subSubRestr = append(subSubRestr, "("+connector.FormatSQLRestrictionWhereByMap("",
+			map[string]interface{}{
+				"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchemaField.Name, map[string]interface{}{
+					ds.SchemaDBField: schema.ID,
+					"hidden":         false,
+					"readonly":       false,
+				}, false, "COUNT(*)"),
+			}, false)+")")
+	}
 	subrestr = append(subrestr, "("+strings.Join(subSubRestr, " AND ")+")")
 	return subrestr
 }
