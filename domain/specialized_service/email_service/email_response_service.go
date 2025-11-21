@@ -134,7 +134,7 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 									utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
 										"is_default": true,
 									}, false, ds.UserDBField),
-								}, false); err == nil && len(res) > 0 {
+								}, false); err == nil && len(l) > 0 {
 									usrFrom = l[0]
 								}
 								fmt.Println(utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec)
