@@ -126,19 +126,21 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 								utils.GetString(tmp, "subject"), utils.GetString(tmp, "template"),
 								dest, s.Domain, utils.GetInt(tmp, utils.SpecialIDParam),
 								utils.ToInt64(sch.ID), -1, -1, "", "")
-							fmt.Println("FORGE", res, err)
-							usrFrom := usr[0]
-							if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-								utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
-									"is_default": true,
-								}, false, ds.UserDBField),
-							}, false); err == nil && len(res) > 0 {
-								usrFrom = l[0]
+							fmt.Println("FORGE", err)
+							if err == nil {
+								fmt.Println("AFTER FORGE")
+								usrFrom := usr[0]
+								if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+									utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
+										"is_default": true,
+									}, false, ds.UserDBField),
+								}, false); err == nil && len(res) > 0 {
+									usrFrom = l[0]
+								}
+								fmt.Println(utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec)
+								go connector.SendMailSafe(
+									utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec, false)
 							}
-							fmt.Println(utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec)
-							go connector.SendMailSafe(
-								utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec, false)
-
 						}
 					} else {
 						fmt.Println("Can't find sended", err)
