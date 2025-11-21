@@ -222,10 +222,14 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 			if !strings.HasPrefix(filePath, "/mnt/files/") {
 				filePath = "/mnt/files/" + filePath
 			}
-			uncompPath, _ := domain_service.UncompressGzip(filePath)
+			uncompPath, err := domain_service.UncompressGzip(filePath)
+			if err != nil {
+				fmt.Println("Could not uncompress file from :", uncompPath, uncompPath, err)
+				continue
+			}
 			data, err := os.ReadFile(uncompPath)
 			if err != nil {
-				fmt.Println("Could not read file:", filePath, err)
+				fmt.Println("Could not read file:", uncompPath, err)
 				continue
 			}
 			domain_service.DeleteUncompressed(uncompPath)
