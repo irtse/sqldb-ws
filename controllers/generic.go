@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"sqldb-ws/controllers/controller"
+	"sqldb-ws/domain/domain_service"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
@@ -44,7 +45,7 @@ func (l *MainController) Download() {
 	if !strings.Contains(filePath, "/mnt/files/") {
 		filePath = "/mnt/files/" + filePath
 	}
-	uncompressedP, err := l.UncompressGzip(filePath)
+	uncompressedP, err := domain_service.UncompressGzip(filePath)
 	if err != nil {
 		l.Ctx.Output.SetStatus(http.StatusNoContent)
 		l.Ctx.Output.Body([]byte(err.Error()))
@@ -73,7 +74,7 @@ func (l *MainController) Download() {
 	l.Ctx.Output.Header("Content-Length", string(rune(stat.Size())))
 	go func() {
 		time.Sleep(60)
-		l.DeleteUncompressed(uncompressedP)
+		domain_service.DeleteUncompressed(uncompressedP)
 	}()
 	// Serve the file
 	http.ServeFile(l.Ctx.ResponseWriter, l.Ctx.Request, filePath)

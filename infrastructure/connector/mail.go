@@ -10,6 +10,7 @@ import (
 	"net/smtp"
 	"os"
 	"path/filepath"
+	"sqldb-ws/domain/domain_service"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/utils"
 	"strings"
@@ -221,13 +222,13 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 			if !strings.HasPrefix(filePath, "/mnt/files/") {
 				filePath = "/mnt/files/" + filePath
 			}
-
-			data, err := os.ReadFile(filePath)
+			uncompPath, _ := domain_service.UncompressGzip(filePath)
+			data, err := os.ReadFile(uncompPath)
 			if err != nil {
 				fmt.Println("Could not read file:", filePath, err)
 				continue
 			}
-
+			domain_service.DeleteUncompressed(uncompPath)
 			writeLine("--" + boundary)
 			writeLine("Content-Type: application/octet-stream")
 			writeLine("Content-Transfer-Encoding: base64")
