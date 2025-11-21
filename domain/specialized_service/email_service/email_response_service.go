@@ -126,6 +126,7 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 								utils.GetString(tmp, "subject"), utils.GetString(tmp, "template"),
 								dest, s.Domain, utils.GetInt(tmp, utils.SpecialIDParam),
 								utils.ToInt64(sch.ID), -1, -1, "", "")
+							fmt.Println("FORGE", res, err)
 							if err == nil {
 								usrFrom := usr[0]
 								if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
@@ -135,6 +136,7 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 								}, false); err == nil && len(res) > 0 {
 									usrFrom = l[0]
 								}
+								fmt.Println(utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec)
 								go connector.SendMailSafe(
 									utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec, false)
 							}
