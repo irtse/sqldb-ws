@@ -116,6 +116,7 @@ func GetResponse() {
 			continue
 		}
 		datas := b["data"].(map[string]interface{})
+		fmt.Println("KEYZ", datas)
 		go func() {
 			m := map[string]map[string]interface{}{}
 			for code, data := range datas {
