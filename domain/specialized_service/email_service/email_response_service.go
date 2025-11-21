@@ -126,9 +126,7 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 								utils.GetString(tmp, "subject"), utils.GetString(tmp, "template"),
 								dest, s.Domain, utils.GetInt(tmp, utils.SpecialIDParam),
 								utils.ToInt64(sch.ID), -1, -1, "", "")
-							fmt.Println("FORGE", err)
 							if err == nil {
-								fmt.Println("AFTER FORGE")
 								usrFrom := usr[0]
 								if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 									utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
