@@ -211,7 +211,11 @@ func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel
 	var datapath, historyPath, commentPath, synthesisPath string = "", "", "", ""
 	if !isEmpty {
 		synthesisPath = d.getSynthesis(record, schema)
-		historyPath = utils.BuildPath(ds.DBDataAccess.Name, utils.ReservedParam, utils.RootOrderParam+"=access_date", utils.RootDirParam+"=desc", utils.RootDestTableIDParam+"="+record.GetString(utils.SpecialIDParam), ds.RootID(ds.DBSchema.Name)+"="+utils.ToString(schema.ID))
+		if schema.Name == ds.DBTask.Name || schema.Name == ds.DBRequest.Name {
+			historyPath = utils.BuildPath(ds.DBDataAccess.Name, utils.ReservedParam, utils.RootOrderParam+"=access_date", utils.RootDirParam+"=desc", utils.RootDestTableIDParam+"="+record.GetString(ds.DestTableDBField), ds.RootID(ds.DBSchema.Name)+"="+record.GetString(ds.SchemaDBField))
+		} else {
+			historyPath = utils.BuildPath(ds.DBDataAccess.Name, utils.ReservedParam, utils.RootOrderParam+"=access_date", utils.RootDirParam+"=desc", utils.RootDestTableIDParam+"="+record.GetString(utils.SpecialIDParam), ds.RootID(ds.DBSchema.Name)+"="+utils.ToString(schema.ID))
+		}
 		if record[ds.DestTableDBField] != nil && record[ds.SchemaDBField] != nil {
 			commentPath = utils.BuildPath(ds.DBComment.Name, utils.ReservedParam, utils.RootDestTableIDParam+"="+record.GetString(ds.DestTableDBField), ds.RootID(ds.DBSchema.Name)+"="+record.GetString(ds.SchemaDBField))
 		} else {
@@ -268,14 +272,23 @@ func (s *ViewConvertor) getMetaData(l int, record utils.Record, schema *sm.Schem
 	updateUser := ""
 	updateDate := ""
 	creationDate := ""
+
+	destID := record[utils.SpecialIDParam]
+	schemaID := schema.ID
+
+	if schema.Name == ds.DBTask.Name || schema.Name == ds.DBRequest.Name {
+		destID = utils.GetString(record, ds.DestTableDBField)
+		schemaID = utils.GetString(record, ds.SchemaDBField)
+	}
+
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 		"access_date": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
-			ds.DestTableDBField: record[utils.SpecialIDParam],
-			ds.SchemaDBField:    schema.ID,
+			ds.DestTableDBField: destID,
+			ds.SchemaDBField:    schemaID,
 			"update":            true,
 		}, false, "MAX(access_date)"),
-		ds.DestTableDBField: record[utils.SpecialIDParam],
-		ds.SchemaDBField:    schema.ID,
+		ds.DestTableDBField: destID,
+		ds.SchemaDBField:    schemaID,
 		"update":            true,
 	}, false); err == nil && len(res) > 0 {
 		updateDate = utils.GetString(res[0], "access_date")
@@ -287,12 +300,12 @@ func (s *ViewConvertor) getMetaData(l int, record utils.Record, schema *sm.Schem
 	}
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 		"access_date": s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
-			ds.DestTableDBField: record[utils.SpecialIDParam],
-			ds.SchemaDBField:    schema.ID,
+			ds.DestTableDBField: destID,
+			ds.SchemaDBField:    schemaID,
 			"write":             true,
 		}, false, "MAX(access_date)"),
-		ds.DestTableDBField: record[utils.SpecialIDParam],
-		ds.SchemaDBField:    schema.ID,
+		ds.DestTableDBField: destID,
+		ds.SchemaDBField:    schemaID,
 		"write":             true,
 	}, false); err == nil && len(res) > 0 {
 		creationDate = utils.GetString(res[0], "access_date")

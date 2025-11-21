@@ -1,6 +1,7 @@
 package triggers
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"sqldb-ws/domain/schema"
@@ -30,7 +31,7 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 		method = utils.CREATE
 	}
 	mt := []sm.ManualTriggerModel{}
-	if res, err := t.GetTriggers("manual", method, fromSchema.ID); err == nil {
+	if res, err := t.GetTriggers("manual", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
 		for _, r := range res {
 			typ := utils.GetString(r, "type")
 			switch typ {
@@ -45,10 +46,20 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 	return mt
 }
 
-func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchemaID string) ([]map[string]interface{}, error) {
+func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchemaID string, recordID string) ([]map[string]interface{}, error) {
 	if method == utils.SELECT {
 		method = utils.CREATE
+		restr := []interface{}{
+			ds.SchemaDBField + "=" + fromSchemaID,
+			ds.DestTableDBField + "=" + recordID,
+			"current_index <= 1",
+		}
+		if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, restr, false); err == nil && len(res) > 0 {
+			return []map[string]interface{}{}, errors.New("can't select a trigger create on a upper after first task of request's workflow")
+		}
 	}
+
+	// TODO if it's the first task
 	return t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTrigger.Name, map[string]interface{}{
 		"on_" + method.String(): true,
 		"mode":                  conn.Quote(mode),
@@ -60,7 +71,7 @@ func (t *TriggerService) Trigger(fromSchema *sm.SchemaModel, record utils.Record
 	if t.Domain.GetAutoload() {
 		return
 	}
-	if res, err := t.GetTriggers("auto", method, fromSchema.ID); err == nil {
+	if res, err := t.GetTriggers("auto", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
 		for _, r := range res {
 			if !ShouldExecLater(r) {
 				t.ExecTrigger(fromSchema, record, r)
