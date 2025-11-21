@@ -178,6 +178,12 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 						"d.write":                  true,
 					}, false, ds.DestTableDBField),
 			}
+			m[utils.SpecialIDParam+"_2"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name+" as d2", map[string]interface{}{
+				"d2." + ds.SchemaDBField:    schema.ID,
+				"d2." + ds.DestTableDBField: "main.id",
+				"d2.read_access":            true,
+				"d2." + ds.UserDBField:      s.Domain.GetUserID(),
+			}, false, ds.DestTableDBField)
 			if hierarch {
 				m[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d1",
 					map[string]interface{}{
