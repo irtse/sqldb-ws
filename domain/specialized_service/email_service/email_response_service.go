@@ -2,7 +2,7 @@ package email_service
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -25,27 +25,8 @@ func NewEmailResponseService() utils.SpecializedServiceITF {
 func (s *EmailResponseService) Entity() utils.SpecializedServiceInfo { return ds.DBEmailResponse }
 
 func (s *EmailResponseService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
-	code, _ := s.Domain.GetParams().Get("code")
-	s.Domain.GetParams().SimpleDelete("code")
 	// check waiting for response
 	record["got_response"] = record["got_response"] == "true" || record["got_response"] == true
-	if code == "" {
-		return record, errors.New("no code found"), false
-	}
-	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
-		"code": db.Quote(code),
-	}, false); err == nil && len(res) > 0 {
-		record[ds.EmailSendedDBField] = res[0][utils.SpecialIDParam]
-		if rr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailResponse.Name, map[string]interface{}{
-			ds.EmailSendedDBField: res[0][utils.SpecialIDParam],
-		}, false); err == nil && len(rr) > 0 {
-			record[utils.SpecialIDParam] = rr[0][utils.SpecialIDParam]
-			s.Domain.GetParams().Set(utils.SpecialIDParam, utils.GetString(rr[0], utils.SpecialIDParam))
-		}
-	} else {
-		return record, errors.New("no related found"), false
-	}
-	delete(record, "code")
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }
 
@@ -158,7 +139,11 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 									utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec, false)
 							}
 						}
+					} else {
+						fmt.Println("Can't find sended", err)
 					}
+				} else {
+					fmt.Println("Can't show user", err)
 				}
 			}
 		}

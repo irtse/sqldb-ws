@@ -139,9 +139,12 @@ func GetResponse() {
 				}, false); err == nil && len(res) > 0 {
 					emailRelated := res[0]
 					data[ds.EmailSendedDBField] = emailRelated[utils.SpecialIDParam]
-					d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
+					data["update_date"] = time.Now().UTC().String()
+					fmt.Println("Create Response")
+					_, err := d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
 						"code": code,
 					}).RootRaw(), data)
+					fmt.Println("Is Created ?", err)
 				}
 			}
 		}()

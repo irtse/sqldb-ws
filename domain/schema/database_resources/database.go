@@ -180,6 +180,7 @@ var DBEmailResponse = models.SchemaModel{
 	Fields: []models.FieldModel{
 		{Name: "got_response", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 0},
 		{Name: "comment", Type: models.VARCHAR.String(), Required: false, Index: 1},
+		{Name: "update_date", Type: models.TIMESTAMP.String(), Required: false, Index: 1},
 		{Name: RootID(DBEmailSended.Name), Type: models.INTEGER.String(), ForeignTable: DBEmailSended.Name, Required: true, Readonly: true, Label: "email attached", Index: 2},
 	},
 }
