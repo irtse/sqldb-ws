@@ -86,11 +86,12 @@ func GetResponse() {
 		fmt.Println("No response URL to reach...")
 		return
 	}
-	for true {
+	for {
+		fmt.Println("Retrieve Response")
 		resp, err := http.Get(fmt.Sprintf("%s/v1/response", host))
 		if err != nil {
 			fmt.Println("GetResponse Error:", err)
-			time.Sleep(1 * time.Hour)
+			time.Sleep(10 * time.Minute)
 			continue
 		}
 		defer resp.Body.Close() // always close the response body
@@ -99,19 +100,19 @@ func GetResponse() {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Println("GetResponse", "Error:", err)
-			time.Sleep(1 * time.Hour)
+			time.Sleep(10 * time.Minute)
 			continue
 		}
 		var b map[string]interface{}
 		json.Unmarshal(body, &b)
 		if b["error"] != nil {
 			fmt.Println("GetResponse", b["error"])
-			time.Sleep(1 * time.Hour)
+			time.Sleep(10 * time.Minute)
 			continue
 		}
 		if b["data"] == nil {
 			fmt.Println("GetResponse", "Empty !")
-			time.Sleep(1 * time.Hour)
+			time.Sleep(10 * time.Minute)
 			continue
 		}
 		datas := b["data"].(map[string]interface{})
@@ -143,7 +144,7 @@ func GetResponse() {
 				}
 			}
 		}()
-		time.Sleep(1 * time.Hour)
+		time.Sleep(10 * time.Minute)
 	}
 }
 
