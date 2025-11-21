@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	conn "sqldb-ws/infrastructure/connector/db"
-	"strings"
 )
 
 type TableRowService struct {
@@ -124,9 +123,6 @@ func (t *TableRowService) Delete(restriction ...string) ([]map[string]interface{
 	var err error
 	if _, err = t.setupFilter(map[string]interface{}{}, false, true, restriction...); err != nil {
 		return nil, err
-	}
-	if strings.Contains(t.Name, "delegation") {
-		fmt.Println("DELETE DELEGATION", t.DB.GetSQLRestriction(), restriction)
 	}
 	if t.Results, err = t.Get(restriction...); err == nil {
 		if t.DB.GetSQLRestriction() == "" {

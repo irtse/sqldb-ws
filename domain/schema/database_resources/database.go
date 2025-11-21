@@ -718,7 +718,7 @@ var PUPERMISSIONEXCEPTION = []string{DBTask.Name, DBEmailResponse.Name}
 var PERMISSIONEXCEPTION = []string{
 	DBDashboard.Name, DBView.Name, DBTask.Name, DBShare.Name,
 	DBDelegation.Name, DBRequest.Name, DBWorkflow.Name,
-	DBEntity.Name, DBSchema.Name,
+	DBEntity.Name, DBSchema.Name, DBEmailSendedUser.Name,
 	DBSchemaField.Name, DBComment.Name, DBDataAccess.Name,
 } // override permission checkup
 
