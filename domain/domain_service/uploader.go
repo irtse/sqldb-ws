@@ -97,7 +97,6 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 	// Create gzip writer
 	gw := gzip.NewWriter(dst)
 	gw.Name = strings.Trim(handler.Filename, " ") // keep original name metadata
-	fmt.Println("<"+compressedPath+">", "<"+strings.Trim(handler.Filename, " ")+">")
 	defer gw.Close()
 
 	// Copy uploaded content → gzip writer → file

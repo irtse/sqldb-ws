@@ -241,7 +241,6 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 			writeLine("")
 
 			encoded := base64.StdEncoding.EncodeToString(data)
-			fmt.Println("FOUNDED", encoded)
 			for i := 0; i < len(encoded); i += 76 {
 				end := i + 76
 				if end > len(encoded) {
