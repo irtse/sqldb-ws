@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -163,8 +164,10 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				}
 			}
 		}
+		fmt.Println(s.OneToMany)
 		for schemaName, om := range s.OneToMany {
 			field, err := sche.GetField(schemaName)
+			fmt.Println(schemaName, om, err, field.GetLink())
 			if err != nil {
 				continue
 			}
