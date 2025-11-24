@@ -171,10 +171,10 @@ func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface
 			if res, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationHistoryStatusFR.Name, m, false); len(res) == 0 {
 				s.Domain.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, m, func(s string) (string, bool) { return s, true })
 			}
-
 		}
 
 	}
+	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
 }
 
 func (s *PublicationService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
