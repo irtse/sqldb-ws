@@ -61,6 +61,19 @@ var PublicationStatusFR = models.SchemaModel{
 	},
 }
 
+var PublicationHistoryStatusFR = models.SchemaModel{
+	Name:     "publication_status_history",
+	Label:    "publication status history",
+	Category: "domain",
+	IsEnum:   true,
+	Fields: []models.FieldModel{
+		{Name: ds.RootID(PublicationStatusFR.Name), Label: "related publication status", Type: models.INTEGER.String(), ForeignTable: PublicationStatusFR.Name, Required: true, Index: 1},
+		{Name: "update_date", Label: "status update", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Default: "CURRENT_TIMESTAMP", Index: 2},
+		{Name: ds.SchemaDBField, Label: "related publication schema", Type: models.INTEGER.String(), ForeignTable: ds.DBSchema.Name, Required: true, Index: 3},
+		{Name: ds.DestTableDBField, Label: "related publication id", Type: models.INTEGER.String(), Required: true, Index: 4},
+	},
+}
+
 var publicationFields = []models.FieldModel{
 	{Name: "name", Label: "intitulé de la publication", Translatable: false,
 		Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
@@ -91,7 +104,6 @@ var ArticleFR = models.SchemaModel{
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: ArticleAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "yes", Required: false, Readonly: false, Index: 9},
 		{Name: "media_name", Label: "nom du journal", Type: models.VARCHAR.String(), Required: true, Readonly: false, Translatable: false, Index: 10},
-		{Name: "DOI", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 11, Translatable: false},
 		{Name: "publishing_date", Label: "date objective de publication", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 	}...),
 }
@@ -136,11 +148,11 @@ var ConferenceFR = models.SchemaModel{
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "yes", Required: false, Readonly: false, Index: 9},
 		{Name: "conference_acronym", Translatable: false, Label: "acronyme de la conférence ", Type: models.VARCHAR.String(), Required: true, Readonly: false, Index: 10},
 		{Name: "conference_name", Translatable: false, Label: "nom de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 11},
-		{Name: "cp_start_date", Label: "date objective de publication", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
-		{Name: "cp_end_date", Label: "commentaires", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 13},
-		{Name: "city", Label: "ville de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 14},
-		{Name: "country", Label: "pays de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 15},
-		{Name: "link", Label: "lien de la conférence", Type: models.URL.String(), Required: false, Readonly: false, Index: 16},
+		{Name: "conference_start_date", Label: "date objective de publication", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
+		{Name: "conference_end_date", Label: "commentaires", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 13},
+		{Name: "conference_city", Label: "ville de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 14},
+		{Name: "conference_country", Label: "pays de la conférence", Type: models.VARCHAR.String(), Required: false, Readonly: false, Index: 15},
+		{Name: "conference_link", Label: "lien de la conférence", Type: models.URL.String(), Required: false, Readonly: false, Index: 16},
 	}...),
 }
 
@@ -318,11 +330,23 @@ var ThesisFR = models.SchemaModel{
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: ThesisAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "yes", Required: false, Readonly: false, Index: 9},
 		{Name: "defense_date", Label: "date de soutenance de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 10},
-		{Name: "director_" + ds.RootID(ds.DBUser.Name), Translatable: false, Type: models.INTEGER.String(), Required: true, ForeignTable: ds.DBUser.Name, Index: 11, Label: "directeur de thèse"},
-		{Name: "co_supervisor_" + ds.RootID(ds.DBUser.Name), Translatable: false, Type: models.INTEGER.String(), Required: true, ForeignTable: ds.DBUser.Name, Index: 12, Label: "co-encadrant de thèse"},
+		{Name: "director_" + ds.RootID(ds.DBUser.Name), Translatable: false, Type: models.LINKADD.String(), Required: true, ForeignTable: ds.DBUser.Name, Index: 11, Label: "directeur de thèse"},
+		{Name: "co_supervisor_" + ds.RootID(ds.DBUser.Name), Translatable: false, Type: models.MANYTOMANYADD.String(), Required: true, ForeignTable: ThesisSupervisorAuthorsFR.Name, Index: 12, Label: "co-encadrant de thèse"},
 		{Name: "t_start_date", Label: "date de début de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 13},
 		{Name: "t_end_date", Label: "date de fin de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 14},
 	}...),
+}
+
+var ThesisSupervisorAuthorsFR = models.SchemaModel{
+	Name:     "thesis_supervisor_authors",
+	Label:    "thesis supervisor authors",
+	Category: "publications",
+	CanOwned: true,
+	Fields: []models.FieldModel{
+		{Name: "name", Label: "name", Type: models.VARCHAR.String(), Translatable: false, Required: true, Index: 1},
+		{Name: ds.RootID(ds.DBUser.Name), Label: "related user", Translatable: false, Type: models.INTEGER.String(), ForeignTable: ds.DBUser.Name, Required: true, Index: 1},
+		{Name: ds.RootID("thesis"), Label: "related publication", Type: models.INTEGER.String(), ForeignTable: "thesis", Required: true, Index: 3},
+	},
 }
 
 var ThesisAffiliationAuthorsFR = models.SchemaModel{
@@ -363,7 +387,7 @@ var InternshipFR = models.SchemaModel{
 
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: InternshipAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "no", Required: false, Readonly: false, Index: 9},
-		{Name: "IRT_manager" + ds.RootID(ds.DBUser.Name), Type: models.INTEGER.String(), Translatable: false, Required: true, ForeignTable: ds.DBUser.Name, Index: 10, Label: "responsable IRT du stage"},
+		{Name: "IRT_manager" + ds.RootID(ds.DBUser.Name), Type: models.LINKADD.String(), Translatable: false, Required: true, ForeignTable: ds.DBUser.Name, Index: 10, Label: "responsable IRT du stage"},
 		{Name: "i_start_date", Label: "date de soutenance de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 11},
 		{Name: "i_end_date", Label: "date de end de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 	}...),
