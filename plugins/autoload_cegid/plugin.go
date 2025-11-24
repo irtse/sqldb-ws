@@ -19,12 +19,13 @@ func Autoload() []sm.SchemaModel {
 	ds.OWNPERMISSIONEXCEPTION = append(ds.OWNPERMISSIONEXCEPTION, []string{
 		models.CoCFR.Name, models.ProjectFR.Name, models.Axis.Name,
 		models.ProofreadingStatus.Name, models.MajorConference.Name,
-		models.PublicationStatusFR.Name, ds.DBUser.Name}...)
+		models.PublicationStatusFR.Name, models.PublicationHistoryStatusFR.Name, ds.DBUser.Name}...)
 
 	ds.PERMISSIONEXCEPTION = append(ds.PERMISSIONEXCEPTION, []string{
 		models.CoCFR.Name, models.ProjectFR.Name, models.Axis.Name,
 		models.ProofreadingStatus.Name, models.MajorConference.Name,
 		models.PublicationStatusFR.Name,
+		models.PublicationHistoryStatusFR.Name,
 		models.OtherPublicationAuthorsFR.Name,
 		models.OtherPublicationAffiliationAuthorsFR.Name,
 		models.ArticleAuthorsFR.Name,
@@ -109,6 +110,7 @@ func Autoload() []sm.SchemaModel {
 		models.ThesisAuthorsFR,
 		models.ThesisSupervisorAuthorsFR,
 		models.ThesisAffiliationAuthorsFR,
+		models.PublicationHistoryStatusFR,
 	}
 }
 
