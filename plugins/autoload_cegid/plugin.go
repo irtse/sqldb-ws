@@ -4,7 +4,6 @@
 package main
 
 import (
-	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -124,7 +123,7 @@ type PublicationService struct {
 
 func NewPublicationService(schemaName sm.SchemaModel) func() utils.SpecializedServiceITF {
 	if sch, err := schema.GetSchema(schemaName.Name); err == nil {
-		sch = sch
+		schemaName = sch
 	}
 	return func() utils.SpecializedServiceITF {
 		return &PublicationService{AbstractSpecializedService: servutils.AbstractSpecializedService{
@@ -162,18 +161,15 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 }
 
 func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
-	fmt.Println("Update STATE", record)
 	if record["state"] != nil && record["state"] != "" {
 		for _, r := range results {
-			fmt.Println("Update STATE 1", r)
 			m := map[string]interface{}{
 				ds.SchemaDBField:                           s.Sch.ID,
 				ds.DestTableDBField:                        r[utils.SpecialIDParam],
 				ds.RootID(models.PublicationStatusFR.Name): utils.GetString(record, "state"),
 			}
 			if res, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationHistoryStatusFR.Name, m, false); len(res) == 0 {
-				_, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, m, func(s string) (string, bool) { return s, true })
-				fmt.Println("sqdqs", err)
+				s.Domain.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, m, func(s string) (string, bool) { return s, true })
 			}
 
 		}
