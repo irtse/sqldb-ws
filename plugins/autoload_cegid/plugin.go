@@ -166,21 +166,16 @@ func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface
 	if record["state"] != nil && record["state"] != "" {
 		for _, r := range results {
 			fmt.Println("Update STATE 1", r)
-			if ss, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, map[string]interface{}{
-				"name": utils.GetString(record, "state"),
-			}, false); err == nil && len(ss) > 0 {
-				fmt.Println("Update STATE 3", ss)
-				m := map[string]interface{}{
-					ds.SchemaDBField:                           s.Sch.ID,
-					ds.DestTableDBField:                        r[utils.SpecialIDParam],
-					ds.RootID(models.PublicationStatusFR.Name): ss[0][utils.SpecialIDParam],
-				}
-				if res, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationHistoryStatusFR.Name, m, false); len(res) == 0 {
-					fmt.Println("Update STATE 3", ss)
-					_, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, m, func(s string) (string, bool) { return s, true })
-					fmt.Println("sqdqs", err)
-				}
+			m := map[string]interface{}{
+				ds.SchemaDBField:                           s.Sch.ID,
+				ds.DestTableDBField:                        r[utils.SpecialIDParam],
+				ds.RootID(models.PublicationStatusFR.Name): utils.GetString(record, "state"),
 			}
+			if res, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationHistoryStatusFR.Name, m, false); len(res) == 0 {
+				_, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, m, func(s string) (string, bool) { return s, true })
+				fmt.Println("sqdqs", err)
+			}
+
 		}
 
 	}
