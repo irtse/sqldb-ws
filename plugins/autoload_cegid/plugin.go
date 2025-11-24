@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -161,18 +162,23 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 }
 
 func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
+	fmt.Println("Update STATE", record)
 	if record["state"] != nil && record["state"] != "" {
 		for _, r := range results {
+			fmt.Println("Update STATE 1", r)
 			if ss, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, map[string]interface{}{
 				"name": utils.GetString(record, "state"),
 			}, false); err == nil && len(ss) > 0 {
+				fmt.Println("Update STATE 3", ss)
 				m := map[string]interface{}{
 					ds.SchemaDBField:                           s.Sch.ID,
 					ds.DestTableDBField:                        r[utils.SpecialIDParam],
 					ds.RootID(models.PublicationStatusFR.Name): ss[0][utils.SpecialIDParam],
 				}
-				if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationHistoryStatusFR.Name, m, false); err == nil && len(res) == 0 {
-					s.Domain.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, m, func(s string) (string, bool) { return s, true })
+				if res, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationHistoryStatusFR.Name, m, false); len(res) == 0 {
+					fmt.Println("Update STATE 3", ss)
+					_, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, m, func(s string) (string, bool) { return s, true })
+					fmt.Println("sqdqs", err)
 				}
 			}
 		}
