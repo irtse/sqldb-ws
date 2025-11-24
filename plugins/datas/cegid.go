@@ -387,7 +387,7 @@ var InternshipFR = models.SchemaModel{
 
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: InternshipAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "no", Required: false, Readonly: false, Index: 9},
-		{Name: "IRT_manager" + ds.RootID(ds.DBUser.Name), Type: models.LINKADD.String(), Translatable: false, Required: true, ForeignTable: ds.DBUser.Name, Index: 10, Label: "responsable IRT du stage"},
+		{Name: "IRT_manager" + ds.RootID(ds.DBUser.Name), Type: models.INTEGER.String(), Translatable: false, Required: true, ForeignTable: ds.DBUser.Name, Index: 10, Label: "responsable IRT du stage"},
 		{Name: "i_start_date", Label: "date de soutenance de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 11},
 		{Name: "i_end_date", Label: "date de end de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 	}...),
