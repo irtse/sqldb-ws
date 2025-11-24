@@ -257,6 +257,7 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		if value == "" {
 			value = utils.GetString(record, field.Name)
 		}
+		fmt.Println("TRIGGERS DATA", toSchema.Name, field.Name, value, destID)
 		t.Domain.GetDb().ClearQueryFilter().UpdateQuery(toSchema.Name, map[string]interface{}{
 			field.Name: value,
 		}, map[string]interface{}{

@@ -68,7 +68,6 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	view.CommentBody = commentBody
 	view.Shortcuts = v.GetShortcuts(schema.ID, addAction)
 	view.Consents = v.getConsent(schema.ID, results)
-	fmt.Println("CONSENTS", view.Consents)
 	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
 	// if there is only one item in the view, we can set the view readonly to the item readonly
 	if len(view.Items) == 1 {
@@ -373,7 +372,6 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 			ds.SchemaDBField:    schemaID,
 			ds.DestTableDBField: results[0][utils.SpecialIDParam],
 		}, false); err == nil && len(res) > 0 {
-			fmt.Println("CONSENT THERE", res, err)
 			return []map[string]interface{}{}
 		}
 	}
@@ -388,7 +386,6 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 			key: true,
 		}, true, utils.SpecialIDParam),
 	}, false); err == nil {
-		fmt.Println("CONSENT THERE Ssss", consents)
 		if len(results) > 0 {
 			for _, c := range consents {
 				if consentsResp, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
