@@ -122,6 +122,9 @@ type PublicationService struct {
 }
 
 func NewPublicationService(schemaName sm.SchemaModel) func() utils.SpecializedServiceITF {
+	if sch, err := schema.GetSchema(schemaName.Name); err == nil {
+		sch = sch
+	}
 	return func() utils.SpecializedServiceITF {
 		return &PublicationService{AbstractSpecializedService: servutils.AbstractSpecializedService{
 			ManyToMany: map[string][]map[string]interface{}{},
@@ -133,28 +136,27 @@ func NewPublicationService(schemaName sm.SchemaModel) func() utils.SpecializedSe
 }
 
 func (s *PublicationService) Entity() utils.SpecializedServiceInfo {
-	if sch, err := schema.GetSchema(s.Sch.Name); err == nil {
-		s.Sch = sch
-	}
 	return s.Sch
 }
 
 func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
-	ok := record["major_conference"]
-	isNotFound := true
-	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
-		for _, r := range res {
-			if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
-				ok = "yes"
-				isNotFound = false
-				break
+	if s.Sch.HasField("major_conference") {
+		ok := record["major_conference"]
+		isNotFound := true
+		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
+					ok = "yes"
+					isNotFound = false
+					break
+				}
 			}
 		}
+		if isNotFound {
+			ok = "no"
+		}
+		record["major_conference"] = ok
 	}
-	if isNotFound {
-		ok = "no"
-	}
-	record["major_conference"] = ok
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }
 
