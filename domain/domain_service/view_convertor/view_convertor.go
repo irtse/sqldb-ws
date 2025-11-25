@@ -528,78 +528,46 @@ func (d *ViewConvertor) HandleLinkField(record utils.Record, field sm.FieldModel
 	return shallowVals, manyVals, manyPathVals
 }
 
+func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sudId string) map[string]utils.Results {
+	if subField.GetLink() != bfTable.GetID() {
+		return manyVals
+	}
+	if subTable.HasField("name") {
+		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
+			subField.Name: sudId,
+		}, false); err == nil {
+			if _, ok := manyVals[field.Name]; !ok {
+				manyVals[field.Name] = utils.Results{}
+			}
+			for _, r := range res {
+				manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
+			}
+		}
+	} else {
+		for _, f := range subTable.Fields {
+			if f.GetLink() > 0 && f.GetLink() != field.GetLink() {
+				if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
+					if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
+						subField.Name: sudId,
+					}, false); err == nil {
+						for _, r := range res {
+							manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, f, utils.GetString(r, utils.SpecialIDParam))
+						}
+					}
+				}
+			}
+		}
+	}
+	return manyVals
+}
+
 func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel, schema *sm.SchemaModel, link string,
 	manyVals map[string]utils.Results, manyPathVals map[string]string) (map[string]utils.Results, map[string]string) {
 	if !d.Domain.IsShallowed() {
 		l, _ := scheme.GetSchemaByID(field.GetLink())
 		for _, f := range l.Fields {
-			fmt.Println(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String()))
 			if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) {
-				if ss, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
-					fmt.Println("ONE TO MANY", ss.Name, l.Name)
-					manyPathVals[field.Name] = utils.BuildPath(
-						link, utils.ReservedParam,
-						f.Name+"="+record.GetString(utils.SpecialIDParam))
-					if l.HasField("name") {
-						fmt.Println(l.Name, ds.RootID(ss.Name), record[utils.SpecialIDParam])
-						if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(l.Name, map[string]interface{}{
-							f.Name: record[utils.SpecialIDParam],
-						}, false); err == nil {
-							if _, ok := manyVals[field.Name]; !ok {
-								manyVals[field.Name] = utils.Results{}
-							}
-							for _, r := range res {
-								manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
-							}
-						}
-						continue
-					}
-				}
-				if f.GetLink() == schema.GetID() || f.GetLink() == 0 {
-					continue
-				}
-				if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
-					if strings.Contains(strings.ToLower(f.Type), "many") {
-						if sch2, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
-							for _, ff := range sch2.Fields {
-								if ff.GetLink() < 0 || ff.GetLink() == f.GetLink() || ff.GetLink() == schema.GetID() {
-									continue
-								}
-								if sch3, err := scheme.GetSchemaByID(ff.GetLink()); err == nil && sch.HasField("name") {
-									if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch3.Name, map[string]interface{}{
-										utils.SpecialIDParam: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(sch.Name, map[string]interface{}{
-											"db" + l.Name + "_id": d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(l.Name, map[string]interface{}{
-												ds.RootID(schema.Name): record[utils.SpecialIDParam],
-												"!name":                nil,
-											}, false, "id"),
-										}, false, ff.Name)}, false); err == nil {
-										for _, r := range res {
-											manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
-										}
-									}
-								}
-							}
-						}
-						continue
-					}
-					if !sch.HasField("name") {
-						continue
-					}
-					if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-						utils.SpecialIDParam: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(l.Name, map[string]interface{}{
-							ds.RootID(schema.Name): record[utils.SpecialIDParam],
-							"!name":                nil,
-						}, false, f.Name),
-					}, false); err == nil {
-						if _, ok := manyVals[field.Name]; !ok {
-							manyVals[field.Name] = utils.Results{}
-						}
-						for _, r := range res {
-							manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
-						}
-					}
-				}
-				continue
+				manyVals = d.recursiveFoundNameOneToMany(*schema, field, manyVals, l, f, utils.GetString(record, utils.SpecialIDParam))
 			}
 			if strings.Contains(f.Name, schema.Name) || f.Name == utils.SpecialIDParam || f.GetLink() <= 0 {
 				continue
