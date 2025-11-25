@@ -26,7 +26,7 @@ var STARTKEY = "start_date"
 var ENDKEY = "end_date"
 
 var STATEPENDING = "pending"
-var STATEPROGRESSING = "progressing"
+var STATEPROGRESSING = "in progress"
 var STATEDISMISS = "dismiss"
 var STATEREFUSED = "refused"
 var STATECANCELED = "canceled"

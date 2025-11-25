@@ -539,6 +539,7 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 						link, utils.ReservedParam,
 						f.Name+"="+record.GetString(utils.SpecialIDParam))
 					if l.HasField("name") {
+						fmt.Println(l.Name, ds.RootID(schema.Name), record[utils.SpecialIDParam])
 						if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(l.Name, map[string]interface{}{
 							ds.RootID(schema.Name): record[utils.SpecialIDParam],
 						}, false); err == nil {

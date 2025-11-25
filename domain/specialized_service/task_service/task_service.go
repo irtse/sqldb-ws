@@ -131,7 +131,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			map[string]interface{}{ // delete all notif
 				"!name":        conn.Quote(utils.GetString(res, "name")),
 				RequestDBField: utils.ToString(res[RequestDBField]),
-				"state":        []string{"'pending'", "'progressing'"},
+				"state":        []string{"'pending'", "'in progress'"},
 			}, false); err == nil && len(otherPendingTasks) > 0 {
 			continue
 		}
@@ -174,7 +174,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if allOptionnal { // no new task in workflow
 			newRecRequest["state"] = "completed"
 		} else {
-			newRecRequest["state"] = "progressing"
+			newRecRequest["state"] = "in progress"
 			if s := utils.GetString(schemes[0], "custom_progressing_status"); s != "" {
 				newRecRequest["state"] = s
 			}

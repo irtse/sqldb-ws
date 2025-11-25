@@ -129,7 +129,7 @@ func (t *AbstractController) csv(d utils.DomainITF, colsFunc map[string]string, 
 				continue
 			}
 			v := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(
-				utils.ToString(r[c]), "(completed)", ""), "(pending)", ""), "(refused)", ""), "(dismiss)", ""), "(progressing)", "")
+				utils.ToString(r[c]), "(completed)", ""), "(pending)", ""), "(refused)", ""), "(dismiss)", ""), "(in progress)", "")
 			row = append(row, v)
 			if v == "true" {
 				v = "yes"
