@@ -331,7 +331,7 @@ var ThesisFR = models.SchemaModel{
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "true", Required: false, Readonly: false, Index: 9},
 		{Name: "defense_date", Label: "date de soutenance de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 10},
 		{Name: "director_" + ds.RootID(ds.DBUser.Name), Translatable: false, Type: models.LINKADD.String(), Required: true, ForeignTable: ds.DBUser.Name, Index: 11, Label: "directeur de thèse"},
-		{Name: "co_supervisor_" + ds.RootID(ds.DBUser.Name), Translatable: false, Type: models.MANYTOMANYADD.String(), Required: true, ForeignTable: ThesisSupervisorAuthorsFR.Name, Index: 12, Label: "co-encadrant de thèse"},
+		{Name: "co_supervisor_" + ds.RootID(ds.DBUser.Name), Translatable: false, Type: models.MANYTOMANYADD.String(), Required: false, ForeignTable: ThesisSupervisorAuthorsFR.Name, Index: 12, Label: "co-encadrant de thèse"},
 		{Name: "t_start_date", Label: "date de début de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 13},
 		{Name: "t_end_date", Label: "date de fin de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 14},
 	}...),
@@ -388,8 +388,8 @@ var InternshipFR = models.SchemaModel{
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: InternshipAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "false", Required: false, Readonly: true, Index: 9},
 		{Name: "IRT_manager" + ds.RootID(ds.DBUser.Name), Type: models.INTEGER.String(), Translatable: false, Required: true, ForeignTable: ds.DBUser.Name, Index: 10, Label: "responsable IRT du stage"},
-		{Name: "i_start_date", Label: "date de soutenance de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 11},
-		{Name: "i_end_date", Label: "date de end de thèse", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
+		{Name: "i_start_date", Label: "date de soutenance de stage", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 11},
+		{Name: "i_end_date", Label: "date de fin de stage", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 	}...),
 }
 
