@@ -545,17 +545,23 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		}
 	} else {
 		for _, f := range subTable.Fields {
-			if f.GetLink() > 0 && f.GetLink() != field.GetLink() {
-				if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
-					if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
-						subField.Name: sudId,
-					}, false); err == nil {
-						for _, r := range res {
-							manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, f, utils.GetString(r, utils.SpecialIDParam))
+			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
+				fmt.Println("D", subTable.Name, subField.Name, sudId)
+				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
+					subField.Name: sudId,
+				}, false); err == nil {
+					for _, ff := range subTable.Fields {
+						if ff.GetLink() == subTable.GetID() {
+							subField = ff
 						}
+					}
+					for _, r := range res {
+						fmt.Println("C", sch.Name, subField.Name, utils.GetString(r, utils.SpecialIDParam))
+						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, subField, utils.GetString(r, utils.SpecialIDParam))
 					}
 				}
 			}
+
 		}
 	}
 	return manyVals
