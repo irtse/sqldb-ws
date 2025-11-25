@@ -167,7 +167,7 @@ func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface
 		if sc, err := schema.GetSchema(s.Domain.GetTable()); err == nil {
 			id = sc.GetID()
 		}
-		fmt.Println(id)
+		fmt.Println("TABLE", id, (s.Domain.GetTable()))
 		for _, r := range results {
 			m := map[string]interface{}{
 				ds.SchemaDBField:                           id,
