@@ -533,15 +533,17 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 	if !d.Domain.IsShallowed() {
 		l, _ := scheme.GetSchemaByID(field.GetLink())
 		for _, f := range l.Fields {
+			fmt.Println(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String()))
 			if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) {
-				if strings.Contains(f.Name, schema.Name) && f.GetLink() > 0 {
+				if ss, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
+					fmt.Println("ONE TO MANY", ss.Name)
 					manyPathVals[field.Name] = utils.BuildPath(
 						link, utils.ReservedParam,
 						f.Name+"="+record.GetString(utils.SpecialIDParam))
 					if l.HasField("name") {
-						fmt.Println(l.Name, ds.RootID(schema.Name), record[utils.SpecialIDParam])
+						fmt.Println(l.Name, ds.RootID(ss.Name), record[utils.SpecialIDParam])
 						if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(l.Name, map[string]interface{}{
-							ds.RootID(schema.Name): record[utils.SpecialIDParam],
+							ds.RootID(ss.Name): record[utils.SpecialIDParam],
 						}, false); err == nil {
 							if _, ok := manyVals[field.Name]; !ok {
 								manyVals[field.Name] = utils.Results{}
