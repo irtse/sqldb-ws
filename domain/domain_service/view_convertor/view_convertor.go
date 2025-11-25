@@ -536,14 +536,14 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 			fmt.Println(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String()))
 			if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) {
 				if ss, err := scheme.GetSchemaByID(f.GetLink()); err == nil {
-					fmt.Println("ONE TO MANY", ss.Name)
+					fmt.Println("ONE TO MANY", ss.Name, l.Name)
 					manyPathVals[field.Name] = utils.BuildPath(
 						link, utils.ReservedParam,
 						f.Name+"="+record.GetString(utils.SpecialIDParam))
 					if l.HasField("name") {
 						fmt.Println(l.Name, ds.RootID(ss.Name), record[utils.SpecialIDParam])
 						if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(l.Name, map[string]interface{}{
-							ds.RootID(ss.Name): record[utils.SpecialIDParam],
+							f.Name: record[utils.SpecialIDParam],
 						}, false); err == nil {
 							if _, ok := manyVals[field.Name]; !ok {
 								manyVals[field.Name] = utils.Results{}
