@@ -571,6 +571,7 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 					link, utils.ReservedParam,
 					f.Name+"="+record.GetString(utils.SpecialIDParam))
 				manyVals = d.recursiveFoundNameOneToMany(*schema, field, manyVals, l, f, utils.GetString(record, utils.SpecialIDParam))
+				continue
 			}
 			if strings.Contains(f.Name, schema.Name) || f.Name == utils.SpecialIDParam || f.GetLink() <= 0 {
 				continue
