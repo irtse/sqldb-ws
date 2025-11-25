@@ -467,7 +467,7 @@ var DBTask = models.SchemaModel{
 		{Name: "priority", Type: models.ENUMURGENCY.String(), Required: false, Default: models.LEVELNORMAL, Readonly: true, Index: 6},
 		{Name: "closing_date", Type: models.TIMESTAMP.String(), Required: false, Readonly: true, Index: 7},
 		{Name: "closing_by" + RootID(DBUser.Name), Type: models.TIMESTAMP.String(), Required: false, Readonly: true, Index: 8},
-		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template attached", Index: 9},
+		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template attached", Hidden: true, Index: 9},
 		{Name: RootID(DBRequest.Name), Type: models.INTEGER.String(), ForeignTable: DBRequest.Name, Required: true, Readonly: true, Label: "request attached", Index: 10},
 		{Name: RootID(DBWorkflowSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBWorkflowSchema.Name, Required: false, Hidden: true, Readonly: true, Label: "workflow attached", Index: 11},
 		{Name: "nexts", Type: models.BIGVARCHAR.String(), Required: false, Default: "all", Hidden: true, Index: 12},
