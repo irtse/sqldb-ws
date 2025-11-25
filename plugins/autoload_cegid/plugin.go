@@ -164,7 +164,7 @@ func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface
 	if record["state"] != nil && record["state"] != "" {
 		for _, r := range results {
 			m := map[string]interface{}{
-				ds.SchemaDBField:                           s.Sch.ID,
+				ds.SchemaDBField:                           s.Sch.GetID(),
 				ds.DestTableDBField:                        r[utils.SpecialIDParam],
 				ds.RootID(models.PublicationStatusFR.Name): utils.GetString(record, "state"),
 			}
