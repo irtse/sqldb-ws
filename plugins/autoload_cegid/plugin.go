@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -162,9 +163,14 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 
 func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
 	if record["state"] != nil && record["state"] != "" {
+		id := s.Sch.GetID()
+		if sc, err := schema.GetSchema(s.Domain.GetTable()); err == nil {
+			id = sc.GetID()
+		}
+		fmt.Println(id)
 		for _, r := range results {
 			m := map[string]interface{}{
-				ds.SchemaDBField:                           s.Sch.GetID(),
+				ds.SchemaDBField:                           id,
 				ds.DestTableDBField:                        r[utils.SpecialIDParam],
 				ds.RootID(models.PublicationStatusFR.Name): utils.GetString(record, "state"),
 			}
