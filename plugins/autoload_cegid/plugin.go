@@ -164,10 +164,10 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {
 	if record["state"] != nil && record["state"] != "" {
 		id := s.Sch.GetID()
-		if sc, err := schema.GetSchema(s.Domain.GetTable()); err == nil {
+		if sc, err := schema.GetSchema(s.Sch.Name); err == nil {
 			id = sc.GetID()
 		}
-		fmt.Println("TABLE", id, (s.Domain.GetTable()))
+		fmt.Println("TABLE", id, (s.Domain.GetTable()), s.Sch.Name)
 		for _, r := range results {
 			m := map[string]interface{}{
 				ds.SchemaDBField:                           id,
