@@ -179,7 +179,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 		}
 		for _, rec := range res {
 			triggers.NewTrigger(s.Domain).Trigger(&sche, rec, utils.UPDATE)
-			if s.Domain.GetTable() == ds.DBRequest.Name || s.Domain.GetTable() == ds.DBTask.Name {
+			if s.Domain.GetTable() == ds.DBRequest.Name || s.Domain.GetTable() == ds.DBTask.Name || utils.GetBool(rec, "is_draft") {
 				continue
 			}
 			if reqs, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
