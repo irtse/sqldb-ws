@@ -262,7 +262,7 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 			if meth == utils.UPDATE {
 				now = now.Add(time.Duration(-175200) * time.Hour)
 			}
-			rnow, _ := time.Parse("2006-01-02", now.Format("2006-01-02"))
+			rnow, _ := time.Parse("2006-01-02", now.Format("2006-01-02 15:04:05"))
 			return err == nil, time1, rnow.UTC()
 		}
 		if strings.Contains(val2, "date") && record[val2] == nil {

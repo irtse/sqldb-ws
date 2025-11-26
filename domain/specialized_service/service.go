@@ -67,9 +67,9 @@ func VerifyLoop(domain utils.DomainITF, schemas ...sm.SchemaModel) {
 	for _, sch := range schemas {
 		currentTime := time.Now()
 		if sch.HasField("start_date") && sch.HasField("end_date") {
-			sqlFilter := "('" + currentTime.Format("2006-01-02") + "' > end_date)"
+			sqlFilter := "('" + currentTime.Format("2006-01-02 15:04:05") + "' > end_date)"
 			domain.DeleteSuperCall(utils.AllParams(sch.Name), sqlFilter)
-			sqlFilter = "'" + currentTime.Format("2006-01-02") + "' > start_date"
+			sqlFilter = "'" + currentTime.Format("2006-01-02 15:04:05") + "' > start_date"
 			db := connector.Open(domain.GetDb())
 			if res, err := db.SelectQueryWithRestriction(sch.Name, sqlFilter, false); err == nil && len(res) > 0 {
 				for _, r := range res {

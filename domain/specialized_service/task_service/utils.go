@@ -218,7 +218,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		}
 	}
 	sqlFilter := []string{
-		"('" + currentTime.Format("2006-01-02") + "' >= start_date AND ('" + currentTime.Format("2006-01-02") + "' < end_date OR end_date IS NULL))",
+		"('" + currentTime.Format("2006-01-02 15:04:05") + "' >= start_date AND ('" + currentTime.Format("2006-01-02 15:04:05") + "' < end_date OR end_date IS NULL))",
 	}
 	sqlFilter = append(sqlFilter, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 		"all_tasks": true,
