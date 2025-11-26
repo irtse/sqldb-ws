@@ -556,7 +556,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 					subField.Name: sudId,
 				}, false); err == nil {
-					for _, ff := range sch.Fields {
+					for _, ff := range subTable.Fields {
 						if ff.GetLink() == subTable.GetID() {
 							subField = ff
 						}
