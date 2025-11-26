@@ -104,7 +104,12 @@ func (t *AbstractController) csv(d utils.DomainITF, colsFunc map[string]string, 
 	lastLine, labs := []string{}, []string{}
 	for _, c := range cols {
 		if v, ok := mapping[c+"_aslabel"]; ok && v != "" {
-			labs = append(labs, v)
+			decoded, err := url.QueryUnescape(v)
+			if err == nil {
+				labs = append(labs, decoded)
+			} else {
+				labs = append(labs, c)
+			}
 		} else {
 			labs = append(labs, c)
 		}
