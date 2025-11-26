@@ -533,7 +533,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		return manyVals
 	}
 	if subTable.HasField("name") {
-		if subTable.HasField(subField.Name) {
+		if !subTable.HasField(subField.Name) {
 			return manyVals
 		}
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{

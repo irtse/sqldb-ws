@@ -1,7 +1,6 @@
 package task_service
 
 import (
-	"fmt"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -227,7 +226,6 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			"!" + "delegated_" + ds.UserDBField: domain.GetUserID(),
 		}, false, utils.SpecialIDParam),
 	}, false))
-	fmt.Println("DELEGATION NOT WORK", sqlFilter)
 	if dels, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
 		ds.DBDelegation.Name, utils.ToListAnonymized(sqlFilter), false); err == nil && len(dels) > 0 {
 		for _, delegated := range dels {
@@ -235,11 +233,11 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			newRec["binded_dbtask"] = id
 			k1 := "delegated_" + ds.UserDBField
 			k2 := ds.UserDBField
-
 			ks1 := "shared_" + ds.UserDBField
 			ks2 := ds.UserDBField
 			newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
+
 			createTaskAndNotify(newRec, request, initialRec, domain, true)
 			share := map[string]interface{}{
 				ks1:                  delegated[k1],
