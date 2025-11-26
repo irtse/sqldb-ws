@@ -197,7 +197,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 								<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'>
 								<path d='M5 13l4 4 10-10' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
 								</svg>" 
-								width="18" height="18" style="display:block; margin:0 auto; border:0;">
+								width="18" height="18" style="display:block; margin-top:10; border:0;">
 							</a>
 						</td>
 						</tr>
@@ -215,7 +215,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 								<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'>
 								<path d='M6 6l12 12M18 6L6 18' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
 								</svg>" 
-								width="18" height="18" style="display:block; margin:0 auto; border:0;">
+								width="18" height="18" style="display:block; margin-top:10; border:0;">
 							</a>
 						</td>
 						</tr>
