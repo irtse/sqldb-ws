@@ -135,7 +135,6 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 								}, false); err == nil && len(l) > 0 {
 									usrFrom = l[0]
 								}
-								fmt.Println(utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec)
 								go connector.SendMailSafe(
 									utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec, false)
 							}

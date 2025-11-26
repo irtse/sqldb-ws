@@ -2,6 +2,7 @@ package task_service
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -53,10 +54,13 @@ func (s *TaskService) TransformToGenericView(results utils.Results, tableName st
 }
 
 func (s *TaskService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
+	fmt.Println("CREATE A TASK", record[ds.RequestDBField])
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 		utils.SpecialIDParam: record[ds.RequestDBField],
 	}, false); err == nil && len(res) > 0 {
 		CreateDelegated(record, res[0], utils.GetInt(record, utils.SpecialIDParam), record, s.Domain)
+	} else {
+		fmt.Println("CREATE A TASK: REQ NOT FOUND", record[ds.RequestDBField])
 	}
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }

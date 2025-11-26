@@ -62,9 +62,12 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 			ds.DestTableDBField + "=" + recordID,
 			"current_index > 1",
 		}
-		if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, restr, false); err == nil && len(res) > 0 {
-			return []map[string]interface{}{}, errors.New("can't select a trigger create on a upper after first task of request's workflow")
+		if recordID != "" {
+			if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, restr, false); err == nil && len(res) > 0 {
+				return []map[string]interface{}{}, errors.New("can't select a trigger create on a upper after first task of request's workflow")
+			}
 		}
+
 	}
 
 	// TODO if it's the first task

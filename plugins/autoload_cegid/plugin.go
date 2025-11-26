@@ -4,7 +4,6 @@
 package main
 
 import (
-	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -167,7 +166,6 @@ func (s *PublicationService) SpecializedUpdateRow(results []map[string]interface
 		if sc, err := schema.GetSchema(s.Sch.Name); err == nil {
 			id = sc.GetID()
 		}
-		fmt.Println("TABLE", id, (s.Domain.GetTable()), s.Sch.Name)
 		for _, r := range results {
 			m := map[string]interface{}{
 				ds.SchemaDBField:                           id,
