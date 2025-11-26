@@ -42,6 +42,7 @@ func GetNewSchemaByWF(workflow map[string]interface{}, schema map[string]interfa
 
 func CompareOrder(schema *sm.SchemaModel, order []string, schemes map[string]interface{}, results []utils.Record, readOnly bool, domain utils.DomainITF) ([]string, map[string]interface{}, bool) {
 	newOrder := []string{}
+	applyNewOrder := true
 	if res, err := GetFilterFields(schema, results, domain); err == nil && len(res) > 0 {
 		for _, ord := range res {
 			if len(order) == 0 || slices.Contains(order, utils.GetString(ord, "name")) {
@@ -51,6 +52,9 @@ func CompareOrder(schema *sm.SchemaModel, order []string, schemes map[string]int
 				}
 				if !slices.Contains(newOrder, utils.GetString(ord, "name")) {
 					newOrder = append(newOrder, utils.GetString(ord, "name"))
+					if utils.GetInt(ord, "index") != 1 {
+						applyNewOrder = false
+					}
 				}
 			}
 		}
@@ -58,7 +62,16 @@ func CompareOrder(schema *sm.SchemaModel, order []string, schemes map[string]int
 	if len(newOrder) == 0 {
 		return order, schemes, readOnly
 	}
-	return newOrder, schemes, readOnly
+	if applyNewOrder {
+		return newOrder, schemes, readOnly
+	}
+	nnOrder := []string{}
+	for _, o := range order {
+		if slices.Contains(newOrder, o) {
+			nnOrder = append(nnOrder, o)
+		}
+	}
+	return nnOrder, schemes, readOnly
 }
 
 func getRedirection(domainID string) string {
