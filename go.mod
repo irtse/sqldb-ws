@@ -79,6 +79,7 @@ require (
 	github.com/rs/zerolog v1.30.0
 	github.com/shiena/ansicolor v0.0.0-20230509054315-a9deabde6e02 // indirect
 	github.com/smartystreets/goconvey v1.6.4
+	github.com/tealeg/xlsx v1.0.5
 	golang.org/x/net v0.39.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )

@@ -2,11 +2,15 @@ package controller
 
 import (
 	"encoding/csv"
+	"fmt"
 	"net/http"
 	"net/url"
 	"sqldb-ws/domain/utils"
 	"strings"
 	"time"
+
+	"github.com/jung-kurt/gofpdf"
+	"github.com/tealeg/xlsx"
 )
 
 func (t *AbstractController) Respond(params map[string]string, asLabel map[string]string, method utils.Method, domain utils.DomainITF, args ...interface{}) {
@@ -66,14 +70,19 @@ func (t *AbstractController) download(d utils.DomainITF, col string, colsCmd str
 	cols, lastLine, results := t.mapping(col, colsCmd, cmd, mapping, resp) // mapping
 	t.Ctx.ResponseWriter.Header().Set("Content-Type", "text/"+format)
 	t.Ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename="+name+"_"+strings.Replace(time.Now().Format(time.RFC3339), " ", "_", -1)+"."+format)
-	if format == "csv" {
+	switch format {
+	case "csv":
 		t.Ctx.ResponseWriter.Write([]byte{0xEF, 0xBB, 0xBF})
 		w := csv.NewWriter(t.Ctx.ResponseWriter)
 		w.Comma = ';'
 		w.WriteAll(t.csv(d, lastLine, mapping, cols, results))
-	} else if format == "json" {
+	case "json":
 		t.json(d, lastLine, mapping, cols, results)
-	} else {
+	case "pdf":
+		t.pdf(d, lastLine, mapping, cols, results)
+	case "xlsx":
+		t.xlsx(d, lastLine, mapping, cols, results)
+	default:
 		t.Response(results, error, format, d.GetUniqueRedirection())
 	}
 }
@@ -146,6 +155,94 @@ func (t *AbstractController) csv(d utils.DomainITF, colsFunc map[string]string, 
 	}
 	data = append(data, lastLine)
 	return data
+}
+
+func (t *AbstractController) pdf(d utils.DomainITF, colsFunc, mapping map[string]string, cols []string, results utils.Results) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 12)
+
+	// Header
+	for _, c := range cols {
+		if v, ok := mapping[c+"_aslabel"]; ok && v != "" {
+			decoded, err := url.QueryUnescape(v)
+			if err == nil {
+				pdf.CellFormat(40, 10, decoded, "1", 0, "C", false, 0, "")
+			} else {
+				pdf.CellFormat(40, 10, c, "1", 0, "C", false, 0, "")
+			}
+		} else {
+			pdf.CellFormat(40, 10, c, "1", 0, "C", false, 0, "")
+		}
+	}
+	pdf.Ln(-1)
+
+	// Data
+	for _, r := range results {
+		for _, c := range cols {
+			v := utils.ToString(r[c])
+			if v == "true" {
+				v = "yes"
+			} else if v == "false" {
+				v = "no"
+			}
+			pdf.CellFormat(40, 10, v, "1", 0, "L", false, 0, "")
+		}
+		pdf.Ln(-1)
+	}
+
+	t.Ctx.ResponseWriter.Header().Set("Content-Type", "application/pdf")
+	t.Ctx.ResponseWriter.Header().Set("Content-Disposition",
+		"attachment; filename="+time.Now().Format("2006-01-02_15-04-05")+".pdf")
+	err := pdf.Output(t.Ctx.ResponseWriter)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (t *AbstractController) xlsx(d utils.DomainITF, colsFunc, mapping map[string]string, cols []string, results utils.Results) {
+	file := xlsx.NewFile()
+	sheet, _ := file.AddSheet("Sheet1")
+
+	// Header
+	headerRow := sheet.AddRow()
+	for _, c := range cols {
+		var label string
+		if v, ok := mapping[c+"_aslabel"]; ok && v != "" {
+			decoded, err := url.QueryUnescape(v)
+			if err == nil {
+				label = decoded
+			} else {
+				label = c
+			}
+		} else {
+			label = c
+		}
+		headerRow.AddCell().Value = label
+	}
+
+	// Data
+	for _, r := range results {
+		row := sheet.AddRow()
+		for _, c := range cols {
+			v := utils.ToString(r[c])
+			if v == "true" {
+				v = "yes"
+			} else if v == "false" {
+				v = "no"
+			}
+			row.AddCell().Value = v
+		}
+	}
+
+	t.Ctx.ResponseWriter.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	t.Ctx.ResponseWriter.Header().Set("Content-Disposition",
+		"attachment; filename="+time.Now().Format("2006-01-02_15-04-05")+".xlsx")
+
+	err := file.Write(t.Ctx.ResponseWriter)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func (t *AbstractController) mapping(col string, colsCmd string, cmd string, mapping map[string]string, resp utils.Results) ([]string, map[string]string, utils.Results) {
