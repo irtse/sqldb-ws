@@ -1,6 +1,7 @@
 package task_service
 
 import (
+	"fmt"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
@@ -226,6 +227,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			"!" + "delegated_" + ds.UserDBField: domain.GetUserID(),
 		}, false, utils.SpecialIDParam),
 	}, false))
+	fmt.Println("DELEGATION NOT WORK", sqlFilter)
 	if dels, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
 		ds.DBDelegation.Name, utils.ToListAnonymized(sqlFilter), false); err == nil && len(dels) > 0 {
 		for _, delegated := range dels {
