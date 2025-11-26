@@ -212,10 +212,10 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
 							<img src="data:image/svg+xml;utf8,
-<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'>
-  <path d='M6 6l12 12M18 6L6 18' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
-</svg>" 
-width="18" height="18">
+								<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'>
+								<path d='M6 6l12 12M18 6L6 18' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
+								</svg>" 
+								width="18" height="18">
 							</a>
 						</td>
 						</tr>

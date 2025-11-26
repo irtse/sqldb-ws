@@ -529,6 +529,7 @@ func (d *ViewConvertor) HandleLinkField(record utils.Record, field sm.FieldModel
 }
 
 func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sudId string) map[string]utils.Results {
+	fmt.Println("RECURSE", subField.GetLink(), bfTable.GetID())
 	if subField.GetLink() != bfTable.GetID() {
 		return manyVals
 	}
@@ -543,13 +544,14 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 			if _, ok := manyVals[field.Name]; !ok {
 				manyVals[field.Name] = utils.Results{}
 			}
+			fmt.Println(subTable.Name, subField.Name, sudId, res)
 			for _, r := range res {
 				manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
 			}
 		}
 	} else {
 		for _, f := range subTable.Fields {
-			if subTable.HasField(subField.Name) {
+			if !subTable.HasField(subField.Name) {
 				continue
 			}
 			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
