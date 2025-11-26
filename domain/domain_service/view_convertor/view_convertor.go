@@ -533,6 +533,9 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		return manyVals
 	}
 	if subTable.HasField("name") {
+		if subTable.HasField(subField.Name) {
+			return manyVals
+		}
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 			subField.Name: sudId,
 		}, false); err == nil {
@@ -545,6 +548,9 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		}
 	} else {
 		for _, f := range subTable.Fields {
+			if subTable.HasField(subField.Name) {
+				continue
+			}
 			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
 				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 					subField.Name: sudId,

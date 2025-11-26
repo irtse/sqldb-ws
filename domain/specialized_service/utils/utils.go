@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -189,6 +190,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 					ds.SchemaDBField: sche.ID,
 				}, false); err == nil && len(res) > 0 {
+					fmt.Println("THERE")
 					s.Domain.CreateSuperCall(utils.AllParams(ds.DBRequest.Name).RootRaw(), map[string]interface{}{
 						ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
 						ds.DestTableDBField: rec[utils.SpecialIDParam],
