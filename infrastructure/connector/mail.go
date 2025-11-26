@@ -184,23 +184,37 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 			host = ""
 		}
 		writeLine(fmt.Sprintf(`
-			<div style="display:flex;justify-content:center;align-items:center;">
-				<br>
-				<table border="0" cellspacing="0" cellpadding="0" style="margin:0 10px 0 0">
-					<tr>
-						<td align="center" style="border-radius:5px; background-color:#13aa52;">
-							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=true" style="font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#fff; font-weight:bold; text-decoration:none;border-radius:5px; padding:12px 18px; border:1px solid #13aa52; display:inline-block;">✔</a>
+			<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+				<tr>
+					<td align="center" valign="middle" style="padding-right:10px;">
+					<table role="presentation" cellspacing="0" cellpadding="0" border="0">
+						<tr>
+						<td bgcolor="#13aa52" style="border-radius:5px;">
+							<a href="%s/v1/response/%s?got_response=true"
+							target="_blank"
+							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
+							✔
+							</a>
 						</td>
-					</tr>
-				</table>
-				<table border="0" cellspacing="0" cellpadding="0">
-					<tr>
-						<td align="center" style="border-radius:5px; background-color:#FF4742;">
-							<a rel="noopener" target="_blank" href="%s/v1/response/%s?got_response=false" style="font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#fff; font-weight:bold; text-decoration:none;border-radius:5px; padding:12px 18px; border:1px solid #FF4742; display:inline-block;">✘</a>
+						</tr>
+					</table>
+					</td>
+
+					<td align="center" valign="middle">
+					<table role="presentation" cellspacing="0" cellpadding="0" border="0">
+						<tr>
+						<td bgcolor="#FF4742" style="border-radius:5px;">
+							<a href="%s/v1/response/%s?got_response=false"
+							target="_blank"
+							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
+							✘
+							</a>
 						</td>
-					</tr>
-				</table>
-			</div><br>`, host, code, host, code))
+						</tr>
+					</table>
+					</td>
+				</tr>
+				</table><br>`, host, code, host, code))
 	}
 
 	writeLine("</body></html>")
