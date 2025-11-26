@@ -193,7 +193,8 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							<a href="%s/v1/response/%s?got_response=true"
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
-							✔
+							 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnogbS0yLjI5IDE0Ljc5bC00LjUtNC41IDEuNDEtMS40MSAzLjA5IDMuMDkgMy4wOS0zLjA5IDEuNDEgMS40MS00LjUgNC41eiIvPjwvc3ZnPg==" 
+                   				width="18" height="18" style="vertical-align:middle;">
 							</a>
 						</td>
 						</tr>
@@ -207,7 +208,8 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							<a href="%s/v1/response/%s?got_response=false"
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
-							✘
+							<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMy41OSA1LjQxTDEyIDExIDguNDEgNy40MSA3IDguODMgMTAuNTkgMTIgNyAxNS41OSA4LjQxIDE3IDEyIDEzLjQxIDE1LjU5IDE3IDE3IDE1LjU5IDEzLjQxIDEybDMuNTktM2wtMS40MS0xLjQxTDEyIDExbDQtMy41OUwxNS41OSA3LjQxeiIvPjwvc3ZnPg==" 
+                   				width="18" height="18" style="vertical-align:middle;">
 							</a>
 						</td>
 						</tr>
