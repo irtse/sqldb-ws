@@ -193,11 +193,9 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							<a href="%s/v1/response/%s?got_response=true"
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
-							 <img src="data:image/svg+xml;utf8,
-								<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'>
-								<path d='M5 13l4 4 10-10' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
-								</svg>" 
-								width="18" height="18" style="display:block; margin-top:10; border:0;">
+							  <img src="https://%s/img/check.png"
+                                 width="18" height="18"
+                                 style="display:block; margin-top:10px; border:0;">
 							</a>
 						</td>
 						</tr>
@@ -212,17 +210,16 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
 							<img src="data:image/svg+xml;utf8,
-								<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'>
-								<path d='M6 6l12 12M18 6L6 18' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
-								</svg>" 
-								width="18" height="18" style="display:block; margin-top:10; border:0;">
+								<img src="https://%s/img/cross.png"
+                                 width="18" height="18"
+                                 style="display:block; margin-top:10px; border:0;">
 							</a>
 						</td>
 						</tr>
 					</table>
 					</td>
 				</tr>
-				</table><br>`, host, code, host, code))
+				</table><br>`, host, code, host, host, code, host))
 	}
 
 	writeLine("</body></html>")

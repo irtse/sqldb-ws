@@ -83,7 +83,6 @@ func (t *TriggerService) Trigger(fromSchema *sm.SchemaModel, record utils.Record
 		return
 	}
 	if res, err := t.GetTriggers("auto", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
-		fmt.Println("COUNT TRIGGERS", len(res))
 		for _, r := range res {
 			if !ShouldExecLater(r) {
 				t.ExecTrigger(fromSchema, record, r)

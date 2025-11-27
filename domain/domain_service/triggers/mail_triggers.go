@@ -89,7 +89,6 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 	if len(dest) > 0 {
 		if toUsers = t.handleOverrideEmailTo(record, dest[0], toSchema, triggerID); len(toUsers) == 0 {
 			if mode == "auto" {
-				fmt.Println("COUNT TRIGGERS not toUsers", dest[0], toSchema.Name, triggerID)
 				return mailings
 			}
 		}
