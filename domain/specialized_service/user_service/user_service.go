@@ -47,7 +47,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 			}, true))
 		}
 	} else if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "disable_share") && s.Domain.GetUserID() != "" {
-		splitted := strings.Split(strings.ReplaceAll(scope, "disable_share", ""), "_")
+		splitted := strings.Split(strings.ReplaceAll(scope, "disable_share_", ""), "_")
 		if len(splitted) > 1 {
 			arr := []interface{}{
 				connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
