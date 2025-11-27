@@ -193,9 +193,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							<a href="%s/v1/response/%s?got_response=true"
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
-							  <img src="https://%s/img/check.png"
-                                 width="18" height="18"
-                                 style="display:block; margin-top:10px; border:0;">
+							  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABNElEQVR4nO2VvUoDQRSGv40iNyoK2kQDSyCwsg6io6CKFoIk8g0Ed3ClY2FpZ2v4BZQ8gVpIkSJsJAiJK0kpZ2aU2EUH1nJ3s9975szuzsLuDgNQ2i+I4QqoehbsAa9AZfAfXAHvAAlfACJvoFK2bK9gBN2AXhgHWpU3bPN7iP6p4HcDq2AH7h7N8ZL2xYypgmMUA5YAXaBw4A0MEPgGcA48Ay0xO4dBEqsZx6eS2kSmqbcf28Ac8A9yClgC1gBWxWUZ8y7A3wvxqALuCk1KwMZwGbK0tc1jFvMyJjNgaLrV0Hu6YAk8C3c5+B1M90DgJt5W3E8QCrhq2KhELrDrhoGRh1H4AJPJfmsHrbL/ytFnXOHqS6n9AxkOQYyHwQ7cAGGrEW3p1eqpAtqGxyqYi5dyfKeGpZRjvLj9ALjBBMn4g4+VpAAAAAElFTkSuQmCC" width="18" height="18">
 							</a>
 						</td>
 						</tr>
@@ -209,10 +207,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							<a href="%s/v1/response/%s?got_response=false"
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
-							<img src="data:image/svg+xml;utf8,
-								<img src="https://%s/img/cross.png"
-                                 width="18" height="18"
-                                 style="display:block; margin-top:10px; border:0;">
+							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABM0lEQVR4nO2VvUoDQRSGv40iNyoK2kQDSyCwsg6io6CKFoIk8g0Ed3ClY2FpZ2v4BZQ8gVpIkSJsJAiJK0kpZ2aU2EUH1nJ3s9975szuzsLuDgNQ2i+I4QqoehbsAa9AZfAfXAHvAAlfACJvoFK2bK9gBN2AXhgHWpU3bPN7iP6p4HcDq2AH7h7N8ZL2xYypgmMUA5YAXaBw4A0MEPgGcA48Ay0xO4dBEqsZx6eS2kSmqbcf28Ac8A9yClgC1gBWxWUZ8y7A3wvxqALuCk1KwMZwGbK0tc1jFvMyJjNgaLrV0Hu6YAk8C3c5+B1M90DgJt5W3E8QCrhq2KhELrDrhoGRh1H4AJPJfmsHrbL/ytFnXOHqS6n9AxkOQYyHwQ7cAGGrEW3p1eqpAtqGxyqYi5dyfKeGpZRjvLj9ALjBBMn4g4+VpAAAAAElFTkSuQmCC" width="18" height="18">
 							</a>
 						</td>
 						</tr>
