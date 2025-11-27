@@ -240,6 +240,7 @@ func (d *SpecializedDomain) GetRowResults(
 			all_results = append(all_results, res...)
 		}
 	}
+	fmt.Println("ALL RESULTS", len(all_results), d.GetTable())
 	return all_results, nil
 }
 
