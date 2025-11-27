@@ -231,6 +231,7 @@ func (d *SpecializedDomain) GetRowResults(
 			if err != nil {
 				return all_results, err
 			}
+			fmt.Println("ALL RESULTS RES", len(res), d.GetTable())
 			AddInCache(d.UserID, tb, meth, cp, res)
 			p, _ = d.Params.Get(utils.RootRawView)
 			if p != "enable" && err == nil && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
