@@ -51,7 +51,7 @@ func SetClosureStatus(res map[string]interface{}) map[string]interface{} {
 		res["is_close"] = true
 		res["closing_date"] = time.Now().Format(time.RFC3339)
 	} else {
-		res["state"] = "in progress"
+		res["state"] = "running"
 		res["is_close"] = false
 		res["closing_date"] = nil
 	}
