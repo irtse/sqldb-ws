@@ -1,6 +1,7 @@
 package user_service
 
 import (
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -60,6 +61,7 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 			innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 				utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, arr, false, "shared_"+ds.UserDBField),
 			}, true))
+			fmt.Println("DISABLE", arr)
 		}
 	}
 	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); ok && strings.Contains(scope, "enable_delegate") && s.Domain.GetUserID() != "" {
