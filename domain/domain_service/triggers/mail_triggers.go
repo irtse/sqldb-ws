@@ -89,19 +89,17 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 	if len(dest) > 0 {
 		if toUsers = t.handleOverrideEmailTo(record, dest[0], toSchema, triggerID); len(toUsers) == 0 {
 			if mode == "auto" {
-				fmt.Println("COUNT TRIGGERS not toUsers", dest[0], toSchema, triggerID)
+				fmt.Println("COUNT TRIGGERS not toUsers", dest[0], toSchema.Name, triggerID)
 				return mailings
 			}
 		}
 	} else if toUsers = t.handleOverrideEmailTo(record, map[string]interface{}{}, toSchema, triggerID); len(toUsers) == 0 {
 		if mode == "auto" {
-			fmt.Println("COUNT TRIGGERS not toUsers", map[string]interface{}{}, toSchema, triggerID)
 			return mailings
 		}
 	}
 	mailSchema, err := schema.GetSchema(ds.DBEmailTemplate.Name)
 	if err != nil {
-		fmt.Println("COUNT TRIGGERS err", err)
 		return mailings
 	}
 	rules := t.GetTriggerRules(triggerID, fromSchema, mailSchema.GetID(), record)
