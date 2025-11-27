@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -108,7 +107,6 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 				}
 			}
 		}
-		fmt.Println("ONE TO MANY S", len(s.OneToMany))
 		for schemaName, om := range s.OneToMany {
 			field, err := sch.GetField(schemaName)
 			if err != nil {
@@ -165,7 +163,6 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				}
 			}
 		}
-		fmt.Println("ONE TO MANY S", len(s.OneToMany))
 		for schemaName, om := range s.OneToMany {
 			field, err := sche.GetField(schemaName)
 			if err != nil {
@@ -349,7 +346,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							s.OneToMany[ff.Name] = []map[string]interface{}{}
 						}
 						for _, mm := range utils.ToList(record[field.Name]) {
-							fmt.Println("ONE TO MANY", s.OneToMany[field.Name], mm)
 							s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
 						}
 					}

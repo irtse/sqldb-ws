@@ -56,6 +56,10 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 			ds.SchemaDBField:    utils.ToInt64(schema.ID),
 			ds.DestTableDBField: utils.GetInt(results[0], utils.SpecialIDParam),
 		}
+		if schema.Name == ds.DBTask.Name || schema.Name == ds.DBRequest.Name {
+			commentBody[ds.SchemaDBField] = utils.GetInt(results[0], ds.SchemaDBField)
+			commentBody[ds.DestTableDBField] = utils.GetInt(results[0], ds.DestTableDBField)
+		}
 	}
 	readOnly := true
 	view := sm.NewView(id, schema.Name, schema.Label, schema, schema.Name, 0, []sm.ManualTriggerModel{})
