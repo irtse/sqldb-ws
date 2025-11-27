@@ -193,7 +193,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							<a href="%s/v1/response/%s?got_response=true"
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
-							  <span style="font-size:18px;color:#fff;font-weight:bold;">✔</span>
+							  <span style="font-size:16px; font-weight:bold; color:#fff; line-height:16px; display:block;">✔</span>
 						</td>
 						</tr>
 					</table>
@@ -206,7 +206,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 							<a href="%s/v1/response/%s?got_response=false"
 							target="_blank"
 							style="display:inline-block; padding:12px 18px; font-size:18px; font-family:Helvetica, Arial, sans-serif; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:5px;">
-								<span style="font-size:18px;color:#fff;font-weight:bold;">✘</span>
+								<span style="font-size:16px; font-weight:bold; color:#fff; line-height:16px; display:block;">✘</span>
 							</a>
 						</td>
 						</tr>
