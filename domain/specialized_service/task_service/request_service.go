@@ -5,7 +5,6 @@ import (
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
-	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -120,33 +119,6 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 	}
 	s.AbstractSpecializedService.SpecializedUpdateRow(results, record)
 	for _, rec := range results {
-		m := map[string]interface{}{
-			ds.UserDBField:      utils.ToString(rec[ds.UserDBField]),
-			ds.DestTableDBField: utils.ToString(rec[utils.SpecialIDParam]),
-		}
-		switch rec["state"] {
-		case "dismiss":
-		case "refused":
-			rec["state"] = "refused"
-			m[sm.NAMEKEY] = "Rejected " + utils.GetString(rec, sm.NAMEKEY)
-			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is rejected and closed."
-		case "completed":
-			m[sm.NAMEKEY] = "Validated " + utils.GetString(rec, sm.NAMEKEY)
-			m["description"] = utils.GetString(rec, sm.NAMEKEY) + " is accepted and closed."
-		}
-		schema, err := schserv.GetSchema(ds.DBRequest.Name)
-		if err == nil && !utils.Compare(rec["is_meta"], true) && CheckStateIsEnded(rec["state"]) {
-			if t, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
-				ds.UserDBField:      utils.ToString(rec[ds.UserDBField]),
-				ds.DestTableDBField: utils.ToString(rec[utils.SpecialIDParam]),
-				"link_id":           schema.ID,
-				"name":              connector.Quote(utils.GetString(m, "name")),
-			}, false); err == nil && len(t) > 0 {
-				return
-			}
-			m["link_id"] = schema.ID
-			s.Domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBNotification.Name, m, func(s string) (string, bool) { return s, true })
-		}
 		if utils.Compare(rec["is_close"], true) {
 			res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				"meta_" + ds.RequestDBField: utils.ToString(rec[utils.SpecialIDParam]),

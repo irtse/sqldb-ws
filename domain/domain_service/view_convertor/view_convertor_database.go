@@ -34,9 +34,12 @@ func (v *ViewConvertor) GetShortcuts(schemaID string, actions []string) map[stri
 }
 
 func (d *ViewConvertor) FetchRecord(tableName string, m map[string]interface{}) []map[string]interface{} {
+	if len(m) == 0 {
+		return []map[string]interface{}{}
+	}
 	t, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(tableName, m, false)
 	if err != nil || len(t) == 0 {
-		return nil
+		return []map[string]interface{}{}
 	}
 	return t
 }
