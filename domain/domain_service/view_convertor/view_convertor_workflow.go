@@ -50,7 +50,7 @@ func (d *ViewConvertor) handleTaskWorkflow(record utils.Record) (sm.WorkflowMode
 	var workflow sm.WorkflowModel
 	reqRecord := d.FetchRecord(ds.DBRequest.Name,
 		map[string]interface{}{
-			ds.RequestDBField: utils.GetString(record, ds.RequestDBField),
+			utils.SpecialIDParam: utils.GetString(record, ds.RequestDBField),
 		})
 	if len(reqRecord) > 0 {
 		workflow.IsDismissable = !utils.GetBool(reqRecord[0], "is_close")
