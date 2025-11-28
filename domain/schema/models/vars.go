@@ -180,7 +180,7 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 			return a.After(b) || a == b, nil
 		case "<=":
 			return a.Before(b) || a == b, nil
-		case "=", "==", "IN", "IS":
+		case "=", "==", "IN":
 			return a == b, nil
 		case "!=", "<>", "NOT IN":
 			return a != b, nil
@@ -197,7 +197,7 @@ func Compare(operator string, typ string, val string, val2 string, record utils.
 			return a >= b, nil
 		case "<=":
 			return a <= b, nil
-		case "=", "==", "IN", "IS":
+		case "=", "==", "IN":
 			return a == b, nil
 		case "!=", "<>", "NOT IN":
 			return a != b, nil
