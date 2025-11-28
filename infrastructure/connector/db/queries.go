@@ -1,6 +1,7 @@
 package connector
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -86,10 +87,11 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 		db = Open(db)
 		defer db.Close()
 	}
-	var columns, values []string = []string{}, []string{}
-
+	var columns []string = []string{}
+	var values = []interface{}{}
+	max := 0
 	for key, element := range record {
-		_, columns, values = db.BuildUpdateQuery(name, key, element, "", columns, values, false, verify)
+		_, columns, values, max = db.BuildUpdateQuery(name, key, element, "", max, columns, values, false, verify)
 	}
 	queryConst := "SELECT tc.constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.table_name = '" + name + "' AND ccu.column_name = 'name';"
 	if record["name"] != nil && record["name"] != "" {
@@ -102,9 +104,9 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 			}
 		}
 	}
-	for _, query := range db.BuildCreateQueries(name, strings.Join(values, ","), strings.Join(columns, ","), "") {
+	for _, query := range db.BuildCreateQueries(name, max, values, strings.Join(columns, ","), "") {
 		if db.GetDriver() == PostgresDriver {
-			i, err := db.QueryRow(query)
+			i, err := db.QueryRow(query, values)
 			if err != nil && strings.Contains(err.Error(), "unique") {
 				if strings.Contains(err.Error(), "pkey") {
 					if res, err := db.QueryAssociativeArray(
@@ -164,15 +166,15 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 			}
 		}
 	}
-	q, err := db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
+	q, values, err := db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
 	if strings.Contains(q, "main.") {
 		name = name + " as main "
-		q, err = db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
+		q, values, err = db.BuildUpdateQueryWithRestriction(name, record, restriction, isOr)
 	}
 	if err != nil {
 		return err
 	}
-	err = db.Query(q)
+	err = db.UQuery(q, values)
 	if err != nil && strings.Contains(err.Error(), "unique") {
 		splitted := strings.Split(err.Error(), "\"")
 		if len(splitted) > 1 {
@@ -215,13 +217,13 @@ func (db *Database) Prepare(query string) (*sql.Stmt, error) {
 /*
 * QueryRow executes a query that is expected to return at most one row.
  */
-func (db *Database) QueryRow(query string) (int64, error) {
+func (db *Database) QueryRow(query string, values []interface{}) (int64, error) {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
 	}
 	id := int64(0)
-	err := db.Conn.QueryRow(query).Scan(&id)
+	err := db.Conn.QueryRowContext(context.Background(), query, values...).Scan(&id)
 	return id, err
 }
 
@@ -234,6 +236,18 @@ func (db *Database) Query(query string) error {
 		defer db.Close()
 	}
 	rows, err := db.Conn.Query(query)
+	if err != nil {
+		return err
+	}
+	return rows.Close()
+}
+
+func (db *Database) UQuery(query string, values []interface{}) error {
+	if db == nil || db.Conn == nil {
+		db = Open(db)
+		defer db.Close()
+	}
+	rows, err := db.Conn.QueryContext(context.Background(), query, values...)
 	if err != nil {
 		return err
 	}

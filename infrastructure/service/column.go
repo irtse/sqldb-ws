@@ -63,7 +63,7 @@ func (t *TableColumnService) Verify(name string) (string, bool) {
 }
 
 func (t *TableColumnService) Create(record map[string]interface{}) ([]map[string]interface{}, error) {
-	queries := t.DB.ClearQueryFilter().BuildCreateQueries(t.Name, "",
+	queries := t.DB.ClearQueryFilter().BuildCreateQueries(t.Name, 1, []interface{}{""},
 		fmt.Sprintf("%v", record["name"]), fmt.Sprintf("%v", record["type"]))
 	for i, query := range queries {
 		if query == "" {
