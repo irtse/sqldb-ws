@@ -153,13 +153,16 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		case "completed":
 			current_index = math.Floor(current_index + 1)
 		case "dismiss":
+			fmt.Println("DISMISSED", current_index)
 			if current_index >= 1 {
 				current_index = math.Floor(current_index - 1)
 			} else if !isOptionnal { // Dismiss will close requests.
 				res["state"] = "refused"
 			}
+			fmt.Println("DISMISSED 2", current_index)
 			// no before task close request and task
 		}
+
 		schemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
 			map[string]interface{}{
 				"index":            current_index,
@@ -191,7 +194,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 				newRecRequest["state"] = s
 			}
 		}
-		if (res["state"] == "refused" || res["state"] == "dismiss") && !isOptionnal {
+		if (res["state"] == "refused") && !isOptionnal {
 			newRecRequest["state"] = res["state"]
 		} else {
 			newRecRequest["current_index"] = current_index
