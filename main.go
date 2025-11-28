@@ -116,7 +116,6 @@ func GetResponse() {
 			continue
 		}
 		datas := b["data"].(map[string]interface{})
-		fmt.Println("KEYZ", datas)
 		go func() {
 			m := map[string]map[string]interface{}{}
 			for code, data := range datas {
@@ -140,10 +139,9 @@ func GetResponse() {
 					emailRelated := res[0]
 					data[ds.EmailSendedDBField] = emailRelated[utils.SpecialIDParam]
 					data["update_date"] = time.Now().UTC()
-					_, err := d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
+					d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
 						"code": code,
 					}).RootRaw(), data)
-					fmt.Println("Is Created ?", err)
 				}
 			}
 		}()

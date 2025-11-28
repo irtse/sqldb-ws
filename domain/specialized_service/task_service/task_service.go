@@ -2,7 +2,6 @@ package task_service
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
@@ -58,8 +57,6 @@ func (s *TaskService) SpecializedCreateRow(record map[string]interface{}, tableN
 		utils.SpecialIDParam: record[ds.RequestDBField],
 	}, false); err == nil && len(res) > 0 {
 		CreateDelegated(record, res[0], utils.GetInt(record, utils.SpecialIDParam), record, s.Domain)
-	} else {
-		fmt.Println("CREATE A TASK: REQ NOT FOUND", record[ds.RequestDBField])
 	}
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }
@@ -110,7 +107,6 @@ func (s *TaskService) SpecializedUpdateRow(results []map[string]interface{}, rec
 
 func (s *TaskService) Write(results []map[string]interface{}, record map[string]interface{}) {
 	for _, res := range results {
-		fmt.Println(res, CheckStateIsEnded(res["state"]))
 		if _, ok := res["is_draft"]; (ok && utils.GetBool(res, "is_draft")) || !CheckStateIsEnded(res["state"]) {
 			continue
 		}
@@ -125,7 +121,6 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			utils.SpecialIDParam: utils.GetInt(res, RequestDBField),
 		}, false)
 		if err != nil || len(requests) == 0 {
-			fmt.Println("NO REQUEST")
 			continue
 		}
 
@@ -138,7 +133,6 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 				RequestDBField: utils.ToString(res[RequestDBField]),
 				"is_close":     false,
 			}, false); err == nil && len(otherPendingTasks) > 0 {
-			fmt.Println("IS OTHERS")
 			continue
 		}
 		beforeSchemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
@@ -223,14 +217,11 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if CheckStateIsEnded(requests[0]["state"]) {
 			newRecRequest["current_index"] = -1
 		}
-		fmt.Println("REC", newRecRequest, len(schemes))
 		s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBRequest.Name, newRecRequest[utils.SpecialIDParam]).RootRaw(), newRecRequest)
 		for _, scheme := range schemes {
-			fmt.Println("SCH", scheme)
 			if current_index != newRecRequest.GetFloat("current_index") && current_index != (newRecRequest.GetFloat("current_index")-1) && !CheckStateIsEnded(requests[0]["state"]) {
 				HandleHierarchicalVerification(s.Domain, newRecRequest, res)
 			} else if current_index == newRecRequest.GetFloat("current_index") && !CheckStateIsEnded(requests[0]["state"]) {
-				fmt.Println("PrepareAndCreateTask", scheme)
 				PrepareAndCreateTask(scheme, requests[0], res, s.Domain, true)
 			}
 		}

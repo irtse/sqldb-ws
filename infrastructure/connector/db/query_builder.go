@@ -269,10 +269,6 @@ func (db *Database) BuildUpdateQuery(tablename string, col string, value interfa
 			set += " " + col + "=" + Quote(fmt.Sprintf("%v", value)) + ","
 			cols = append(cols, col)
 			colValues = append(colValues, Quote(fmt.Sprintf("%v", value)))
-			if strings.Contains(fmt.Sprintf("%v", value), "'") {
-				fmt.Println("", fmt.Sprintf("%v", value))
-			}
-
 		} else {
 			set += " " + col + "=" + FormatForSQL(strings.Split(typ, ":")[0], value) + ","
 			cols = append(cols, col)

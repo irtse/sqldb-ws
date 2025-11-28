@@ -533,13 +533,11 @@ func (d *ViewConvertor) HandleLinkField(record utils.Record, field sm.FieldModel
 }
 
 func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sudId string) map[string]utils.Results {
-	fmt.Println("RECURSE", subField.GetLink(), bfTable.GetID())
 	if subField.GetLink() != bfTable.GetID() {
 		return manyVals
 	}
 	if subTable.HasField("name") {
 		if !subTable.HasField(subField.Name) {
-			fmt.Println(subTable.Name, subField.Name)
 			return manyVals
 		}
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
@@ -548,7 +546,6 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 			if _, ok := manyVals[field.Name]; !ok {
 				manyVals[field.Name] = utils.Results{}
 			}
-			fmt.Println(subTable.Name, subField.Name, sudId, res)
 			for _, r := range res {
 				manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
 			}
@@ -568,7 +565,6 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 						}
 					}
 					for _, r := range res {
-						fmt.Println(subField.Name, sch.Name)
 						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, subField, utils.GetString(r, utils.SpecialIDParam))
 					}
 				}
