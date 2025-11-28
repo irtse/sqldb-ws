@@ -168,6 +168,7 @@ func (s *FilterService) GetFilterDelete(restr []string, schema sm.SchemaModel) [
 		return restr
 	}
 	restr = append(restr, "("+strings.Join(s.getFilterReadonly(schema, false), " OR ")+")")
+	fmt.Println("DELETE VIEW", restr)
 	return restr
 }
 func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []string {

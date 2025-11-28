@@ -54,7 +54,6 @@ func (s *TaskService) TransformToGenericView(results utils.Results, tableName st
 }
 
 func (s *TaskService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
-	fmt.Println("CREATE A TASK", record[ds.RequestDBField])
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 		utils.SpecialIDParam: record[ds.RequestDBField],
 	}, false); err == nil && len(res) > 0 {

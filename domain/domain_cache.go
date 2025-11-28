@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"sqldb-ws/domain/domain_service/permission"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -91,7 +90,6 @@ func GetInCache(userID string, tableName string, method utils.Method, params uti
 	if err != nil {
 		return false, utils.Results{}
 	}
-	fmt.Println("VALUE IN CACHE FOUNDED !")
 	return true, dp
 }
 
