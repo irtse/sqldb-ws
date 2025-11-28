@@ -585,9 +585,11 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 		l, _ := scheme.GetSchemaByID(field.GetLink())
 		for _, f := range l.Fields {
 			if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) {
-				manyPathVals[field.Name] = utils.BuildPath(
-					link, utils.ReservedParam,
-					f.Name+"="+record.GetString(utils.SpecialIDParam))
+				if f.GetLink() == schema.GetID() {
+					manyPathVals[field.Name] = utils.BuildPath(
+						link, utils.ReservedParam,
+						f.Name+"="+record.GetString(utils.SpecialIDParam))
+				}
 				manyVals = d.recursiveFoundNameOneToMany(*schema, field, manyVals, l, f, utils.GetString(record, utils.SpecialIDParam))
 				continue
 			}
