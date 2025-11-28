@@ -260,15 +260,15 @@ func (db *Database) BuildUpdateQuery(tablename string, col string, value interfa
 	}
 	if typ, ok := verify(col); ok && (!slices.Contains([]string{"NULL", "null", "'null'", ""}, FormatForSQL(strings.Split(typ, ":")[0], value)) || typ == "") {
 		if value == nil || value == "" {
-			set += " " + col + " IS " + Quote(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''")) + ","
+			set += " " + col + " IS " + Quote(fmt.Sprintf("%v", value)) + ","
 			cols = append(cols, col)
 			colValues = append(colValues, "NULL")
 			return set, cols, colValues
 		}
 		if value == "" || (reflect.TypeOf(value) != nil && reflect.TypeOf(value).Kind().String() == "string") {
-			set += " " + col + "=" + Quote(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''")) + ","
+			set += " " + col + "=" + Quote(fmt.Sprintf("%v", value)) + ","
 			cols = append(cols, col)
-			colValues = append(colValues, Quote(strings.ReplaceAll(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''"), "''''", "''")))
+			colValues = append(colValues, Quote(fmt.Sprintf("%v", value)))
 			if strings.Contains(fmt.Sprintf("%v", value), "'") {
 				fmt.Println("", fmt.Sprintf("%v", value))
 			}
