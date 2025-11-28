@@ -135,6 +135,14 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 		"!state":            connector.Quote("dismiss"),
 		ds.UserDBField:      task[ds.UserDBField],
 	}, false); err == nil && len(res) == 0 {
+		domain.GetDb().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+			ds.DestTableDBField: task[ds.DestTableDBField],
+			ds.SchemaDBField:    task[ds.SchemaDBField],
+			ds.RequestDBField:   task[ds.RequestDBField],
+			"name":              connector.Quote(utils.GetString(task, "name")),
+			"state":             connector.Quote("dismiss"),
+			ds.UserDBField:      task[ds.UserDBField],
+		}, false)
 		i, err := domain.GetDb().CreateQuery(ds.DBTask.Name, task, func(s string) (string, bool) {
 			return "", true
 		})
