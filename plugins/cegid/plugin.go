@@ -160,7 +160,7 @@ func ImportPublication() {
 				data[i] = strings.ReplaceAll(data[i], ";", ",")
 				for _, auth := range strings.Split(data[i], ",") {
 					for _, n := range strings.Split(auth, " ") {
-						restr = append(restr, "name::text LIKE '%"+strings.Trim(n, " ")+"%'")
+						restr = append(restr, "name::text LIKE '%"+strings.Trim(strings.ReplaceAll(n, "'", "''"), " ")+"%'")
 					}
 				}
 				if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, restr, false); err == nil && len(usr) > 0 {
@@ -193,7 +193,7 @@ func ImportPublication() {
 					}
 					restr := []interface{}{}
 					for _, n := range strings.Split(authors, " ") {
-						restr = append(restr, "name::text LIKE '%"+strings.Trim(n, " ")+"%'")
+						restr = append(restr, "name::text LIKE '%"+strings.Trim(strings.ReplaceAll(n, "'", "''"), " ")+"%'")
 					}
 					if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, restr, false); err == nil && len(usr) > 0 {
 						model["authors"].([]map[string]interface{})[y]["authors"] = map[string]interface{}{
