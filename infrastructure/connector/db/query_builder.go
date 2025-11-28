@@ -268,7 +268,11 @@ func (db *Database) BuildUpdateQuery(tablename string, col string, value interfa
 		if value == "" || (reflect.TypeOf(value) != nil && reflect.TypeOf(value).Kind().String() == "string") {
 			set += " " + col + "=" + Quote(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''")) + ","
 			cols = append(cols, col)
-			colValues = append(colValues, Quote(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''")))
+			colValues = append(colValues, Quote(strings.ReplaceAll(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''"), "''''", "''")))
+			if strings.Contains(fmt.Sprintf("%v", value), "'") {
+				fmt.Println("", fmt.Sprintf("%v", value))
+			}
+
 		} else {
 			set += " " + col + "=" + FormatForSQL(strings.Split(typ, ":")[0], value) + ","
 			cols = append(cols, col)
