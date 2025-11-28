@@ -110,6 +110,7 @@ func (s *TaskService) SpecializedUpdateRow(results []map[string]interface{}, rec
 
 func (s *TaskService) Write(results []map[string]interface{}, record map[string]interface{}) {
 	for _, res := range results {
+		fmt.Println(res, CheckStateIsEnded(res["state"]))
 		if _, ok := res["is_draft"]; (ok && utils.GetBool(res, "is_draft")) || !CheckStateIsEnded(res["state"]) {
 			continue
 		}
@@ -208,6 +209,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if CheckStateIsEnded(requests[0]["state"]) {
 			newRecRequest["current_index"] = -1
 		}
+		fmt.Println("REC", newRecRequest)
 		s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBRequest.Name, newRecRequest[utils.SpecialIDParam]).RootRaw(), newRecRequest)
 		for _, scheme := range schemes {
 			if current_index != newRecRequest.GetFloat("current_index") && current_index != (newRecRequest.GetFloat("current_index")-1) && !CheckStateIsEnded(requests[0]["state"]) {
