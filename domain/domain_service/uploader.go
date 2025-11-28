@@ -69,6 +69,16 @@ func (u *Uploader) deleteBeforeUpload(storage string, fileName string) {
 	}
 }
 
+func removeNonLatin1(s string) string {
+	result := make([]rune, 0, len(s))
+	for _, r := range s {
+		if r <= 255 { // Latin-1
+			result = append(result, r)
+		}
+	}
+	return string(result)
+}
+
 func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (string, error) {
 	defer file.Close()
 
@@ -96,7 +106,7 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 
 	// Create gzip writer
 	gw := gzip.NewWriter(dst)
-	gw.Name = strings.Trim(handler.Filename, " ") // keep original name metadata
+	gw.Name = strings.Trim(removeNonLatin1(handler.Filename), " ") // keep original name metadata
 	defer gw.Close()
 
 	// Copy uploaded content → gzip writer → file
@@ -109,6 +119,7 @@ func (u *Uploader) upload(file multipart.File, handler *multipart.FileHeader) (s
 
 func UncompressGzip(uncompressedPath string) (string, error) {
 	// Ensure the file exists
+	uncompressedPath = removeNonLatin1(uncompressedPath)
 	inFile, err := os.Open(fmt.Sprintf("%v.gz", strings.Trim(uncompressedPath, " ")))
 	if err != nil {
 		return "", fmt.Errorf("failed to open gzip file: %w", err)

@@ -437,13 +437,13 @@ func FormatForSQL(datatype string, value interface{}) string {
 				if strings.Contains(fmt.Sprintf("%v", value), "()") {
 					return strings.Replace(SQLInjectionProtector(decodedValue), "'", "''", -1)
 				}
-				return Quote(strings.Replace(SQLInjectionProtector(decodedValue), "'", "''", -1))
+				return Quote(SQLInjectionProtector(decodedValue))
 			}
 		}
 	}
 	if strings.Contains(strval, "%") {
 		decodedValue := fmt.Sprint(value)
-		return Quote(strings.Replace(SQLInjectionProtector(decodedValue), "'", "''", -1))
+		return Quote(SQLInjectionProtector(decodedValue))
 	}
 	return SQLInjectionProtector(strval)
 }

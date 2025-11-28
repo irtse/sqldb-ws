@@ -205,6 +205,7 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 			ds.SchemaDBField:    schema.ID,
 		}, false, "COUNT(*)"),
 	}, true)+")")
+	fmt.Println("EDIT")
 	return restr
 }
 
