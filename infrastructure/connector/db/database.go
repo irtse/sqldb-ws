@@ -238,18 +238,17 @@ type DB interface {
 	BuildDropTableQueries(name string) []string
 	BuildSchemaQuery(name string) string
 	BuildListTableQuery() string
-	UQuery(query string, values []interface{}) error
 	CreateQuery(name string, record map[string]interface{}, verify func(string) (string, bool)) (int64, error)
 	BuildCreateTableQuery(name string) string
-	BuildCreateQueries(tableName string, max int, values []interface{}, cols string, typ string) []string
+	BuildCreateQueries(tableName string, values string, cols string, typ string) []string
 	ApplyQueryFilters(restr string, order string, limit string, views string, additionnalRestriction ...string)
-	BuildUpdateQuery(tableName string, col string, value interface{}, set string, max int, cols []string, colValues []interface{}, ok bool, verify func(string) (string, bool)) (string, []string, []interface{}, int)
-	BuildUpdateQueryWithRestriction(tableName string, record map[string]interface{}, restrictions map[string]interface{}, isOr bool) (string, []interface{}, error)
-	BuildUpdateRowQuery(tableName string, record map[string]interface{}, verify func(string) (string, bool)) (string, []interface{}, error)
+	BuildUpdateQuery(tableName string, col string, value interface{}, set string, cols []string, colValues []string, ok bool, verify func(string) (string, bool)) (string, []string, []string)
+	BuildUpdateQueryWithRestriction(tableName string, record map[string]interface{}, restrictions map[string]interface{}, isOr bool) (string, error)
+	BuildUpdateRowQuery(tableName string, record map[string]interface{}, verify func(string) (string, bool)) (string, error)
 	BuildUpdateColumnQueries(tableName string, record map[string]interface{}, verify func(string) (string, bool)) ([]string, error)
 	Prepare(query string) (*sql.Stmt, error)
 	RowResultToMap(rows *sql.Rows, columnNames []string, columnType map[string]string) (map[string]interface{}, error)
 	GetDriver() string
 	Query(query string) error
-	QueryRow(query string, values []interface{}) (int64, error)
+	QueryRow(query string) (int64, error)
 }
