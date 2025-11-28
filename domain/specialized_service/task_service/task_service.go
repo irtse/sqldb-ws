@@ -177,6 +177,17 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 				}
 			}
 		}
+		if res["state"] == "dismiss" {
+			for _, sch := range schemes {
+				s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, map[string]interface{}{
+					"is_close": false,
+					"state":    "pending",
+				}, map[string]interface{}{
+					ds.WorkflowSchemaDBField: sch[utils.SpecialIDParam],
+					ds.RequestDBField:        res[ds.RequestDBField],
+				}, false)
+			}
+		}
 		newRecRequest := utils.Record{utils.SpecialIDParam: requests[0][utils.SpecialIDParam]}
 		if allOptionnal {
 			if nextScheme, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
