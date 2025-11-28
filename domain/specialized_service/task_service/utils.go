@@ -133,9 +133,10 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 		ds.SchemaDBField:    task[ds.SchemaDBField],
 		ds.RequestDBField:   task[ds.RequestDBField],
 		"name":              connector.Quote(utils.GetString(task, "name")),
-		"!state":            connector.Quote("refused"),
+		"!state":            connector.Quote("dismiss"),
 		ds.UserDBField:      task[ds.UserDBField],
 	}, false); err == nil && len(res) == 0 {
+		fmt.Println("createTaskAndNotify!", task)
 		i, err := domain.GetDb().CreateQuery(ds.DBTask.Name, task, func(s string) (string, bool) {
 			return "", true
 		})
@@ -145,6 +146,8 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 		CreateDelegated(task, request, i, initialRec, domain)
 		notify(task, i, domain)
 		return i
+	} else {
+		fmt.Println("test")
 	}
 	return -1
 }
