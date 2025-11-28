@@ -226,9 +226,11 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		fmt.Println("REC", newRecRequest, len(schemes))
 		s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBRequest.Name, newRecRequest[utils.SpecialIDParam]).RootRaw(), newRecRequest)
 		for _, scheme := range schemes {
+			fmt.Println("SCH", scheme)
 			if current_index != newRecRequest.GetFloat("current_index") && current_index != (newRecRequest.GetFloat("current_index")-1) && !CheckStateIsEnded(requests[0]["state"]) {
 				HandleHierarchicalVerification(s.Domain, newRecRequest, res)
 			} else if current_index == newRecRequest.GetFloat("current_index") && !CheckStateIsEnded(requests[0]["state"]) {
+				fmt.Println("PrepareAndCreateTask", scheme)
 				PrepareAndCreateTask(scheme, requests[0], res, s.Domain, true)
 			}
 		}

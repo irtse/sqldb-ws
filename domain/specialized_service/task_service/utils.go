@@ -130,6 +130,7 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 		ds.SchemaDBField:    task[ds.SchemaDBField],
 		ds.RequestDBField:   task[ds.RequestDBField],
 		"name":              connector.Quote(utils.GetString(task, "name")),
+		"!state":            "refused",
 		ds.UserDBField:      task[ds.UserDBField],
 	}, false); err == nil && len(res) == 0 {
 		i, err := domain.GetDb().CreateQuery(ds.DBTask.Name, task, func(s string) (string, bool) {
