@@ -94,8 +94,9 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 	queryConst := "SELECT tc.constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.table_name = '" + name + "' AND ccu.column_name = 'name';"
 	if record["name"] != nil && record["name"] != "" {
 		if i := db.QueryLen(queryConst); i > 0 {
+			n := strings.ReplaceAll(fmt.Sprintf("%v", record["name"]), "'", "''")
 			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
-				"LOWER(REPLACE(name::text, ' ', '')) = LOWER(REPLACE('" + fmt.Sprintf("%v", record["name"]) + "', ' ', ''))",
+				"LOWER(REPLACE(name::text, ' ', '')) = LOWER(REPLACE('" + n + "', ' ', ''))",
 			}, false); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) != "0" {
 				return 0, errors.New("we found a <name> already existing, it should be unique !")
 			}
@@ -154,9 +155,10 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 	}
 	if record["name"] != nil && record["name"] != "" {
 		if i := db.QueryLen("SELECT tc.constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage ccu ON tc.constraint_name = ccu.constraint_name WHERE tc.table_name = '" + name + "' AND ccu.column_name = 'name';"); i > 0 {
+			n := strings.ReplaceAll(fmt.Sprintf("%v", record["name"]), "'", "''")
 			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
 				"id=" + fmt.Sprintf("%v", restriction["id"]),
-				"LOWER(REPLACE(name::text, ' ', '')) = LOWER(REPLACE('" + fmt.Sprintf("%v", record["name"]) + "', ' ', ''))",
+				"LOWER(REPLACE(name::text, ' ', '')) = LOWER(REPLACE('" + n + "', ' ', ''))",
 			}, false); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) != "0" {
 				return errors.New("we found a <name> already existing, it should be unique !")
 			}
