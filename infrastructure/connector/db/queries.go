@@ -193,6 +193,9 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 		name = name + " as main "
 		q = db.BuildDeleteQuery(name, colName)
 	}
+	if strings.Contains(name, "delegation") || strings.Contains(name, "share") {
+		fmt.Println(q)
+	}
 	return db.Query(q)
 }
 

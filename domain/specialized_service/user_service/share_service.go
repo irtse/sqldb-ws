@@ -51,7 +51,7 @@ func (s *ShareService) VerifyDataIntegrity(record map[string]interface{}, tablen
 }
 
 func (s *ShareService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	if s.Domain.IsSuperAdmin() {
+	if !s.Domain.IsSuperAdmin() {
 		innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			ds.UserDBField: s.Domain.GetUserID(),
 		}, true))
