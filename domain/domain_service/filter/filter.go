@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"net/url"
 	"slices"
 	sch "sqldb-ws/domain/schema"
@@ -112,7 +111,6 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 		}
 		for key, val := range domainParams.Values {
 			key, val, _, typ, foreign, err := schema.GetTypeAndLinkForField(key, val, "", f)
-			fmt.Println(key, val, err)
 			if err != nil && key != utils.SpecialIDParam {
 				continue
 			}
@@ -154,6 +152,12 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 						"", map[string]interface{}{ds.SchemaDBField: enum}, false))
 				}
 
+			}
+		} else {
+			for _, alt := range alterRestr {
+				if alt != "" {
+					restr = append(restr, alt)
+				}
 			}
 		}
 	}
