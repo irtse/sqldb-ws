@@ -139,7 +139,8 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			}, false); err == nil && len(otherPendingTasks) > 0 {
 			continue
 		}
-		beforeSchemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
+		beforeSchemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
+			ds.DBWorkflowSchema.Name,
 			map[string]interface{}{
 				utils.SpecialIDParam: res[ds.WorkflowSchemaDBField],
 			}, false)
@@ -152,13 +153,12 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		case "completed":
 			current_index = math.Floor(current_index + 1)
 		case "dismiss":
-			if !isOptionnal {
-				if current_index >= 1 {
-					current_index = math.Floor(current_index - 1)
-				} else { // Dismiss will close requests.
-					res["state"] = "refused"
-				}
-			} // no before task close request and task
+			if current_index >= 1 {
+				current_index = math.Floor(current_index - 1)
+			} else if !isOptionnal { // Dismiss will close requests.
+				res["state"] = "refused"
+			}
+			// no before task close request and task
 		}
 		schemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
 			map[string]interface{}{
@@ -175,8 +175,16 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			}
 		}
 		newRecRequest := utils.Record{utils.SpecialIDParam: requests[0][utils.SpecialIDParam]}
-		if allOptionnal { // no new task in workflow
-			newRecRequest["state"] = "completed"
+		if allOptionnal {
+			if nextScheme, err := s.Domain.GetDb().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
+				map[string]interface{}{
+					"index":            current_index + 1,
+					ds.WorkflowDBField: requests[0][ds.WorkflowDBField],
+				}, false); err == nil && len(nextScheme) == 0 {
+				newRecRequest["state"] = "completed" // should be last...
+			} else {
+				newRecRequest["state"] = "running"
+			}
 		} else {
 			newRecRequest["state"] = "running"
 			if s := utils.GetString(schemes[0], "custom_progressing_status"); s != "" {
