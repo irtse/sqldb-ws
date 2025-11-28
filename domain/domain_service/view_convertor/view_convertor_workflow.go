@@ -50,7 +50,7 @@ func (d *ViewConvertor) handleTaskWorkflow(record utils.Record) (sm.WorkflowMode
 	var workflow sm.WorkflowModel
 	reqRecord := d.FetchRecord(ds.DBRequest.Name,
 		map[string]interface{}{
-			utils.SpecialIDParam: utils.GetString(record, ds.RequestDBField),
+			ds.RequestDBField: utils.GetString(record, ds.RequestDBField),
 		})
 	if len(reqRecord) > 0 {
 		workflow.IsDismissable = !utils.GetBool(reqRecord[0], "is_close")
@@ -66,7 +66,8 @@ func (d *ViewConvertor) handleTaskWorkflow(record utils.Record) (sm.WorkflowMode
 		utils.SpecialIDParam: record.GetInt(ds.WorkflowSchemaDBField),
 	})
 	if len(schemaRecord) > 0 {
-		workflow.IsDismissable = !utils.GetBool(schemaRecord[0], "optionnal")
+		workflow.IsDismissable = utils.GetBool(schemaRecord[0], "optionnal")
+		workflow.IsRefusable = !utils.GetBool(schemaRecord[0], "optionnal")
 		workflow.Current = utils.GetString(schemaRecord[0], "index")
 		workflow.CurrentHub = utils.Compare(schemaRecord[0]["hub"], true)
 		return workflow, utils.ToString(schemaRecord[0][ds.RootID(ds.DBWorkflow.Name)]), requestID, nexts

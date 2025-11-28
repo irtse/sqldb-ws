@@ -393,6 +393,7 @@ type WorkflowModel struct { // lightest struct based on SchemaModel dedicate to 
 	ID             string                         `json:"id"`
 	IsDismiss      bool                           `json:"is_dismiss"`
 	IsDismissable  bool                           `json:"is_dismissable"`
+	IsRefusable    bool                           `json:"is_refusable"`
 	Current        string                         `json:"current"`
 	Position       string                         `json:"position"`
 	IsClose        bool                           `json:"is_close"`
