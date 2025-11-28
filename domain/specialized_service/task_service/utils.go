@@ -127,7 +127,6 @@ func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, r
 }
 
 func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) int64 {
-	fmt.Println("createTaskAndNotify")
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		ds.DestTableDBField: task[ds.DestTableDBField],
 		ds.SchemaDBField:    task[ds.SchemaDBField],
@@ -136,7 +135,6 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 		"!state":            connector.Quote("dismiss"),
 		ds.UserDBField:      task[ds.UserDBField],
 	}, false); err == nil && len(res) == 0 {
-		fmt.Println("createTaskAndNotify!", task)
 		i, err := domain.GetDb().CreateQuery(ds.DBTask.Name, task, func(s string) (string, bool) {
 			return "", true
 		})
@@ -146,8 +144,6 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 		CreateDelegated(task, request, i, initialRec, domain)
 		notify(task, i, domain)
 		return i
-	} else {
-		fmt.Println("test")
 	}
 	return -1
 }
