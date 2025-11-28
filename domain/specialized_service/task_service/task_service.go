@@ -125,6 +125,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			utils.SpecialIDParam: utils.GetInt(res, RequestDBField),
 		}, false)
 		if err != nil || len(requests) == 0 {
+			fmt.Println("NO REQUEST")
 			continue
 		}
 
@@ -135,8 +136,9 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			map[string]interface{}{ // delete all notif
 				"!name":        conn.Quote(utils.GetString(res, "name")),
 				RequestDBField: utils.ToString(res[RequestDBField]),
-				"state":        []string{"'pending'", "'running'"},
+				"is_close":     false,
 			}, false); err == nil && len(otherPendingTasks) > 0 {
+			fmt.Println("IS OTHERS")
 			continue
 		}
 		beforeSchemes, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
@@ -153,13 +155,11 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		case "completed":
 			current_index = math.Floor(current_index + 1)
 		case "dismiss":
-			fmt.Println("DISMISSED", current_index)
 			if current_index >= 1 {
 				current_index = math.Floor(current_index - 1)
 			} else if !isOptionnal { // Dismiss will close requests.
 				res["state"] = "refused"
 			}
-			fmt.Println("DISMISSED 2", current_index)
 			// no before task close request and task
 		}
 
@@ -223,7 +223,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if CheckStateIsEnded(requests[0]["state"]) {
 			newRecRequest["current_index"] = -1
 		}
-		fmt.Println("REC", newRecRequest)
+		fmt.Println("REC", newRecRequest, len(schemes))
 		s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBRequest.Name, newRecRequest[utils.SpecialIDParam]).RootRaw(), newRecRequest)
 		for _, scheme := range schemes {
 			if current_index != newRecRequest.GetFloat("current_index") && current_index != (newRecRequest.GetFloat("current_index")-1) && !CheckStateIsEnded(requests[0]["state"]) {
