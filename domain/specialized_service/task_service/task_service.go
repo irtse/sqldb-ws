@@ -215,9 +215,6 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if utils.GetString(res, "closing_comment") != "" && CheckStateIsEnded(newRecRequest["state"]) {
 			newRecRequest["closing_comment"] = utils.GetString(res, "closing_comment")
 		}
-		if CheckStateIsEnded(requests[0]["state"]) {
-			newRecRequest["current_index"] = -1
-		}
 		fmt.Println("MESS", newRecRequest)
 		s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBRequest.Name, newRecRequest[utils.SpecialIDParam]).RootRaw(), newRecRequest)
 		fmt.Println("schemes", schemes)
