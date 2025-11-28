@@ -181,7 +181,7 @@ func (db *Database) BuildCreateTableQuery(name string) string {
 	return fmt.Sprintf("CREATE TABLE %s (id SERIAL PRIMARY KEY, active BOOLEAN DEFAULT TRUE, is_draft BOOLEAN DEFAULT FALSE)", name)
 }
 
-func (db *Database) BuildCreateQueries(tableName string, max int, values []interface{}, cols string, typ string) []string {
+func (db *Database) BuildCreateQueries(tableName string, values string, cols string, typ string) []string {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
@@ -202,14 +202,10 @@ func (db *Database) BuildCreateQueries(tableName string, max int, values []inter
 			queries = append(queries, "ALTER TABLE "+tableName+" ADD "+cols+" "+typ+" NULL")
 		}
 	} else {
-		if len(values) == 0 || cols == "" {
+		if values == "" || cols == "" {
 			return []string{""}
 		}
-		vars := []string{}
-		for i := 0; i < max; i++ {
-			vars = append(vars, fmt.Sprintf("$%v", i+1))
-		}
-		queries = append(queries, "INSERT INTO "+tableName+"("+cols+") VALUES ("+strings.Join(vars, ",")+")")
+		queries = append(queries, "INSERT INTO "+tableName+"("+cols+") VALUES ("+values+")")
 		if db.Driver == PostgresDriver {
 			queries[len(queries)-1] = queries[len(queries)-1] + " RETURNING ID"
 		}
@@ -253,8 +249,8 @@ func (db *Database) ApplyQueryFilters(restr string, order string, limit string, 
 	}
 }
 
-func (db *Database) BuildUpdateQuery(tablename string, col string, value interface{}, set string, index int,
-	cols []string, colValues []interface{}, isUpdate bool, verify func(string) (string, bool)) (string, []string, []interface{}, int) {
+func (db *Database) BuildUpdateQuery(tablename string, col string, value interface{}, set string,
+	cols []string, colValues []string, isUpdate bool, verify func(string) (string, bool)) (string, []string, []string) {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
@@ -264,35 +260,40 @@ func (db *Database) BuildUpdateQuery(tablename string, col string, value interfa
 	}
 	if typ, ok := verify(col); ok && (!slices.Contains([]string{"NULL", "null", "'null'", ""}, FormatForSQL(strings.Split(typ, ":")[0], value)) || typ == "") {
 		if value == nil || value == "" {
-			set += " " + col + " = $" + fmt.Sprintf("%v", (index+1)) + ","
+			set += " " + col + " IS " + Quote(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''")) + ","
 			cols = append(cols, col)
 			colValues = append(colValues, "NULL")
-			index++
-			return set, cols, colValues, index
-		} else {
-			set += " " + col + " = $" + fmt.Sprintf("%v", (index+1)) + ","
+			return set, cols, colValues
+		}
+		if value == "" || (reflect.TypeOf(value) != nil && reflect.TypeOf(value).Kind().String() == "string") {
+			set += " " + col + "=" + Quote(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''")) + ","
 			cols = append(cols, col)
-			colValues = append(colValues, value)
-			index++
+			colValues = append(colValues, Quote(strings.ReplaceAll(strings.ReplaceAll(fmt.Sprintf("%v", value), "'", "''"), "''''", "''")))
+			if strings.Contains(fmt.Sprintf("%v", value), "'") {
+				fmt.Println("", fmt.Sprintf("%v", value))
+			}
+
+		} else {
+			set += " " + col + "=" + FormatForSQL(strings.Split(typ, ":")[0], value) + ","
+			cols = append(cols, col)
+			colValues = append(colValues, FormatForSQL(strings.Split(typ, ":")[0], value))
 		}
 	}
-	return set, cols, colValues, index
+	return set, cols, colValues
 }
 
-func (db *Database) BuildUpdateQueryWithRestriction(tableName string, record map[string]interface{}, restrictions map[string]interface{}, isOr bool) (string, []interface{}, error) {
+func (db *Database) BuildUpdateQueryWithRestriction(tableName string, record map[string]interface{}, restrictions map[string]interface{}, isOr bool) (string, error) {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
 	}
 	set := ""
-	values := []interface{}{}
-	i := 0
 	for key, element := range record {
-		set, _, values, _ = db.BuildUpdateQuery(tableName, key, element, set, i, []string{}, values, true, func(s string) (string, bool) { return "", true })
+		set, _, _ = db.BuildUpdateQuery(tableName, key, element, set, []string{}, []string{}, true, func(s string) (string, bool) { return "", true })
 	}
 	set = RemoveLastChar(set)
 	if set == "" {
-		return "", values, errors.New("no value to update")
+		return "", errors.New("no value to update")
 	}
 	if strings.Contains(FormatSQLRestrictionWhereByMap("", restrictions, isOr), "main.") {
 		tableName = tableName + " as main "
@@ -301,23 +302,21 @@ func (db *Database) BuildUpdateQueryWithRestriction(tableName string, record map
 	if t := FormatSQLRestrictionWhereByMap("", restrictions, isOr); t != "" {
 		query += " WHERE " + t
 	}
-	return query, values, nil
+	return query, nil
 }
 
-func (db *Database) BuildUpdateRowQuery(tableName string, record map[string]interface{}, verify func(string) (string, bool)) (string, []interface{}, error) {
+func (db *Database) BuildUpdateRowQuery(tableName string, record map[string]interface{}, verify func(string) (string, bool)) (string, error) {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
 	}
 	set := ""
-	values := []interface{}{}
-	i := 0
 	for key, element := range record {
-		set, _, values, _ = db.BuildUpdateQuery(tableName, key, element, set, i, []string{}, values, true, verify)
+		set, _, _ = db.BuildUpdateQuery(tableName, key, element, set, []string{}, []string{}, true, verify)
 	}
 	set = RemoveLastChar(set)
 	if set == "" {
-		return "", values, errors.New("no value to update")
+		return "", errors.New("no value to update")
 	}
 	if strings.Contains(db.SQLRestriction, "main.") {
 		tableName = tableName + " as main "
@@ -328,7 +327,7 @@ func (db *Database) BuildUpdateRowQuery(tableName string, record map[string]inte
 	}
 
 	query = db.applyOrderAndLimit(query)
-	return query, values, nil
+	return query, nil
 }
 
 func (db *Database) BuildUpdateColumnQueries(tableName string, record map[string]interface{}, verify func(string) (string, bool)) ([]string, error) {

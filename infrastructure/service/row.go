@@ -103,8 +103,8 @@ func (t *TableRowService) Update(record map[string]interface{}, restriction ...s
 		return nil, err
 	}
 	t.EmptyCol.Name = t.Name
-	if query, values, err := t.DB.BuildUpdateRowQuery(t.Table.Name, record, t.EmptyCol.Verify); err == nil {
-		if err := t.DB.UQuery(query, values); err != nil {
+	if query, err := t.DB.BuildUpdateRowQuery(t.Table.Name, record, t.EmptyCol.Verify); err == nil {
+		if err := t.DB.Query(query); err != nil {
 			return t.DBError(nil, err)
 		}
 	} else {
