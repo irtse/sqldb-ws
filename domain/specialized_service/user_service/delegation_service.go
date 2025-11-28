@@ -188,7 +188,6 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 			}, false)
 		}
 		results[i] = task.SetClosureStatus(res)
-
 	}
 }
 

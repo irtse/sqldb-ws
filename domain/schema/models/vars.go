@@ -257,7 +257,6 @@ func IsDateComparable(typ string, val string, val2 string, record utils.Record, 
 	if slices.Contains([]string{"TIME", "DATE", "TIMESTAMP"}, strings.ToUpper(typ)) {
 		time1, err := parseDate(val)
 		if strings.Contains(strings.ToUpper(val2), "NOW") || strings.Contains(strings.ToUpper(val2), "CURRENT_DATE") {
-
 			now := time.Now().UTC()
 			if meth == utils.UPDATE {
 				now = now.Add(time.Duration(-175200) * time.Hour)

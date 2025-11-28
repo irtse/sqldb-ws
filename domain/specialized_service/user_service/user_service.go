@@ -37,6 +37,15 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
 					ds.SchemaDBField:    utils.ToInt64(splitted[0]),
 					ds.UserDBField:      s.Domain.GetUserID(),
+					"0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+						ds.UserDBField:      s.Domain.GetUserID(),
+						ds.DestTableDBField: utils.ToInt64(splitted[1]),
+						ds.SchemaDBField:    utils.ToInt64(splitted[0]),
+					}, false, "COUNT(*)"),
+					"0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+						ds.UserDBField: s.Domain.GetUserID(),
+						"all_tasks":    true,
+					}, false, "COUNT(*)"),
 				}, false),
 			}
 			currentTime := time.Now()
@@ -53,6 +62,15 @@ func (s *UserService) GenerateQueryFilter(tableName string, innerestr ...string)
 					ds.UserDBField:      s.Domain.GetUserID(),
 					ds.DestTableDBField: utils.ToInt64(splitted[1]),
 					ds.SchemaDBField:    utils.ToInt64(splitted[0]),
+					"0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+						ds.UserDBField:      s.Domain.GetUserID(),
+						ds.DestTableDBField: utils.ToInt64(splitted[1]),
+						ds.SchemaDBField:    utils.ToInt64(splitted[0]),
+					}, false, "COUNT(*)"),
+					"0_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDelegation.Name, map[string]interface{}{
+						ds.UserDBField: s.Domain.GetUserID(),
+						"all_tasks":    true,
+					}, false, "COUNT(*)"),
 				}, false),
 			}
 			currentTime := time.Now()
