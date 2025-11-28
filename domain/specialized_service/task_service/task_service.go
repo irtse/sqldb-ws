@@ -191,7 +191,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 				newRecRequest["state"] = s
 			}
 		}
-		if res["state"] == "refused" && !isOptionnal {
+		if (res["state"] == "refused" || res["state"] == "dismiss") && !isOptionnal {
 			newRecRequest["state"] = res["state"]
 		} else {
 			newRecRequest["current_index"] = current_index
