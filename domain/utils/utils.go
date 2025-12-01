@@ -1,20 +1,20 @@
 package utils
 
 import (
+	"archive/zip"
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/ledongthuc/pdf"
-	"github.com/unidoc/unioffice/document"
 )
 
 func BuildPath(tableName string, rows string, extra ...string) string {
@@ -154,50 +154,197 @@ func SearchInFile(filename string, searchTerm string) bool {
 func readFileAsText(path string) (string, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 
-	switch ext {
-	case ".txt":
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return "", err
-		}
-		return string(data), nil
-
-	case ".docx":
-		doc, err := document.Open(path)
-		if err != nil {
-			return "", err
-		}
-		var text string
-		for _, para := range doc.Paragraphs() {
-			for _, run := range para.Runs() {
-				text += run.Text()
-			}
-		}
-		return text, nil
-
-	case ".pdf":
-		f, r, err := pdf.Open(path)
-		defer f.Close()
-		if err != nil {
-			return "", err
-		}
-		var text string
-		totalPage := r.NumPage()
-		for pageIndex := 1; pageIndex <= totalPage; pageIndex++ {
-			p := r.Page(pageIndex)
-			if p.V.IsNull() {
-				continue
-			}
-			text, err := p.GetPlainText(nil)
-			if err != nil {
-				return "", err
-			}
-			text += text
-		}
-		return text, nil
-	default:
-		return "", fmt.Errorf("unsupported file extension: %s", ext)
+	if strings.Contains(path, ".txt") || strings.Contains(path, ".md") || strings.Contains(path, ".rst") {
+		return readTXT(path)
+	} else if strings.Contains(path, ".tex") {
+		return readTEX(path)
+	} else if strings.Contains(path, ".rtf") || strings.Contains(path, ".rtx") {
+		return readRTF(path)
+	} else if strings.Contains(path, ".docx") {
+		return readDOCX(path)
+	} else if strings.Contains(path, ".odt") {
+		return readODT(path)
+	} else if strings.Contains(path, ".fodt") {
+		return readFODT(path)
+	} else if strings.Contains(path, ".abw") {
+		return readABW(path)
+	} else {
+		return "", fmt.Errorf("unsupported format: %s", ext)
 	}
+}
+
+func readTXT(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	return string(data), err
+}
+
+func readTEX(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	// Remove LaTeX commands \command{...}
+	re := regexp.MustCompile(`\\[a-zA-Z]+\{.*?\}`)
+	cleaned := re.ReplaceAllString(string(data), "")
+	return cleaned, nil
+}
+
+func readRTF(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	text := string(data)
+
+	// Remove RTF commands like \b, \par, \f1, \fs24
+	text = regexp.MustCompile(`\\[a-zA-Z]+\d*`).ReplaceAllString(text, "")
+	// Remove braces
+	text = strings.ReplaceAll(text, "{", "")
+	text = strings.ReplaceAll(text, "}", "")
+
+	return text, nil
+}
+
+func readDOCX(path string) (string, error) {
+	r, err := zip.OpenReader(path)
+	if err != nil {
+		return "", err
+	}
+	defer r.Close()
+
+	var docXML []byte
+
+	for _, f := range r.File {
+		if f.Name == "word/document.xml" {
+			rc, _ := f.Open()
+			docXML, _ = io.ReadAll(rc)
+			rc.Close()
+		}
+	}
+
+	if docXML == nil {
+		return "", fmt.Errorf("document.xml not found")
+	}
+
+	type Text struct {
+		Text string `xml:",chardata"`
+	}
+
+	type Node struct {
+		Runs []Text `xml:"t"`
+	}
+
+	type Document struct {
+		Body struct {
+			Paragraphs []Node `xml:"p"`
+		} `xml:"body"`
+	}
+
+	var doc Document
+	xml.Unmarshal(docXML, &doc)
+
+	var sb strings.Builder
+	for _, p := range doc.Body.Paragraphs {
+		for _, t := range p.Runs {
+			sb.WriteString(t.Text)
+		}
+		sb.WriteString("\n")
+	}
+
+	return sb.String(), nil
+}
+
+func readODT(path string) (string, error) {
+	r, err := zip.OpenReader(path)
+	if err != nil {
+		return "", err
+	}
+	defer r.Close()
+
+	var xmlData []byte
+	for _, f := range r.File {
+		if f.Name == "content.xml" {
+			rc, _ := f.Open()
+			xmlData, _ = io.ReadAll(rc)
+			rc.Close()
+		}
+	}
+
+	if xmlData == nil {
+		return "", fmt.Errorf("content.xml not found")
+	}
+
+	type P struct {
+		Text string `xml:",chardata"`
+	}
+
+	type Content struct {
+		Paragraphs []P `xml:"body>text>p"`
+	}
+
+	var doc Content
+	xml.Unmarshal(xmlData, &doc)
+
+	var sb strings.Builder
+	for _, p := range doc.Paragraphs {
+		sb.WriteString(p.Text)
+		sb.WriteString("\n")
+	}
+	return sb.String(), nil
+}
+
+func readFODT(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	type P struct {
+		Text string `xml:",chardata"`
+	}
+
+	type Doc struct {
+		Paragraphs []P `xml:"body>text>p"`
+	}
+
+	var d Doc
+	xml.Unmarshal(data, &d)
+
+	var sb strings.Builder
+	for _, p := range d.Paragraphs {
+		sb.WriteString(p.Text)
+		sb.WriteString("\n")
+	}
+
+	return sb.String(), nil
+}
+
+func readABW(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	type P struct {
+		Text string `xml:",chardata"`
+	}
+
+	type Doc struct {
+		Paragraphs []P `xml:"body>p"`
+	}
+
+	var d Doc
+	xml.Unmarshal(data, &d)
+
+	var sb strings.Builder
+	for _, p := range d.Paragraphs {
+		sb.WriteString(p.Text)
+		sb.WriteString("\n")
+	}
+
+	return sb.String(), nil
 }
 
 func UncompressGzip(uncompressedPath string) (string, error) {
