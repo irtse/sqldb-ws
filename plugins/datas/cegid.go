@@ -50,6 +50,15 @@ var ProjectFR = models.SchemaModel{ // todo
 }
 
 // should set up as json better than a go file...
+var PublicationTagsFR = models.SchemaModel{
+	Name:     "publication_tags",
+	Label:    "publication tags",
+	Category: "domain",
+	IsEnum:   true,
+	Fields: []models.FieldModel{
+		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+	},
+}
 
 var PublicationStatusFR = models.SchemaModel{
 	Name:     "publication_status",
@@ -116,7 +125,7 @@ var ArticlePublicationTagsFR = models.SchemaModel{
 	Label:    "article publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("article"), Label: "related publication", Type: models.INTEGER.String(), ForeignTable: "article", Required: true, Index: 3},
 	},
 }
@@ -176,7 +185,7 @@ var ConferencePublicationTagsFR = models.SchemaModel{
 	Label:    "conference publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("conference_presentation"), Label: "related publication", Type: models.INTEGER.String(), ForeignTable: "conference_presentation", Required: true, Hidden: true, Index: 3},
 	},
 }
@@ -233,7 +242,7 @@ var PresentationPublicationTagsFR = models.SchemaModel{
 	Label:    "presentation publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("presentation"), Label: "related publication", Hidden: true, Type: models.INTEGER.String(), ForeignTable: "presentation", Required: true, Index: 3},
 	},
 }
@@ -293,7 +302,7 @@ var PosterPublicationTagsFR = models.SchemaModel{
 	Label:    "poster publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("poster"), Label: "related publication", Hidden: true, Type: models.INTEGER.String(), ForeignTable: "poster", Required: true, Index: 3},
 	},
 }
@@ -347,7 +356,7 @@ var HDRPublicationTagsFR = models.SchemaModel{
 	Label:    "hdr publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("research_authorization"), Hidden: true, Label: "related publication", Type: models.INTEGER.String(), ForeignTable: "research_authorization", Required: true, Index: 3},
 	},
 }
@@ -405,7 +414,7 @@ var ThesisPublicationTagsFR = models.SchemaModel{
 	Label:    "thesis publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("thesis"), Label: "related publication", Hidden: true, Type: models.INTEGER.String(), ForeignTable: "thesis", Required: true, Index: 3},
 	},
 }
@@ -473,7 +482,7 @@ var InternshipPublicationTagsFR = models.SchemaModel{
 	Label:    "internship publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("internship"), Hidden: true, Label: "related publication", Type: models.INTEGER.String(), ForeignTable: "internship", Required: true, Index: 3},
 	},
 }
@@ -528,7 +537,7 @@ var DemoPublicationTagsFR = models.SchemaModel{
 	Label:    "demo publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("demo"), Hidden: true, Label: "related publication", Type: models.INTEGER.String(), ForeignTable: "demo", Required: true, Index: 3},
 	},
 }
@@ -585,7 +594,7 @@ var OtherPublicationTagsFR = models.SchemaModel{
 	Label:    "other publication tags",
 	Category: "domain",
 	Fields: []models.FieldModel{
-		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		{Name: ds.RootID(PublicationTagsFR.Name), Label: "related tag", Type: models.INTEGER.String(), ForeignTable: PublicationTagsFR.Name, Required: true, Index: 1},
 		{Name: ds.RootID("other_publication"), Hidden: true, Label: "related publication", Type: models.INTEGER.String(), ForeignTable: "other_publication", Required: true, Index: 3},
 	},
 }
