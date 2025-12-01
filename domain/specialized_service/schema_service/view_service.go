@@ -333,7 +333,9 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 		values := utils.ToMap(item)["values"]
 		utils.ToMap(item)["schema_id"] = schema.ID
 		utils.ToMap(values)["type"] = schema.Label
+		fmt.Println("DetectFileToSearchIn", len(s.Domain.DetectFileToSearchIn()))
 		if len(s.Domain.DetectFileToSearchIn()) > 0 {
+			fmt.Println("DetectFileToSearchIn")
 			for search, field := range s.Domain.DetectFileToSearchIn() {
 				filePath := utils.GetString(utils.ToMap(values), field)
 				if !strings.Contains(filePath, "/mnt/files/") {
@@ -344,7 +346,9 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 					fmt.Println("can't uncompress path", filePath, err)
 					continue
 				}
-				if utils.ToMap(values)[field] == nil || !utils.SearchInFile(uComp, search) {
+				fmt.Println(uComp)
+
+				if !utils.SearchInFile(uComp, search) {
 					utils.DeleteUncompressed(uComp)
 					continue
 				}

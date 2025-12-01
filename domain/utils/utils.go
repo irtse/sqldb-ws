@@ -135,7 +135,6 @@ func SearchInFile(filename string, searchTerm string) bool {
 		filename = "/mnt/files/" + filename
 	}
 	text, err := readFileAsText(filename)
-	fmt.Println(filename)
 	if err != nil {
 		fmt.Println("can't read file as text", filename, err)
 		return false
