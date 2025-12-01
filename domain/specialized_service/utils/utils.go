@@ -79,16 +79,22 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+				for _, fff := range ff.Fields {
+					if fff.GetLink() == sch.GetID() {
+						s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam))
+						break
+					}
+				}
 				for _, m := range mm {
 					if m[utils.SpecialIDParam] != nil {
 						for _, fff := range ff.Fields {
 							if fff.GetLink() == sch.GetID() {
-								fmt.Println("THERE")
-								s.Domain.GetDb().ClearQueryFilter().UpdateQuery(schemaName, map[string]interface{}{
+								err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ff.Name, map[string]interface{}{
 									fff.Name: record[utils.SpecialIDParam],
 								}, map[string]interface{}{
 									utils.SpecialIDParam: m[utils.SpecialIDParam],
 								}, false)
+								fmt.Println("THERE", fff.Name, schemaName, record[utils.SpecialIDParam], m, err)
 							}
 						}
 					}
@@ -138,13 +144,19 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 			if err != nil {
 				continue
 			}
+
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.delete(&ff, s.Domain.GetTable(), ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
+				for _, fff := range ff.Fields {
+					if fff.GetLink() == sche.GetID() {
+						s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam))
+						break
+					}
+				}
 				for _, m := range mm {
 					if m[utils.SpecialIDParam] != nil {
 						for _, fff := range ff.Fields {
 							if fff.GetLink() == sche.GetID() {
-								err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(schemaName, map[string]interface{}{
+								err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ff.Name, map[string]interface{}{
 									fff.Name: record[utils.SpecialIDParam],
 								}, map[string]interface{}{
 									utils.SpecialIDParam: m[utils.SpecialIDParam],
