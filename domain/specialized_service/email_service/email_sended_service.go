@@ -84,24 +84,7 @@ func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{},
 			}
 		}
 	}
-	for _, to := range s.To {
-		if strings.Contains(to, "@") {
-			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
-				"name":                to,
-				ds.EmailSendedDBField: record[utils.SpecialIDParam],
-			})
-		} else if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-			"name": connector.Quote(to),
-		}, false); err == nil && len(res) > 0 {
-			for _, r := range res {
-				s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
-					"name":                to,
-					ds.UserDBField:        r[utils.SpecialIDParam],
-					ds.EmailSendedDBField: record[utils.SpecialIDParam],
-				})
-			}
-		}
-	}
+
 	s.AbstractSpecializedService.SpecializedCreateRow(record, tableName)
 }
 
@@ -120,5 +103,28 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 		}
 	}
 	delete(record, "to_email")
+	for _, to := range s.To {
+		if strings.Contains(to, "@") {
+			if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
+				"name":                to,
+				ds.EmailSendedDBField: record[utils.SpecialIDParam],
+			}); err == nil && len(res) > 0 {
+				record["to_email"] = res[0][utils.SpecialIDParam]
+			}
+		} else if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+			"name": connector.Quote(to),
+		}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
+					"name":                to,
+					ds.UserDBField:        r[utils.SpecialIDParam],
+					ds.EmailSendedDBField: record[utils.SpecialIDParam],
+				}); err == nil && len(res) > 0 {
+					record["to_email"] = res[0][utils.SpecialIDParam]
+				}
+			}
+		}
+	}
+
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }

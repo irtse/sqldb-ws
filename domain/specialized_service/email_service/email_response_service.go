@@ -115,6 +115,7 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 						sch, _ := schema.GetSchema(ds.DBEmailResponse.Name)
 						dest := dests[0]
 						if emailUser, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSendedUser.Name, map[string]interface{}{
+							utils.SpecialIDParam:  r["to_email"],
 							ds.EmailSendedDBField: r[utils.SpecialIDParam],
 						}, false); err == nil && len(emailUser) > 0 {
 							if utils.GetString(record, "comment") != "" {

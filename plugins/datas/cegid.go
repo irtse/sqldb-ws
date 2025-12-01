@@ -74,10 +74,22 @@ var PublicationHistoryStatusFR = models.SchemaModel{
 	},
 }
 
+var PublicationTagsFR = models.SchemaModel{
+	Name:     "publication_tags",
+	Label:    "publication tags",
+	Category: "domain",
+	IsEnum:   true,
+	Fields: []models.FieldModel{
+		{Name: "name", Label: "nom", Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+	},
+}
+
 var publicationFields = []models.FieldModel{
 	{Name: "name", Label: "intitulé de la publication", Translatable: false,
 		Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
 	{Name: "state", Default: 1, Type: models.INTEGER.String(), ForeignTable: PublicationStatusFR.Name, Required: false, Readonly: true, Label: "statut de publication", Index: 1},
+	{Name: "tags", Type: models.MANYTOMANYADD.String(), Required: false, Translatable: false,
+		ForeignTable: PublicationTagsFR.Name, Index: 1, Label: "mots-clés"},
 	{Name: "manager_" + ds.RootID(ds.DBUser.Name), Type: models.INTEGER.String(), Required: true, Translatable: false,
 		ForeignTable: ds.DBUser.Name, Index: 1, Label: "responsable IRT de la publication"},
 	{Name: "project_accronym", Type: models.INTEGER.String(), Required: true, Translatable: false,
