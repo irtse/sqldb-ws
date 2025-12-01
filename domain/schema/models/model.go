@@ -100,6 +100,7 @@ func (t SchemaModel) GetTypeAndLinkForField(name string, search string, operator
 		return name, search, operator, "", "", err
 	}
 	if strings.Contains(field.Type, "upload") && operator == "~~" {
+		fmt.Println("GetTypeAndLinkForField", field.Name, search)
 		if strings.Contains(field.Type, "upload_str") {
 			onUpload(field.Name, search)
 		}

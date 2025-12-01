@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"fmt"
 	"net/url"
 	"slices"
 	sch "sqldb-ws/domain/schema"
@@ -100,6 +101,7 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 		alterRestr := []string{}
 		f := func(s string, search string) {
 			splitted := strings.Split(s, ",")
+			fmt.Println("AddDetectFileToSearchIn", splitted, search)
 			for _, str := range splitted {
 				d.Domain.AddDetectFileToSearchIn(str, search)
 			}
