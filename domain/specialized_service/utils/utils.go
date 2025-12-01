@@ -93,7 +93,7 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 						delete(m, utils.SpecialIDParam)
 					} else {
 						for _, fff := range ff.Fields {
-							if fff.GetLink() > 0 && fff.GetLink() == sch.GetID() {
+							if fff.GetLink() != ff.GetID() && fff.GetLink() > 0 {
 								if m[utils.SpecialIDParam] != nil {
 									m[fff.Name] = m[utils.SpecialIDParam]
 								}
@@ -102,7 +102,13 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 							}
 						}
 					}
-					m[ds.RootID(tablename)] = record[utils.SpecialIDParam]
+					for _, fff := range ff.Fields {
+						if fff.GetLink() == sch.GetID() {
+							m[fff.Name] = record[utils.SpecialIDParam]
+							break
+						}
+					}
+
 					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 				}
 			}
