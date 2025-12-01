@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -78,10 +79,10 @@ func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sc
 		}
 		if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 			for _, m := range mm {
+				sub := utils.ToMap(m)
+				delete(sub, utils.SpecialIDParam)
+				isOK := false
 				for _, fff := range ff.Fields {
-					sub := utils.ToMap(m)
-					isOK := false
-					delete(sub, utils.SpecialIDParam)
 					if fff.GetLink() == sch.GetID() {
 						isOK = true
 						sub[fff.Name] = record[utils.SpecialIDParam]
@@ -97,9 +98,11 @@ func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sc
 							sub[fff.Name] = m[utils.SpecialIDParam]
 						}
 					}
-					if isOK {
-						s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), sub)
-					}
+
+				}
+				fmt.Println("isOK", ff.Name, sub)
+				if isOK {
+					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), sub)
 				}
 			}
 		}
