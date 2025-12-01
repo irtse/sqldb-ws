@@ -72,7 +72,7 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 }
 
 func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sch sm.SchemaModel) {
-	fmt.Println(s.ManyToMany)
+	fmt.Println(sch.Name, s.ManyToMany)
 	for schemaName, mm := range s.ManyToMany {
 		field, err := sch.GetField(schemaName)
 		if err != nil {
@@ -112,11 +112,12 @@ func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sc
 					}
 				}
 				delete(m, utils.SpecialIDParam)
-				fmt.Println("MANY", schemaName, m)
+				fmt.Println("sd", ff.Name, m)
 				s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 			}
 		}
 	}
+	fmt.Println(sch.Name, s.OneToMany)
 	for schemaName, om := range s.OneToMany {
 		field, err := sch.GetField(schemaName)
 		if err != nil {
@@ -127,6 +128,7 @@ func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sc
 				for _, fff := range ff.Fields {
 					if fff.GetLink() == sch.GetID() {
 						m[fff.Name] = record[utils.SpecialIDParam]
+						fmt.Println("sqd", ff.Name, m)
 						s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 						break
 					}
@@ -291,12 +293,11 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sche.Name, map[string]interface{}{
 								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
 							}, false); err == nil && len(res) > 0 {
-								l = append(l, res[0])
+								l = append(l, map[string]interface{}{utils.SpecialIDParam: res[0][utils.SpecialIDParam]})
 							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sche.Name, map[string]interface{}{
 								"name": utils.GetString(utils.ToMap(n), "name"),
 							}, func(s string) (string, bool) { return "", true }); err == nil {
-								utils.ToMap(n)[utils.SpecialIDParam] = i
-								l = append(l, utils.ToMap(n))
+								l = append(l, map[string]interface{}{utils.SpecialIDParam: i})
 							}
 						}
 						record[field.Name] = l
