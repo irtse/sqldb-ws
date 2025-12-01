@@ -329,10 +329,17 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 						l := []interface{}{}
+						isSame := false
+						for _, ff := range sch.Fields {
+							if ff.GetLink() == sch.GetID() {
+								isSame = true
+								break
+							}
+						}
 						for _, n := range utils.ToList(record[field.Name]) {
 							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
-							}, false); err == nil && len(res) > 0 {
+							}, false); err == nil && len(res) > 0 && !isSame {
 								l = append(l, map[string]interface{}{utils.SpecialIDParam: res[0][utils.SpecialIDParam]})
 							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
 								"name": utils.GetString(utils.ToMap(n), "name"),
