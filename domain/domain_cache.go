@@ -93,16 +93,6 @@ func GetInCache(userID string, tableName string, method utils.Method, params uti
 	return true, dp
 }
 
-func removeNonLatin1(s string) string {
-	result := make([]rune, 0, len(s))
-	for _, r := range s {
-		if r <= 255 { // Latin-1
-			result = append(result, r)
-		}
-	}
-	return string(result)
-}
-
 func CompressMap(m utils.Results) (string, error) {
 	// 1. Convert map to JSON
 	jsonBytes, err := json.Marshal(m)
@@ -113,7 +103,7 @@ func CompressMap(m utils.Results) (string, error) {
 	// 2. Compress with gzip
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
-	gz.Name = removeNonLatin1(gz.Name)
+	gz.Name = gz.Name
 	if _, err := gz.Write(jsonBytes); err != nil {
 		return "", err
 	}
