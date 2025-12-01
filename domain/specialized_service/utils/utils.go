@@ -197,7 +197,13 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				continue
 			}
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-				s.delete(&ff, s.Domain.GetTable(), ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
+				for _, fff := range ff.Fields {
+					if fff.GetLink() == sche.GetID() {
+						s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam))
+						break
+					}
+				}
+
 				for _, m := range om {
 					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
 					delete(m, utils.SpecialIDParam)
@@ -369,13 +375,11 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 					delete(record, field.Name)
 				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
-					if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-						if s.OneToMany[ff.Name] == nil {
-							s.OneToMany[ff.Name] = []map[string]interface{}{}
-						}
-						for _, mm := range utils.ToList(record[field.Name]) {
-							s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
-						}
+					if s.OneToMany[field.Name] == nil {
+						s.OneToMany[field.Name] = []map[string]interface{}{}
+					}
+					for _, mm := range utils.ToList(record[field.Name]) {
+						s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
 					}
 					delete(record, field.Name)
 				}
