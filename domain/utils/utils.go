@@ -138,6 +138,7 @@ func SearchInFile(filename string, searchTerm string) bool {
 	if err != nil {
 		return false
 	}
+	fmt.Println(text, searchTerm, strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm)))
 	return strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm))
 }
 

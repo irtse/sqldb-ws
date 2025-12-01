@@ -231,29 +231,6 @@ func (d *SpecializedDomain) GetRowResults(
 			if err != nil {
 				return all_results, err
 			}
-			if len(d.DetectFileToSearchIn()) > 0 {
-				newR := utils.Results{}
-				for search, field := range d.DetectFileToSearchIn() {
-					for _, r := range res {
-						filePath := utils.GetString(r, field)
-						if !strings.Contains(filePath, "/mnt/files/") {
-							filePath = "/mnt/files/" + filePath
-						}
-						uComp, err := utils.UncompressGzip(filePath)
-						if err != nil {
-							continue
-						}
-
-						if !utils.SearchInFile(uComp, search) {
-							utils.DeleteUncompressed(uComp)
-							continue
-						}
-						utils.DeleteUncompressed(uComp)
-						newR = append(newR, r)
-					}
-				}
-				res = newR
-			}
 			AddInCache(d.UserID, tb, meth, cp, res)
 			p, _ = d.Params.Get(utils.RootRawView)
 			if p != "enable" && err == nil && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
