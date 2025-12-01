@@ -15,6 +15,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/unidoc/unipdf/v3/extractor"
+	"github.com/unidoc/unipdf/v3/model"
 )
 
 func BuildPath(tableName string, rows string, extra ...string) string {
@@ -155,11 +158,50 @@ func readFileAsText(path string) (string, error) {
 		return readODT(path)
 	} else if strings.Contains(path, ".fodt") {
 		return readFODT(path)
+	} else if strings.Contains(path, ".pdf") {
+		return readPDF(path)
 	} else if strings.Contains(path, ".abw") {
 		return readABW(path)
 	} else {
 		return "", fmt.Errorf("unsupported format: %s", ext)
 	}
+}
+
+func readPDF(path string) (string, error) {
+	// Create a buffer to store extracted text
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	pdfReader, err := model.NewPdfReader(f)
+	if err != nil {
+		return "", err
+	}
+
+	numPages, err := pdfReader.GetNumPages()
+	if err != nil {
+		return "", err
+	}
+
+	var result string
+	for i := 1; i <= numPages; i++ {
+		page, err := pdfReader.GetPage(i)
+		if err != nil {
+			return "", err
+		}
+		ext, err := extractor.New(page)
+		if err != nil {
+			return "", err
+		}
+		text, err := ext.ExtractText()
+		if err != nil {
+			return "", err
+		}
+		result += text + "\n"
+	}
+	return result, nil
 }
 
 func readTXT(path string) (string, error) {
