@@ -148,6 +148,9 @@ func Compare(or string) ([]string, string) {
 	if strings.Contains(or, "<>~") {
 		keyVal = strings.Split(or, "<>~")
 		operator = " NOT LIKE "
+	} else if strings.Contains(or, "~~") {
+		keyVal = strings.Split(or, "~~")
+		operator = "~~"
 	} else if strings.Contains(or, "~") {
 		keyVal = strings.Split(or, "~")
 		operator = " LIKE "
