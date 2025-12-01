@@ -1,6 +1,7 @@
 package email_service
 
 import (
+	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
@@ -129,6 +130,7 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 			to,
 		}
 		if i < len(s.To)-1 {
+			fmt.Println("CREATE DBEmailSended", record)
 			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name), record)
 		} else {
 			tos = append(tos, to)

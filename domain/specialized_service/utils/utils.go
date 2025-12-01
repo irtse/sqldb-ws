@@ -154,7 +154,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 						delete(m, utils.SpecialIDParam)
 					} else {
 						for _, fff := range ff.Fields {
-							if !strings.Contains(fff.Name, ff.Name) && fff.GetLink() > 0 {
+							if fff.GetLink() != ff.GetID() && fff.GetLink() != sche.GetID() && fff.GetLink() > 0 {
 								if m[utils.SpecialIDParam] != nil {
 									m[fff.Name] = m[utils.SpecialIDParam]
 								}
@@ -163,7 +163,12 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 							}
 						}
 					}
-					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
+					for _, fff := range ff.Fields {
+						if fff.GetLink() == sche.GetID() {
+							m[fff.Name] = record[utils.SpecialIDParam]
+							break
+						}
+					}
 					delete(m, utils.SpecialIDParam)
 					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 				}
