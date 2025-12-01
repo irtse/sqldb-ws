@@ -71,83 +71,68 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 	return t
 }
 
-func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sch sm.SchemaModel) {
-	fmt.Println(sch.Name, s.ManyToMany)
-	for schemaName, mm := range s.ManyToMany {
-		field, err := sch.GetField(schemaName)
-		if err != nil {
-			continue
-		}
-
-		if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-			for _, m := range mm {
-				if m[utils.SpecialIDParam] != nil {
-					for _, fff := range ff.Fields {
-						if fff.GetLink() == sch.GetID() {
-							err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ff.Name, map[string]interface{}{
-								fff.Name: record[utils.SpecialIDParam],
-							}, map[string]interface{}{
-								utils.SpecialIDParam: m[utils.SpecialIDParam],
-							}, false)
-							fmt.Println("THERE", fff.Name, schemaName, record[utils.SpecialIDParam], m, err)
-						}
-					}
-				}
-			}
-			for _, m := range mm {
-				for _, fff := range ff.Fields {
-					if fff.GetLink() != ff.GetID() && fff.GetLink() != sch.GetID() && fff.GetLink() > 0 {
-						if m[utils.SpecialIDParam] != nil {
-							m[fff.Name] = m[utils.SpecialIDParam]
-						}
-						delete(m, utils.SpecialIDParam)
-						break
-					}
-				}
-				for _, fff := range ff.Fields {
-					fmt.Println(record[utils.SpecialIDParam], fff.Name, fff.GetLink(), sch.GetID(), sch.Name)
-					if fff.GetLink() == sch.GetID() {
-						m[fff.Name] = utils.GetInt(record, utils.SpecialIDParam)
-						break
-					}
-				}
-				delete(m, utils.SpecialIDParam)
-				fmt.Println("sd", ff.Name, m)
-				s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
-			}
-		}
-	}
-	fmt.Println(sch.Name, s.OneToMany)
-	for schemaName, om := range s.OneToMany {
-		field, err := sch.GetField(schemaName)
-		if err != nil {
-			continue
-		}
-		if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
-			for _, fff := range ff.Fields {
-				if fff.GetLink() == sch.GetID() {
-					s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam))
-					break
-				}
-			}
-			for _, m := range om {
-				for _, fff := range ff.Fields {
-					if fff.GetLink() == sch.GetID() {
-						m[fff.Name] = record[utils.SpecialIDParam]
-						fmt.Println("sqd", ff.Name, m)
-						_, err := s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
-						fmt.Println(err)
-						break
-					}
-				}
-			}
-		}
-	}
-}
-
 func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]interface{}, tablename string) {
 	if sch, err := schema.GetSchema(tablename); err == nil {
-		s.WriteMany(record, sch)
+		for schemaName, mm := range s.ManyToMany {
+			field, err := sch.GetField(schemaName)
+			if err != nil {
+				continue
+			}
+			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+				for _, fff := range ff.Fields {
+					if fff.GetLink() == sch.GetID() {
+						s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam))
+						break
+					}
+				}
+				for _, m := range mm {
+					if m[utils.SpecialIDParam] != nil {
+						for _, fff := range ff.Fields {
+							if fff.GetLink() == sch.GetID() {
+								err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ff.Name, map[string]interface{}{
+									fff.Name: record[utils.SpecialIDParam],
+								}, map[string]interface{}{
+									utils.SpecialIDParam: m[utils.SpecialIDParam],
+								}, false)
+								fmt.Println("THERE", fff.Name, schemaName, record[utils.SpecialIDParam], m, err)
+							}
+						}
+					}
+				}
+				for _, m := range mm {
+					for _, fff := range ff.Fields {
+						if fff.GetLink() != ff.GetID() && fff.GetLink() != sch.GetID() && fff.GetLink() > 0 {
+							if m[utils.SpecialIDParam] != nil {
+								m[fff.Name] = m[utils.SpecialIDParam]
+							}
+							delete(m, utils.SpecialIDParam)
+							break
+						}
+					}
+
+					for _, fff := range ff.Fields {
+						if fff.GetLink() == sch.GetID() {
+							m[fff.Name] = record[utils.SpecialIDParam]
+							break
+						}
+					}
+
+					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
+				}
+			}
+		}
+		for schemaName, om := range s.OneToMany {
+			field, err := sch.GetField(schemaName)
+			if err != nil {
+				continue
+			}
+			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+				for _, m := range om {
+					m[ds.RootID(tablename)] = record[utils.SpecialIDParam]
+					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
+				}
+			}
+		}
 		triggers.NewTrigger(s.Domain).Trigger(&sch, record, utils.CREATE)
 	}
 }
@@ -155,7 +140,71 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]interface{}, record map[string]interface{}) {
 	sche, err := schema.GetSchema(s.Domain.GetTable())
 	if err == nil {
-		s.WriteMany(record, sche)
+		fmt.Println(s.ManyToMany)
+		for schemaName, mm := range s.ManyToMany {
+			field, err := sche.GetField(schemaName)
+			if err != nil {
+				continue
+			}
+
+			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+				for _, fff := range ff.Fields {
+					if fff.GetLink() == sche.GetID() {
+						s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam))
+						break
+					}
+				}
+				for _, m := range mm {
+					if m[utils.SpecialIDParam] != nil {
+						for _, fff := range ff.Fields {
+							if fff.GetLink() == sche.GetID() {
+								err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ff.Name, map[string]interface{}{
+									fff.Name: record[utils.SpecialIDParam],
+								}, map[string]interface{}{
+									utils.SpecialIDParam: m[utils.SpecialIDParam],
+								}, false)
+								fmt.Println("THERE", fff.Name, schemaName, record[utils.SpecialIDParam], m, err)
+							}
+						}
+					}
+				}
+				for _, m := range mm {
+					for _, fff := range ff.Fields {
+						if fff.GetLink() != ff.GetID() && fff.GetLink() != sche.GetID() && fff.GetLink() > 0 {
+							if m[utils.SpecialIDParam] != nil {
+								m[fff.Name] = m[utils.SpecialIDParam]
+							}
+							delete(m, utils.SpecialIDParam)
+							break
+						}
+					}
+					for _, fff := range ff.Fields {
+						fmt.Println(record[utils.SpecialIDParam], fff.Name, fff.GetLink(), sche.GetID(), sche.Name)
+						if fff.GetLink() == sche.GetID() {
+							m[fff.Name] = utils.GetInt(record, utils.SpecialIDParam)
+							break
+						}
+					}
+					delete(m, utils.SpecialIDParam)
+					fmt.Println("MANY", schemaName, m)
+					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
+				}
+			}
+		}
+		for schemaName, om := range s.OneToMany {
+			field, err := sche.GetField(schemaName)
+			if err != nil {
+				continue
+			}
+			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+				s.delete(&ff, s.Domain.GetTable(), ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
+				for _, m := range om {
+					m[ds.RootID(s.Domain.GetTable())] = record[utils.SpecialIDParam]
+					delete(m, utils.SpecialIDParam)
+					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
+				}
+			}
+		}
 		for _, rec := range res {
 			triggers.NewTrigger(s.Domain).Trigger(&sche, rec, utils.UPDATE)
 			if s.Domain.GetTable() == ds.DBRequest.Name || s.Domain.GetTable() == ds.DBTask.Name || utils.GetBool(rec, "is_draft") {
@@ -294,14 +343,14 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					if i, err := strconv.Atoi(utils.GetString(record, field.Name)); err == nil && i != 0 {
 						continue
 					}
-					if sche, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+					if sch, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 						l := []interface{}{}
 						for _, n := range utils.ToList(record[field.Name]) {
-							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sche.Name, map[string]interface{}{
+							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
 							}, false); err == nil && len(res) > 0 {
 								l = append(l, map[string]interface{}{utils.SpecialIDParam: res[0][utils.SpecialIDParam]})
-							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sche.Name, map[string]interface{}{
+							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sch.Name, map[string]interface{}{
 								"name": utils.GetString(utils.ToMap(n), "name"),
 							}, func(s string) (string, bool) { return "", true }); err == nil {
 								l = append(l, map[string]interface{}{utils.SpecialIDParam: i})
@@ -312,31 +361,22 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				}
 
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) && record[field.Name] != nil {
-					if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil && record[utils.SpecialIDParam] != nil {
-						if record[utils.SpecialIDParam] != nil {
-							for _, fff := range ff.Fields {
-								if fff.GetLink() == sch.GetID() {
-									s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam))
-									break
-								}
-							}
-						}
-						if s.ManyToMany[ff.Name] == nil {
-							s.ManyToMany[field.Name] = []map[string]interface{}{}
-						}
-						for _, mm := range utils.ToList(record[field.Name]) {
-							s.ManyToMany[field.Name] = append(s.ManyToMany[field.Name], utils.ToMap(mm))
-						}
-						delete(record, field.Name)
-					}
-				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
-					if s.OneToMany[field.Name] == nil {
-						s.OneToMany[field.Name] = []map[string]interface{}{}
+					if s.ManyToMany[field.Name] == nil {
+						s.ManyToMany[field.Name] = []map[string]interface{}{}
 					}
 					for _, mm := range utils.ToList(record[field.Name]) {
-						s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
+						s.ManyToMany[field.Name] = append(s.ManyToMany[field.Name], utils.ToMap(mm))
 					}
-
+					delete(record, field.Name)
+				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
+					if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
+						if s.OneToMany[ff.Name] == nil {
+							s.OneToMany[ff.Name] = []map[string]interface{}{}
+						}
+						for _, mm := range utils.ToList(record[field.Name]) {
+							s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
+						}
+					}
 					delete(record, field.Name)
 				}
 			}
