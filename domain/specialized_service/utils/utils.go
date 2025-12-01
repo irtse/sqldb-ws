@@ -167,11 +167,12 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 					for _, fff := range ff.Fields {
 						fmt.Println(record[utils.SpecialIDParam], fff.Name, fff.GetLink(), sche.GetID(), sche.Name)
 						if fff.GetLink() == sche.GetID() {
-							m[fff.Name] = record[utils.SpecialIDParam]
+							m[fff.Name] = utils.GetInt(record, utils.SpecialIDParam)
 							break
 						}
 					}
 					delete(m, utils.SpecialIDParam)
+					fmt.Println("MANY", m)
 					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 				}
 			}
