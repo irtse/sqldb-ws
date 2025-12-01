@@ -140,7 +140,7 @@ func SearchInFile(filename string, searchTerm string) bool {
 		return false
 	}
 
-	if strings.Contains(text, searchTerm) {
+	if strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm)) {
 		return true
 	} else {
 		return false
