@@ -127,7 +127,9 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 	for i, to := range s.To {
 		record["code"] = uuid.New()
 		record["to_email"] = []interface{}{
-			to,
+			map[string]interface{}{
+				"name": to,
+			},
 		}
 		if i < len(s.To)-1 {
 			fmt.Println("CREATE DBEmailSended", record)
