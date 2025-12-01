@@ -136,6 +136,7 @@ func SearchInFile(filename string, searchTerm string) bool {
 	}
 	text, err := readFileAsText(filename)
 	if err != nil {
+		fmt.Println(text, err)
 		return false
 	}
 	fmt.Println(text, searchTerm, strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm)))
