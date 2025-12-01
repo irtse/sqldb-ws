@@ -81,28 +81,27 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 			if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 				for _, m := range mm {
 					if m[utils.SpecialIDParam] != nil {
-						s.Domain.GetDb().UpdateQuery(ff.Name, map[string]interface{}{
-							ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-						}, map[string]interface{}{
-							utils.SpecialIDParam: m[utils.SpecialIDParam],
-						}, false)
-					}
-					if ff.HasField(ds.RootID(ff.Name)) {
-						if m[utils.SpecialIDParam] != nil {
-							m[ds.RootID(ff.Name)] = m[utils.SpecialIDParam]
-						}
-						delete(m, utils.SpecialIDParam)
-					} else {
 						for _, fff := range ff.Fields {
-							if fff.GetLink() != ff.GetID() && fff.GetLink() != sch.GetID() && fff.GetLink() > 0 {
-								if m[utils.SpecialIDParam] != nil {
-									m[fff.Name] = m[utils.SpecialIDParam]
-								}
-								delete(m, utils.SpecialIDParam)
-								break
+							if fff.GetLink() == sch.GetID() {
+								fmt.Println("THERE")
+								s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
+									fff.Name: record[utils.SpecialIDParam],
+								}, map[string]interface{}{
+									utils.SpecialIDParam: m[utils.SpecialIDParam],
+								}, false)
 							}
 						}
 					}
+					for _, fff := range ff.Fields {
+						if fff.GetLink() != ff.GetID() && fff.GetLink() != sch.GetID() && fff.GetLink() > 0 {
+							if m[utils.SpecialIDParam] != nil {
+								m[fff.Name] = m[utils.SpecialIDParam]
+							}
+							delete(m, utils.SpecialIDParam)
+							break
+						}
+					}
+
 					for _, fff := range ff.Fields {
 						if fff.GetLink() == sch.GetID() {
 							m[fff.Name] = record[utils.SpecialIDParam]
@@ -143,26 +142,24 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 				s.delete(&ff, s.Domain.GetTable(), ds.RootID(s.Domain.GetTable()), utils.GetString(record, utils.SpecialIDParam))
 				for _, m := range mm {
 					if m[utils.SpecialIDParam] != nil {
-						s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
-							ds.RootID(s.Domain.GetTable()): record[utils.SpecialIDParam],
-						}, map[string]interface{}{
-							utils.SpecialIDParam: m[utils.SpecialIDParam],
-						}, false)
-					}
-					if ff.HasField(ds.RootID(ff.Name)) {
-						if m[utils.SpecialIDParam] != nil {
-							m[ds.RootID(ff.Name)] = m[utils.SpecialIDParam]
-						}
-						delete(m, utils.SpecialIDParam)
-					} else {
 						for _, fff := range ff.Fields {
-							if fff.GetLink() != ff.GetID() && fff.GetLink() != sche.GetID() && fff.GetLink() > 0 {
-								if m[utils.SpecialIDParam] != nil {
-									m[fff.Name] = m[utils.SpecialIDParam]
-								}
-								delete(m, utils.SpecialIDParam)
-								break
+							if fff.GetLink() == sche.GetID() {
+								fmt.Println("THERE", fff.Name, record[utils.SpecialIDParam])
+								s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
+									fff.Name: record[utils.SpecialIDParam],
+								}, map[string]interface{}{
+									utils.SpecialIDParam: m[utils.SpecialIDParam],
+								}, false)
 							}
+						}
+					}
+					for _, fff := range ff.Fields {
+						if fff.GetLink() != ff.GetID() && fff.GetLink() != sche.GetID() && fff.GetLink() > 0 {
+							if m[utils.SpecialIDParam] != nil {
+								m[fff.Name] = m[utils.SpecialIDParam]
+							}
+							delete(m, utils.SpecialIDParam)
+							break
 						}
 					}
 					for _, fff := range ff.Fields {
@@ -352,7 +349,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						s.ManyToMany[field.Name] = []map[string]interface{}{}
 					}
 					for _, mm := range utils.ToList(record[field.Name]) {
-						fmt.Println("add MM", mm)
 						s.ManyToMany[field.Name] = append(s.ManyToMany[field.Name], utils.ToMap(mm))
 					}
 					delete(record, field.Name)
