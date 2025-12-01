@@ -134,13 +134,10 @@ func SearchInFile(filename string, searchTerm string) bool {
 	if !strings.Contains(filename, "/mnt/files/") {
 		filename = "/mnt/files/" + filename
 	}
-	fmt.Println(filename)
 	text, err := readFileAsText(filename)
-	fmt.Println("ERROR", err)
 	if err != nil {
 		return false
 	}
-	fmt.Println(text, searchTerm, strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm)))
 	return strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm))
 }
 
