@@ -72,6 +72,7 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 }
 
 func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sch sm.SchemaModel) {
+	fmt.Println(s.ManyToMany)
 	for schemaName, mm := range s.ManyToMany {
 		field, err := sch.GetField(schemaName)
 		if err != nil {
@@ -98,7 +99,6 @@ func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sc
 							sub[fff.Name] = m[utils.SpecialIDParam]
 						}
 					}
-
 				}
 				fmt.Println("isOK", ff.Name, sub)
 				if isOK {
@@ -281,11 +281,12 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sche.Name, map[string]interface{}{
 								"name": connector.Quote(utils.GetString(utils.ToMap(n), "name")),
 							}, false); err == nil && len(res) > 0 {
-								l = append(l, map[string]interface{}{utils.SpecialIDParam: res[0][utils.SpecialIDParam]})
+								l = append(l, res[0])
 							} else if i, err := s.Domain.GetDb().ClearQueryFilter().CreateQuery(sche.Name, map[string]interface{}{
 								"name": utils.GetString(utils.ToMap(n), "name"),
 							}, func(s string) (string, bool) { return "", true }); err == nil {
-								l = append(l, map[string]interface{}{utils.SpecialIDParam: i})
+								utils.ToMap(n)[utils.SpecialIDParam] = i
+								l = append(l, utils.ToMap(n))
 							}
 						}
 						record[field.Name] = l
