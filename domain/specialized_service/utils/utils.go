@@ -78,32 +78,42 @@ func (s *AbstractSpecializedService) WriteMany(record map[string]interface{}, sc
 		if err != nil {
 			continue
 		}
+
 		if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 			for _, m := range mm {
-				sub := utils.ToMap(m)
-				delete(sub, utils.SpecialIDParam)
-				isOK := false
-				for _, fff := range ff.Fields {
-					if fff.GetLink() == sch.GetID() {
-						isOK = true
-						sub[fff.Name] = record[utils.SpecialIDParam]
-						if m[utils.SpecialIDParam] != nil {
-							s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ff.Name, map[string]interface{}{
+				if m[utils.SpecialIDParam] != nil {
+					for _, fff := range ff.Fields {
+						if fff.GetLink() == sch.GetID() {
+							err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ff.Name, map[string]interface{}{
 								fff.Name: record[utils.SpecialIDParam],
 							}, map[string]interface{}{
 								utils.SpecialIDParam: m[utils.SpecialIDParam],
 							}, false)
-						}
-					} else if fff.GetLink() != ff.GetID() && fff.GetLink() != sch.GetID() && fff.GetLink() > 0 {
-						if m[utils.SpecialIDParam] != nil {
-							sub[fff.Name] = m[utils.SpecialIDParam]
+							fmt.Println("THERE", fff.Name, schemaName, record[utils.SpecialIDParam], m, err)
 						}
 					}
 				}
-				fmt.Println("isOK", ff.Name, sub)
-				if isOK {
-					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), sub)
+			}
+			for _, m := range mm {
+				for _, fff := range ff.Fields {
+					if fff.GetLink() != ff.GetID() && fff.GetLink() != sch.GetID() && fff.GetLink() > 0 {
+						if m[utils.SpecialIDParam] != nil {
+							m[fff.Name] = m[utils.SpecialIDParam]
+						}
+						delete(m, utils.SpecialIDParam)
+						break
+					}
 				}
+				for _, fff := range ff.Fields {
+					fmt.Println(record[utils.SpecialIDParam], fff.Name, fff.GetLink(), sch.GetID(), sch.Name)
+					if fff.GetLink() == sch.GetID() {
+						m[fff.Name] = utils.GetInt(record, utils.SpecialIDParam)
+						break
+					}
+				}
+				delete(m, utils.SpecialIDParam)
+				fmt.Println("MANY", schemaName, m)
+				s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 			}
 		}
 	}
