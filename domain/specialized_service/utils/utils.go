@@ -98,6 +98,8 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 							}
 						}
 					}
+				}
+				for _, m := range mm {
 					for _, fff := range ff.Fields {
 						if fff.GetLink() != ff.GetID() && fff.GetLink() != sch.GetID() && fff.GetLink() > 0 {
 							if m[utils.SpecialIDParam] != nil {
@@ -165,6 +167,8 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 							}
 						}
 					}
+				}
+				for _, m := range mm {
 					for _, fff := range ff.Fields {
 						if fff.GetLink() != ff.GetID() && fff.GetLink() != sche.GetID() && fff.GetLink() > 0 {
 							if m[utils.SpecialIDParam] != nil {
