@@ -144,12 +144,12 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 					if m[utils.SpecialIDParam] != nil {
 						for _, fff := range ff.Fields {
 							if fff.GetLink() == sche.GetID() {
-								fmt.Println("THERE", fff.Name, record[utils.SpecialIDParam])
-								s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
+								err := s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
 									fff.Name: record[utils.SpecialIDParam],
 								}, map[string]interface{}{
 									utils.SpecialIDParam: m[utils.SpecialIDParam],
 								}, false)
+								fmt.Println("THERE", fff.Name, record[utils.SpecialIDParam], m, err)
 							}
 						}
 					}
