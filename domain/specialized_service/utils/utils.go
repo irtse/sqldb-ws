@@ -149,7 +149,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 								}, map[string]interface{}{
 									utils.SpecialIDParam: m[utils.SpecialIDParam],
 								}, false)
-								fmt.Println("THERE", fff.Name, record[utils.SpecialIDParam], m, err)
+								fmt.Println("THERE", fff.Name, schemaName, record[utils.SpecialIDParam], m, err)
 							}
 						}
 					}
