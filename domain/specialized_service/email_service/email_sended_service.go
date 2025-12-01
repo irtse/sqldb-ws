@@ -23,6 +23,34 @@ func NewEmailSendedService() utils.SpecializedServiceITF {
 func (s *EmailSendedService) Entity() utils.SpecializedServiceInfo { return ds.DBEmailSended }
 
 func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{}, tableName string) {
+	for _, to := range s.To {
+		if strings.Contains(to, "@") {
+			if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
+				"name":                to,
+				ds.EmailSendedDBField: record[utils.SpecialIDParam],
+			}); err == nil && len(res) > 0 {
+				record["to_email"] = res[0][utils.SpecialIDParam]
+				s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
+					utils.SpecialIDParam: record[utils.SpecialIDParam],
+				}, false)
+			}
+		} else if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+			"name": connector.Quote(to),
+		}, false); err == nil && len(res) > 0 {
+			for _, r := range res {
+				if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
+					"name":                to,
+					ds.UserDBField:        r[utils.SpecialIDParam],
+					ds.EmailSendedDBField: record[utils.SpecialIDParam],
+				}); err == nil && len(res) > 0 {
+					record["to_email"] = res[0][utils.SpecialIDParam]
+					s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
+						utils.SpecialIDParam: record[utils.SpecialIDParam],
+					}, false)
+				}
+			}
+		}
+	}
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailTemplate.Name, map[string]interface{}{
 		utils.SpecialIDParam:  record[ds.EmailTemplateDBField],
 		"is_response_valid":   false,
@@ -95,31 +123,15 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 		}
 	}
 	delete(record, "to_email")
+	tos := []string{}
 	for i, to := range s.To {
-		if strings.Contains(to, "@") {
-			if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
-				"name":                to,
-				ds.EmailSendedDBField: record[utils.SpecialIDParam],
-			}); err == nil && len(res) > 0 {
-				record["to_email"] = res[0][utils.SpecialIDParam]
-			}
-		} else if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-			"name": connector.Quote(to),
-		}, false); err == nil && len(res) > 0 {
-			for _, r := range res {
-				if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
-					"name":                to,
-					ds.UserDBField:        r[utils.SpecialIDParam],
-					ds.EmailSendedDBField: record[utils.SpecialIDParam],
-				}); err == nil && len(res) > 0 {
-					record["to_email"] = res[0][utils.SpecialIDParam]
-				}
-			}
-		}
 		record["code"] = uuid.New()
 		if i < len(s.To)-1 {
 			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name), record)
+		} else {
+			tos = append(tos, to)
 		}
 	}
+	s.To = tos
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }
