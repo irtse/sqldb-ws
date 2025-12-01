@@ -141,7 +141,7 @@ func (d *ViewConvertor) ProcessLinkedSchema(shallowField *sm.ViewFieldModel, sch
 	}
 	if strings.Contains(scheme.Type, "many") {
 		for _, field := range schema.Fields {
-			if strings.Contains(field.Name, "_id") && !strings.Contains(field.Name, tableName) && field.GetLink() > 0 {
+			if field.GetLink() == s.GetID() {
 				schField, _ := sch.GetSchemaByID(field.GetLink())
 				shallowField.LinkPath = fmt.Sprintf("/%s/%s?rows=all&%s=enable", utils.MAIN_PREFIX, schField.Name, utils.RootShallow)
 			}
