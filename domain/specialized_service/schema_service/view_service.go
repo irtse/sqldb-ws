@@ -330,7 +330,6 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 	schema *sm.SchemaModel, params utils.Params, main bool) (utils.Record, []string) {
 	newOrder := []string{}
 	newItem := []interface{}{}
-	fmt.Println(len(value))
 	for _, item := range value {
 		values := utils.ToMap(item)["values"]
 		utils.ToMap(item)["schema_id"] = schema.ID
@@ -344,7 +343,6 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 				}
 				uComp, err := utils.UncompressGzip(filePath)
 				if err != nil {
-					fmt.Println(uComp, err)
 					continue
 				}
 
@@ -391,7 +389,6 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 		newItem = append(newItem, item)
 		// here its to format by filter depending on task running about this document of viewing, if enable.
 	}
-	fmt.Println(len(newItem))
 	if rec[key] == nil {
 		rec[key] = newItem
 	} else {
