@@ -355,7 +355,7 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 				isOK = true
 				break
 			}
-			if isOK {
+			if !isOK {
 				continue
 			}
 		}
