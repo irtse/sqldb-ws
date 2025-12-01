@@ -134,9 +134,10 @@ func SearchInFile(filename string, searchTerm string) bool {
 	if !strings.Contains(filename, "/mnt/files/") {
 		filename = "/mnt/files/" + filename
 	}
+	fmt.Println(filename)
 	text, err := readFileAsText(filename)
+	fmt.Println("ERROR", err)
 	if err != nil {
-		fmt.Println(text, err)
 		return false
 	}
 	fmt.Println(text, searchTerm, strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm)))
@@ -145,7 +146,6 @@ func SearchInFile(filename string, searchTerm string) bool {
 
 func readFileAsText(path string) (string, error) {
 	ext := strings.ToLower(filepath.Ext(path))
-
 	if strings.Contains(path, ".txt") || strings.Contains(path, ".md") || strings.Contains(path, ".rst") {
 		return readTXT(path)
 	} else if strings.Contains(path, ".tex") {
