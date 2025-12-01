@@ -98,10 +98,12 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 		record["code"] = uuid.New()
 	}
 	if record["to_email"] != nil {
-		s.To = append(s.To, utils.ToString(utils.ToMap(record["to_email"])["name"]))
+		for _, e := range utils.ToList(record["to_email"]) {
+			s.To = append(s.To, utils.ToString(utils.ToMap(e)["name"]))
+		}
 	}
 	delete(record, "to_email")
-	for _, to := range s.To {
+	for i, to := range s.To {
 		if strings.Contains(to, "@") {
 			if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
 				"name":                to,
@@ -122,7 +124,9 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 				}
 			}
 		}
+		if i < len(s.To)-1 {
+			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name), record)
+		}
 	}
-
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }
