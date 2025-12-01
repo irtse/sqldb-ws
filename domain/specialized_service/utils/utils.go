@@ -133,6 +133,7 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]interface{}, record map[string]interface{}) {
 	sche, err := schema.GetSchema(s.Domain.GetTable())
 	if err == nil {
+		fmt.Println(s.ManyToMany)
 		for schemaName, mm := range s.ManyToMany {
 			field, err := sche.GetField(schemaName)
 			if err != nil {
@@ -172,7 +173,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 						}
 					}
 					delete(m, utils.SpecialIDParam)
-					fmt.Println("MANY", m)
+					fmt.Println("MANY", schemaName, m)
 					s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
 				}
 			}
@@ -351,6 +352,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						s.ManyToMany[field.Name] = []map[string]interface{}{}
 					}
 					for _, mm := range utils.ToList(record[field.Name]) {
+						fmt.Println("add MM", mm)
 						s.ManyToMany[field.Name] = append(s.ManyToMany[field.Name], utils.ToMap(mm))
 					}
 					delete(record, field.Name)
