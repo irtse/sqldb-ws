@@ -333,7 +333,6 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 		values := utils.ToMap(item)["values"]
 		utils.ToMap(item)["schema_id"] = schema.ID
 		utils.ToMap(values)["type"] = schema.Label
-		fmt.Println("extractItems", s.Domain.DetectFileToSearchIn())
 		if len(s.Domain.DetectFileToSearchIn()) > 0 {
 			for search, field := range s.Domain.DetectFileToSearchIn() {
 				filePath := utils.GetString(utils.ToMap(values), field)

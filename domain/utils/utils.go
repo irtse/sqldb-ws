@@ -131,17 +131,13 @@ func Translate(str string) string {
 }
 
 func SearchInFile(filename string, searchTerm string) bool {
-	filePath, err := UncompressGzip(filename)
-	if err != nil {
-		return false
+	if !strings.Contains(filename, "/mnt/files/") {
+		filename = "/mnt/files/" + filename
 	}
-	if !strings.Contains(filePath, "/mnt/files/") {
-		filePath = "/mnt/files/" + filename
-	}
-	text, err := readFileAsText(filePath)
-	fmt.Println(text)
+	text, err := readFileAsText(filename)
+	fmt.Println(filename)
 	if err != nil {
-		fmt.Println("can't read file as text", filePath, err)
+		fmt.Println("can't read file as text", filename, err)
 		return false
 	}
 	if strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm)) {
