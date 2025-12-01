@@ -271,7 +271,7 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 		s.Domain.GetDb().SetSQLOrder(sqlorder)
 		s.Domain.GetDb().SetSQLLimit(sqllimit)
 		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
-		dd, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(tablename, map[string]interface{}{}, false)
+		dd, _ := s.Domain.GetDb().SelectQueryWithRestriction(tablename, map[string]interface{}{}, false)
 		for _, d := range dd {
 			datas = append(datas, d)
 		}
