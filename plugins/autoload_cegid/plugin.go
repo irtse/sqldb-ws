@@ -22,6 +22,7 @@ func Autoload() []sm.SchemaModel {
 		models.PublicationStatusFR.Name, models.PublicationHistoryStatusFR.Name, ds.DBUser.Name}...)
 
 	ds.PERMISSIONEXCEPTION = append(ds.PERMISSIONEXCEPTION, []string{
+		models.PublicationTagsFR.Name,
 		models.ArticlePublicationTagsFR.Name,
 		models.ConferencePublicationTagsFR.Name,
 		models.PresentationPublicationTagsFR.Name,
@@ -60,6 +61,7 @@ func Autoload() []sm.SchemaModel {
 		models.PosterFR.Name, models.PresentationFR.Name, models.ConferenceFR.Name,
 	}...)
 	ds.POSTPERMISSIONEXCEPTION = append(ds.POSTPERMISSIONEXCEPTION, []string{
+		models.PublicationTagsFR.Name,
 		models.ArticlePublicationTagsFR.Name,
 		models.ConferencePublicationTagsFR.Name,
 		models.PresentationPublicationTagsFR.Name,
@@ -106,7 +108,7 @@ func Autoload() []sm.SchemaModel {
 		NewPublicationService(models.PosterFR),
 		NewPublicationService(models.HDRFR),
 	}...)
-	return []sm.SchemaModel{models.CoCFR, models.ProjectFR, models.Axis, models.MajorConference,
+	return []sm.SchemaModel{models.CoCFR, models.ProjectFR, models.Axis, models.MajorConference, models.PublicationTagsFR,
 		models.ArticlePublicationTagsFR,
 		models.ConferencePublicationTagsFR,
 		models.PresentationPublicationTagsFR,
