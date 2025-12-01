@@ -227,7 +227,13 @@ func (t *TriggerService) handleOverrideEmailTo(record, dest map[string]interface
 func (t *TriggerService) triggerMail(record utils.Record, fromSchema *sm.SchemaModel, triggerID, toSchemaID, destID int64) {
 	for _, mail := range t.TriggerManualMail("auto", record, fromSchema, triggerID, toSchemaID, destID) {
 		delete(mail, "force_file_attached")
-		t.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name).RootRaw(), mail)
+		for _, to := range utils.ToList(mail["to_email"]) {
+			mm := utils.ToMap(mail)
+			mm["to_email"] = to
+			fmt.Println("MM", mm)
+			t.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name).RootRaw(), mail)
+		}
+
 	}
 }
 

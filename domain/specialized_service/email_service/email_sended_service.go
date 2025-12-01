@@ -98,9 +98,7 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 		record["code"] = uuid.New()
 	}
 	if record["to_email"] != nil {
-		for _, e := range utils.ToList(record["to_email"]) {
-			s.To = append(s.To, utils.ToString(utils.ToMap(e)["name"]))
-		}
+		s.To = append(s.To, utils.ToString(utils.ToMap(record["to_email"])["name"]))
 	}
 	delete(record, "to_email")
 	for _, to := range s.To {
