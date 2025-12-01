@@ -84,7 +84,7 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 						for _, fff := range ff.Fields {
 							if fff.GetLink() == sch.GetID() {
 								fmt.Println("THERE")
-								s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
+								s.Domain.GetDb().ClearQueryFilter().UpdateQuery(schemaName, map[string]interface{}{
 									fff.Name: record[utils.SpecialIDParam],
 								}, map[string]interface{}{
 									utils.SpecialIDParam: m[utils.SpecialIDParam],
@@ -144,7 +144,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 					if m[utils.SpecialIDParam] != nil {
 						for _, fff := range ff.Fields {
 							if fff.GetLink() == sche.GetID() {
-								err := s.Domain.GetDb().UpdateQuery(schemaName, map[string]interface{}{
+								err := s.Domain.GetDb().ClearQueryFilter().UpdateQuery(schemaName, map[string]interface{}{
 									fff.Name: record[utils.SpecialIDParam],
 								}, map[string]interface{}{
 									utils.SpecialIDParam: m[utils.SpecialIDParam],
