@@ -329,13 +329,12 @@ func (s *ViewService) extractSchema(value map[string]interface{}, record utils.R
 func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Record, record utils.Record,
 	schema *sm.SchemaModel, params utils.Params, main bool) (utils.Record, []string) {
 	newOrder := []string{}
+	newItem := []interface{}{}
 	for _, item := range value {
 		values := utils.ToMap(item)["values"]
 		utils.ToMap(item)["schema_id"] = schema.ID
 		utils.ToMap(values)["type"] = schema.Label
-		fmt.Println("DetectFileToSearchIn", len(s.Domain.DetectFileToSearchIn()))
 		if len(s.Domain.DetectFileToSearchIn()) > 0 {
-			fmt.Println("DetectFileToSearchIn")
 			for search, field := range s.Domain.DetectFileToSearchIn() {
 				filePath := utils.GetString(utils.ToMap(values), field)
 				if !strings.Contains(filePath, "/mnt/files/") {
@@ -383,12 +382,13 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 		}
 		rec, record, values = s.getFilter(rec, record, utils.ToMap(values), schema)
 		newOrder, values = view_convertor.GetOrder(schema, record, utils.ToMap(values), newOrder, s.Domain)
+		newItem = append(newItem, item)
 		// here its to format by filter depending on task running about this document of viewing, if enable.
 	}
 	if rec[key] == nil {
-		rec[key] = value
+		rec[key] = newItem
 	} else {
-		rec[key] = append(rec[key].([]interface{}), value...)
+		rec[key] = append(rec[key].([]interface{}), newItem...)
 	}
 	return rec, newOrder
 }
