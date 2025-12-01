@@ -334,26 +334,6 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 		values := utils.ToMap(item)["values"]
 		utils.ToMap(item)["schema_id"] = schema.ID
 		utils.ToMap(values)["type"] = schema.Label
-		if len(s.Domain.DetectFileToSearchIn()) > 0 {
-			for search, field := range s.Domain.DetectFileToSearchIn() {
-				filePath := utils.GetString(utils.ToMap(values), field)
-				if !strings.Contains(filePath, "/mnt/files/") {
-					filePath = "/mnt/files/" + filePath
-				}
-				uComp, err := utils.UncompressGzip(filePath)
-				if err != nil {
-					fmt.Println("can't uncompress path", filePath, err)
-					continue
-				}
-				fmt.Println(uComp)
-
-				if !utils.SearchInFile(uComp, search) {
-					utils.DeleteUncompressed(uComp)
-					continue
-				}
-				utils.DeleteUncompressed(uComp)
-			}
-		}
 		if line, ok := params.Get(utils.RootFilterLine); ok {
 			if val, operator := connector.GetFieldInInjection(line, ds.DestTableDBField); val != "" && utils.GetString(utils.ToMap(values), ds.DestTableDBField) != "" {
 				if schemaDest, err := schserv.GetSchemaByID(utils.GetInt(utils.ToMap(values), ds.SchemaDBField)); err == nil {
