@@ -5,7 +5,6 @@ import (
 	"runtime"
 	"slices"
 	"sort"
-	"sqldb-ws/domain/domain_service"
 	filterserv "sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	schserv "sqldb-ws/domain/schema"
@@ -340,16 +339,16 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 				if !strings.Contains(filePath, "/mnt/files/") {
 					filePath = "/mnt/files/" + filePath
 				}
-				uComp, err := domain_service.UncompressGzip(filePath)
+				uComp, err := utils.UncompressGzip(filePath)
 				if err != nil {
 					fmt.Println("can't uncompress path", filePath, err)
 					continue
 				}
 				if utils.ToMap(values)[field] == nil || !utils.SearchInFile(uComp, search) {
-					domain_service.DeleteUncompressed(uComp)
+					utils.DeleteUncompressed(uComp)
 					continue
 				}
-				domain_service.DeleteUncompressed(uComp)
+				utils.DeleteUncompressed(uComp)
 			}
 		}
 		if line, ok := params.Get(utils.RootFilterLine); ok {

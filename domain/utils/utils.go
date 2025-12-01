@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -130,16 +131,19 @@ func Translate(str string) string {
 }
 
 func SearchInFile(filename string, searchTerm string) bool {
-	filePath := filename
+	filePath, err := UncompressGzip(filename)
+	if err != nil {
+		return false
+	}
 	if !strings.Contains(filePath, "/mnt/files/") {
 		filePath = "/mnt/files/" + filename
 	}
 	text, err := readFileAsText(filePath)
+	fmt.Println(text)
 	if err != nil {
 		fmt.Println("can't read file as text", filePath, err)
 		return false
 	}
-
 	if strings.Contains(strings.ToLower(text), strings.ToLower(searchTerm)) {
 		return true
 	} else {
@@ -194,4 +198,39 @@ func readFileAsText(path string) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported file extension: %s", ext)
 	}
+}
+
+func UncompressGzip(uncompressedPath string) (string, error) {
+	// Ensure the file exists
+	inFile, err := os.Open(fmt.Sprintf("%v.gz", strings.Trim(uncompressedPath, " ")))
+	if err != nil {
+		return "", fmt.Errorf("failed to open gzip file: %w", err)
+	}
+	defer inFile.Close()
+	// Create a gzip reader
+	gzipReader, err := gzip.NewReader(inFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to create gzip reader: %w", err)
+	}
+	defer gzipReader.Close()
+	// Create destination file
+	outFile, err := os.Create(uncompressedPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to create uncompressed file: %w", err)
+	}
+	defer outFile.Close()
+
+	// Copy data from gzip -> destination file
+	if _, err := io.Copy(outFile, gzipReader); err != nil {
+		return "", fmt.Errorf("failed to decompress: %w", err)
+	}
+
+	return uncompressedPath, nil
+}
+
+func DeleteUncompressed(path string) error {
+	if err := os.Remove(path); err != nil {
+		return fmt.Errorf("failed to delete temp file: %w", err)
+	}
+	return nil
 }
