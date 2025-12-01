@@ -329,6 +329,7 @@ func (s *ViewService) extractSchema(value map[string]interface{}, record utils.R
 func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Record, record utils.Record,
 	schema *sm.SchemaModel, params utils.Params, main bool) (utils.Record, []string) {
 	newOrder := []string{}
+	newItem := []interface{}{}
 	for _, item := range value {
 		values := utils.ToMap(item)["values"]
 		utils.ToMap(item)["schema_id"] = schema.ID
@@ -342,6 +343,7 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 				}
 				uComp, err := utils.UncompressGzip(filePath)
 				if err != nil {
+					fmt.Println(uComp, err)
 					continue
 				}
 
@@ -367,7 +369,6 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 					if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schemaDest.Name, []string{
 						"id = " + utils.GetString(utils.ToMap(values), ds.DestTableDBField), cmd,
 					}, false); err == nil && len(res) == 0 {
-						fmt.Println("THERE", utils.GetString(utils.ToMap(values), ds.DestTableDBField), cmd)
 						continue
 					}
 				}
@@ -386,12 +387,13 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 		}
 		rec, record, values = s.getFilter(rec, record, utils.ToMap(values), schema)
 		newOrder, values = view_convertor.GetOrder(schema, record, utils.ToMap(values), newOrder, s.Domain)
+		newItem = append(newItem, item)
 		// here its to format by filter depending on task running about this document of viewing, if enable.
 	}
 	if rec[key] == nil {
-		rec[key] = value
+		rec[key] = newItem
 	} else {
-		rec[key] = append(rec[key].([]interface{}), value...)
+		rec[key] = append(rec[key].([]interface{}), newItem...)
 	}
 	return rec, newOrder
 }
