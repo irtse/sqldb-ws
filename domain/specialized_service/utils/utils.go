@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -164,6 +165,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 						}
 					}
 					for _, fff := range ff.Fields {
+						fmt.Println(record[utils.SpecialIDParam], fff.Name, fff.GetLink(), sche.GetID(), sche.Name)
 						if fff.GetLink() == sche.GetID() {
 							m[fff.Name] = record[utils.SpecialIDParam]
 							break

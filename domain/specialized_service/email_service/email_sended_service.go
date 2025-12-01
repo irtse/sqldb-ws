@@ -31,6 +31,7 @@ func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{},
 				ds.EmailSendedDBField: record[utils.SpecialIDParam],
 			}); err == nil && len(res) > 0 {
 				record["to_email"] = res[0][utils.SpecialIDParam]
+				fmt.Println(record)
 				s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
 					utils.SpecialIDParam: record[utils.SpecialIDParam],
 				}, false)
@@ -45,6 +46,7 @@ func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{},
 					ds.EmailSendedDBField: record[utils.SpecialIDParam],
 				}); err == nil && len(res) > 0 {
 					record["to_email"] = res[0][utils.SpecialIDParam]
+					fmt.Println(record)
 					s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
 						utils.SpecialIDParam: record[utils.SpecialIDParam],
 					}, false)
