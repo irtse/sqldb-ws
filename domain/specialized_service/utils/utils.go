@@ -93,7 +93,7 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 						delete(m, utils.SpecialIDParam)
 					} else {
 						for _, fff := range ff.Fields {
-							if !strings.Contains(fff.Name, ff.Name) && fff.GetLink() > 0 {
+							if fff.GetLink() > 0 && fff.GetLink() == sch.GetID() {
 								if m[utils.SpecialIDParam] != nil {
 									m[fff.Name] = m[utils.SpecialIDParam]
 								}

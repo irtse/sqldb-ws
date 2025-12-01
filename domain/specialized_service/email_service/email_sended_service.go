@@ -122,10 +122,12 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 			s.To = append(s.To, utils.ToString(utils.ToMap(e)["name"]))
 		}
 	}
-	delete(record, "to_email")
 	tos := []string{}
 	for i, to := range s.To {
 		record["code"] = uuid.New()
+		record["to_email"] = []interface{}{
+			to,
+		}
 		if i < len(s.To)-1 {
 			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name), record)
 		} else {
@@ -133,5 +135,6 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 		}
 	}
 	s.To = tos
+	delete(record, "to_email")
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }
