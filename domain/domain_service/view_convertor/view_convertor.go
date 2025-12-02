@@ -603,7 +603,7 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 			// on veut former une requête comme suit : SELECT * FROM dbuser WHERE id IN (SELECT dbuser_id FROM demo_authors WHERE dbdemo_id = ?)
 			// HERE IS REGULARY MALFORMED REQUEST FOR AUTHORS
 			// SELECT * FROM article_authors WHERE id IN (SELECT id FROM article_affiliation_authors WHERE dbarticle_id=197 AND dbarticle_authors_id IS NOT NULL) pq: column "dbarticle_authors_id" does not exist
-			fmt.Println(f.Name, schema.Name, f.GetLink(), schema.GetID())
+			// TODO make a proper loop to reach table with name
 			if lid, err := scheme.GetSchemaByID(f.GetLink()); err == nil && f.GetLink() != schema.GetID() {
 				linkTable, err := scheme.GetSchema(link)
 				if err != nil {
@@ -642,17 +642,7 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 						manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
 					}
 				}
-			} else if f.GetLink() == schema.GetID() && l.HasField("name") {
-				fmt.Println("THERE")
-				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(l.Name, map[string]interface{}{
-					f.Name: record.GetString(utils.SpecialIDParam),
-				}, false); err == nil {
-					for _, r := range res {
-						manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
-					}
-				}
 			}
-
 		}
 	}
 	return manyVals, manyPathVals
