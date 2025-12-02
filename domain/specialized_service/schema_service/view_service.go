@@ -152,6 +152,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 				}
 			}
 		}
+
 		// retrive additionnal view to combine to the main... add a type can be filtered by a filter line
 		// add type onto order and schema plus verify if filter not implied.
 		// may regenerate to get limits... for file... for type and for dest_table_id if needed.
@@ -172,6 +173,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		dp.Delete(func(k string) bool {
 			return k == utils.RootRowsParam || k == utils.SpecialIDParam || k == utils.RootTableParam || k == utils.SpecialSubIDParam
 		})
+		fmt.Println(params.Get(utils.RootFilterLine))
 		if _, ok := record["group_by"]; ok {
 			if field, err := schema.GetFieldByID(record.GetInt("group_by")); err == nil {
 				params.Set(utils.RootGroupBy, field.Name)
