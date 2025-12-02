@@ -105,6 +105,8 @@ func GetResponse() {
 		}
 		var b map[string]interface{}
 		json.Unmarshal(body, &b)
+		fmt.Println("Retrieve Response", body)
+
 		if b["error"] != nil {
 			fmt.Println("GetResponse", b["error"])
 			time.Sleep(10 * time.Minute)
