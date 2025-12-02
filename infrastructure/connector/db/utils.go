@@ -67,9 +67,10 @@ func DeleteFieldInInjection(injection string, searchField string) string {
 	return injection
 }
 
-func GetFieldInInjection(injection string, searchField string) (string, string) {
+func GetFieldInInjection(injection string, searchField string) (string, string, string) {
 	injection = SQLInjectionProtector(injection)
 	ands := strings.Split(injection, "+")
+	beforeSeparator := "and"
 	for _, andUndecoded := range ands {
 		and, _ := url.QueryUnescape(fmt.Sprint(andUndecoded))
 		ors := strings.Split(and, "|")
@@ -93,11 +94,13 @@ func GetFieldInInjection(injection string, searchField string) (string, string) 
 				continue
 			}
 			if keyVal[0] == searchField {
-				return keyVal[1], operator
+				return keyVal[1], operator, beforeSeparator
 			}
+			beforeSeparator = "or"
 		}
+		beforeSeparator = "and"
 	}
-	return "", ""
+	return "", "", beforeSeparator
 }
 
 func FormatSQLRestrictionWhereInjection(injection string, getTypeAndLink func(string, string, string, func(string, string)) (string, string, string, string, string, error), special func(string, string)) string {
