@@ -73,6 +73,7 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 
 func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]interface{}, tablename string) {
 	if sch, err := schema.GetSchema(tablename); err == nil {
+		fmt.Println(s.ManyToMany)
 		s.applyMany(sch, record, s.ManyToMany)
 		s.applyMany(sch, record, s.OneToMany)
 		triggers.NewTrigger(s.Domain).Trigger(&sch, record, utils.CREATE)
