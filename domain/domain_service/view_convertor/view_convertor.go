@@ -552,9 +552,10 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		}
 	} else {
 		for _, f := range subTable.Fields {
-			if !subTable.HasField(subField.Name) {
+			if !subTable.HasField(subField.Name) || strings.Contains(strings.ToLower(subField.Type), "many") {
 				continue
 			}
+			fmt.Println(subField.Name, subField.Type)
 			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
 				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 					subField.Name: sudId,
