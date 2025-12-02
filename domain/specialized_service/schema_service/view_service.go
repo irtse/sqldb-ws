@@ -136,12 +136,10 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 				fmt.Println("TYPE FILTER", val, operator, schema.Name)
 				if operator == "=" {
 					if schema.Name != val {
-						channel <- nil
-						return
+						notFound = true
 					}
 				} else if schema.Name == val {
-					channel <- nil
-					return
+					notFound = true
 				}
 			}
 		}
