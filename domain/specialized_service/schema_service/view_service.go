@@ -130,16 +130,16 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
 			if val, operator := connector.GetFieldInInjection(line, "type"); val != "" {
-				if strings.Contains(operator, "LIKE") {
-					if strings.Contains(operator, "NOT") && (strings.Contains(schema.Label, val) || strings.Contains(schema.Name, val)) {
-						notFound = true
-					} else if !strings.Contains(schema.Label, val) && !strings.Contains(schema.Name, val) {
-
+				fmt.Println("TYPE FILTER", val, operator)
+				if operator == "=" {
+					if schema.Name != val {
+						channel <- nil
+						return
 					}
-				} else if schema.Name != val && schema.Label != val {
-					notFound = true
+				} else if schema.Name == val {
+					channel <- nil
+					return
 				}
-				dp.Set(utils.RootFilterLine, connector.DeleteFieldInInjection(line, "type"))
 			}
 		}
 		// retrive additionnal view to combine to the main... add a type can be filtered by a filter line

@@ -254,6 +254,7 @@ func ImportVisibility() {
 
 	_, datas := importFile(filepath)
 	for _, data := range datas {
+		fmt.Println("VISIBILITY", data)
 		if res, err := d.GetDb().ClearQueryFilter().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
 			ds.EntityDBField: d.GetDb().ClearQueryFilter().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntity.Name, map[string]interface{}{
 				"name": d.GetDb().ClearQueryFilter().ClearQueryFilter().BuildSelectQueryWithRestriction(models.Project.Name, map[string]interface{}{
