@@ -536,8 +536,8 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 	if subField.GetLink() != bfTable.GetID() {
 		return manyVals
 	}
-	if subTable.HasField("name") || strings.Contains(strings.ToLower(subField.Type), "many") {
-		if !subTable.HasField(subField.Name) {
+	if subTable.HasField("name") {
+		if !subTable.HasField(subField.Name) || strings.Contains(strings.ToLower(subField.Type), "many") {
 			return manyVals
 		}
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{

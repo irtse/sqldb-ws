@@ -133,8 +133,8 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
 			if val, operator := connector.GetFieldInInjection(line, "type"); val != "" {
-				fmt.Println("TYPE FILTER", val, operator, schema.Name)
-				if operator == "!=" {
+				fmt.Println("TYPE FILTER", val, operator, schema.Name, schema.Label)
+				if operator == "=" {
 					if schema.Label != val && schema.Name != val {
 						notFound = true
 					}
