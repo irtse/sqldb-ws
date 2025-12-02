@@ -125,13 +125,14 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 			schema = &s
 		}
 	}
-
+	nativeLine := ""
 	dp := domainParams.Copy()
 	if schema == nil {
 		channel <- nil
 	} else {
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
+			nativeLine = line
 			if val, operator, separator := connector.GetFieldInInjection(line, "type"); val != "" {
 				if separator == "and" {
 					if operator == "=" {
@@ -174,6 +175,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 			return k == utils.RootRowsParam || k == utils.SpecialIDParam || k == utils.RootTableParam || k == utils.SpecialSubIDParam
 		})
 		fmt.Println(params.Get(utils.RootFilterLine))
+		fmt.Println("native", nativeLine)
 		if _, ok := record["group_by"]; ok {
 			if field, err := schema.GetFieldByID(record.GetInt("group_by")); err == nil {
 				params.Set(utils.RootGroupBy, field.Name)
