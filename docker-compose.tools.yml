@@ -12,9 +12,9 @@ services:
       - sqldb
     labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.front.entrypoints=web"
-        - "traefik.http.routers.front.rule=PathPrefix(`/grafana`)"
-        - "traefik.http.services.front.loadbalancer.server.port=3000"
+        - "traefik.http.routers.grafana.entrypoints=web"
+        - "traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)"
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     environment:
       - GF_DEFAULT_LANGUAGE=fr
       - GF_AUTH_ANONYMOUS_ENABLED=true
