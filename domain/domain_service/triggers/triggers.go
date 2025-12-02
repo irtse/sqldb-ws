@@ -84,7 +84,7 @@ func (t *TriggerService) Trigger(fromSchema *sm.SchemaModel, record utils.Record
 	}
 	if res, err := t.GetTriggers("auto", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
 		for _, r := range res {
-			fmt.Println("TRIGGERS ID", r[utils.SpecialIDParam])
+			fmt.Println("TRIGGERS ID ", r[utils.SpecialIDParam])
 			if !ShouldExecLater(r) {
 				t.ExecTrigger(fromSchema, record, r)
 				ShouldExecJob(r)
