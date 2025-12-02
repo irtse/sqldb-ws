@@ -148,8 +148,6 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		switch res["state"] {
 		case "completed":
 			current_index = math.Floor(current_index + 1)
-		case "refused":
-			current_index = math.Floor(current_index + 1)
 		case "dismiss":
 			if current_index >= 1 {
 				current_index = math.Floor(current_index - 1)
@@ -199,10 +197,12 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			newRecRequest["state"] = "running"
 			if s := utils.GetString(schemes[0], "custom_progressing_status"); s != "" {
 				newRecRequest["state"] = s
+				newRecRequest["current_index"] = current_index + 1
 			}
 		}
 		if (res["state"] == "refused") && !isOptionnal {
 			newRecRequest["state"] = res["state"]
+
 		} else {
 			newRecRequest["current_index"] = current_index
 			for _, scheme := range schemes { // verify before

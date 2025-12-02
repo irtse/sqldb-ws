@@ -692,13 +692,13 @@ var DBShare = models.SchemaModel{
 	},
 } // TODO PERMISSION
 
-var OWNPERMISSIONEXCEPTION = []string{DBNotification.Name, DBDelegation.Name, DBDashboard.Name, DBDashboardVars.Name, DBDashboardFavorite.Name}
+var OWNPERMISSIONEXCEPTION = []string{DBNotification.Name, DBDelegation.Name, DBDashboard.Name, DBDashboardVars.Name, DBDashboardFavorite.Name, DBDashboardFavorite.Name}
 var AllPERMISSIONEXCEPTION = []string{DBNotification.Name, DBViewAttribution.Name, DBUser.Name, DBFilter.Name, DBFilterField.Name, DBComment.Name}
-var POSTPERMISSIONEXCEPTION = []string{DBEmailSended.Name, DBEmailSendedUser.Name, DBRequest.Name, DBConsentResponse.Name, DBDelegation.Name, DBShare.Name}
+var POSTPERMISSIONEXCEPTION = []string{DBEmailSended.Name, DBEmailSendedUser.Name, DBDashboardFavorite.Name, DBRequest.Name, DBConsentResponse.Name, DBDelegation.Name, DBShare.Name}
 var PUPERMISSIONEXCEPTION = []string{DBTask.Name, DBEmailResponse.Name}
 var PERMISSIONEXCEPTION = []string{
-	DBDashboard.Name, DBView.Name, DBTask.Name, DBShare.Name,
-	DBDelegation.Name, DBRequest.Name, DBWorkflow.Name,
+	DBDashboard.Name, DBView.Name, DBTask.Name, DBShare.Name, DBDashboardVars.Name,
+	DBDelegation.Name, DBRequest.Name, DBWorkflow.Name, DBDashboardFavorite.Name,
 	DBEntity.Name, DBSchema.Name, DBEmailSendedUser.Name,
 	DBSchemaField.Name, DBComment.Name, DBDataAccess.Name,
 } // override permission checkup
@@ -706,7 +706,7 @@ var PERMISSIONEXCEPTION = []string{
 var ROOTTABLES = []models.SchemaModel{DBSchemaField, DBUser, DBWorkflow, DBView, DBRequest, DBSchema, DBPermission, DBFilter, DBFilterField, DBEntity,
 	DBRole, DBDataAccess, DBNotification, DBEntityUser, DBRoleAttribution, DBShare,
 	DBConsent, DBTask, DBWorkflowSchema, DBRolePermission, DBHierarchy, DBViewAttribution,
-	DBDashboard, // DBDashboardElement, DBDashboardMathField, DBDashboardLabel,
+	DBDashboard, DBDashboardVars, DBDashboardFavorite, // DBDashboardElement, DBDashboardMathField, DBDashboardLabel,
 	DBComment, DBDelegation,
 	DBConsentResponse, DBEmailTemplate,
 	DBTrigger, DBTriggerRule, DBTriggerCondition, DBTriggerDestination,
