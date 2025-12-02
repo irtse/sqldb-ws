@@ -73,7 +73,20 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		for _, schema := range schemas {
 			go s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
 		}
+		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
+		for range schemas {
+			if rec := <-subChan; rec != nil {
+				for _, i := range utils.ToList(rec["items"]) {
+					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
+				}
+				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
+				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
+			}
+		}
 		for _, schema := range schemas {
+			if len(res) == 0 {
+				continue
+			}
 			newSchema := map[string]interface{}{}
 			for k, v := range res[0]["schema"].(map[string]interface{}) {
 				if schema.HasField(k) {
@@ -96,16 +109,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 			res[0]["schema"] = newSchema
 			res[0]["multi_view_path"] = append(res[0]["multi_view_path"].([]interface{}), utils.BuildPath(schema.Name, utils.ReservedParam))
-		}
-		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
-		for range schemas {
-			if rec := <-subChan; rec != nil {
-				for _, i := range utils.ToList(rec["items"]) {
-					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
-				}
-				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
-				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
-			}
 		}
 	}
 	sort.SliceStable(res, func(i, j int) bool {
@@ -130,7 +133,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
 			if val, operator := connector.GetFieldInInjection(line, "type"); val != "" {
-				fmt.Println("TYPE FILTER", val, operator)
+				fmt.Println("TYPE FILTER", val, operator, schema.Name)
 				if operator == "=" {
 					if schema.Name != val {
 						channel <- nil
