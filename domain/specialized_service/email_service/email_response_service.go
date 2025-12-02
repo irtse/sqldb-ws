@@ -25,6 +25,7 @@ func NewEmailResponseService() utils.SpecializedServiceITF {
 func (s *EmailResponseService) Entity() utils.SpecializedServiceInfo { return ds.DBEmailResponse }
 
 func (s *EmailResponseService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
+	fmt.Println("RESPONSE", record)
 	// check waiting for response
 	record["got_response"] = record["got_response"] == "true" || record["got_response"] == true
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
@@ -41,6 +42,7 @@ func (s *EmailResponseService) SpecializedUpdateRow(results []map[string]interfa
 }
 
 func (s *EmailResponseService) Write(record map[string]interface{}, tableName string) {
+	fmt.Println("RESPONSE Write", record)
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
 		utils.SpecialIDParam: utils.GetString(record, ds.EmailSendedDBField),
 	}, false); err == nil {
@@ -108,6 +110,7 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 				if usr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					utils.SpecialIDParam: r["from_email"],
 				}, false); err == nil && len(usr) > 0 {
+					fmt.Println("FROM")
 					schMapped, _ := schema.GetSchemaByID(utils.GetInt(r, "mapped_withdbschema_id"))
 					if dests, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schMapped.Name, map[string]interface{}{
 						utils.SpecialIDParam: r["mapped_withdbdest_table_id"],
@@ -120,21 +123,21 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 							if utils.GetString(record, "comment") != "" {
 								dest["comment"] = "`" + utils.GetString(record, "comment") + "`"
 							}
-
+							usrFrom := usr[0]
+							if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+								utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
+									"is_default": true,
+								}, false, ds.UserDBField),
+							}, false); err == nil && len(l) > 0 {
+								usrFrom = l[0]
+							}
 							dest["from_email"] = utils.GetString(emailUser[0], "name")
-							rec, err := connector.ForgeMail(usr[0], usr[0],
+							rec, err := connector.ForgeMail(usrFrom, usr[0],
 								utils.GetString(tmp, "subject"), utils.GetString(tmp, "template"),
 								dest, s.Domain, utils.GetInt(tmp, utils.SpecialIDParam),
 								utils.ToInt64(sch.ID), -1, -1, "", "")
 							if err == nil {
-								usrFrom := usr[0]
-								if l, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-									utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEmailList.Name, map[string]interface{}{
-										"is_default": true,
-									}, false, ds.UserDBField),
-								}, false); err == nil && len(l) > 0 {
-									usrFrom = l[0]
-								}
+
 								go connector.SendMailSafe(
 									utils.GetString(usrFrom, "email"), utils.GetString(usr[0], "email"), rec, false)
 							}
