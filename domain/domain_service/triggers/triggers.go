@@ -262,12 +262,6 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		if value == "" {
 			value = utils.GetString(record, field.Name)
 		}
-		err = t.Domain.GetDb().ClearQueryFilter().UpdateQuery(toSchema.Name, map[string]interface{}{
-			field.Name: value,
-		}, map[string]interface{}{
-			utils.SpecialIDParam: destID,
-		}, false)
-		fmt.Println("RULES DONE", toSchema.Name, field.Name, value, destID, err)
 		s := t.Domain.GetSpecialized(toSchema.Name)
 		s.SpecializedUpdateRow([]map[string]interface{}{
 			map[string]interface{}{
@@ -279,6 +273,11 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 				field.Name: value,
 			},
 		)
+		err = t.Domain.GetDb().ClearQueryFilter().UpdateQuery(toSchema.Name, map[string]interface{}{
+			field.Name: value,
+		}, map[string]interface{}{
+			utils.SpecialIDParam: destID,
+		}, false)
 	}
 }
 
