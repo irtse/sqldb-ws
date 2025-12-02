@@ -249,7 +249,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							}
 						}
 						if t2 != nil {
-							fmt.Println(utils.ToList(record[field.Name]))
+							fmt.Println("BEF mm", utils.ToList(record[field.Name]))
 							for _, mm := range utils.ToList(record[field.Name]) {
 								newMM := map[string]interface{}{}
 								// cherchons dans T2 notre valeur si elle existe.
