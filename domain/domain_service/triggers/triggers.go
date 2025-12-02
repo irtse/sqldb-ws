@@ -277,7 +277,6 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		}, map[string]interface{}{
 			utils.SpecialIDParam: destID,
 		}, false)
-		fmt.Println(toSchema.Name, field.Name, value, destID, err)
 	}
 }
 

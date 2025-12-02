@@ -1,7 +1,6 @@
 package email_service
 
 import (
-	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
@@ -31,7 +30,6 @@ func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{},
 				ds.EmailSendedDBField: record[utils.SpecialIDParam],
 			}); err == nil && len(res) > 0 {
 				record["to_email"] = res[0][utils.SpecialIDParam]
-				fmt.Println(record)
 				s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
 					utils.SpecialIDParam: record[utils.SpecialIDParam],
 				}, false)
@@ -46,7 +44,6 @@ func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{},
 					ds.EmailSendedDBField: record[utils.SpecialIDParam],
 				}); err == nil && len(res) > 0 {
 					record["to_email"] = res[0][utils.SpecialIDParam]
-					fmt.Println(record)
 					s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
 						utils.SpecialIDParam: record[utils.SpecialIDParam],
 					}, false)
@@ -134,7 +131,6 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 			},
 		}
 		if i < len(s.To)-1 {
-			fmt.Println("CREATE DBEmailSended", record)
 			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name), record)
 		} else {
 			tos = append(tos, to)

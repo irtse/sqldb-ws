@@ -87,7 +87,6 @@ func GetResponse() {
 		return
 	}
 	for {
-		fmt.Println("Retrieve Response")
 		resp, err := http.Get(fmt.Sprintf("%s/v1/response", host))
 		if err != nil {
 			fmt.Println("GetResponse Error:", err)

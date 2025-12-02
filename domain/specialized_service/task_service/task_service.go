@@ -148,6 +148,8 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		switch res["state"] {
 		case "completed":
 			current_index = math.Floor(current_index + 1)
+		case "refused":
+			current_index = math.Floor(current_index + 1)
 		case "dismiss":
 			if current_index >= 1 {
 				current_index = math.Floor(current_index - 1)
