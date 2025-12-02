@@ -204,7 +204,6 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 				}
 				if len(subAlt) > 0 {
 					subAlt += " AND "
-					fmt.Println("THERE AND subAlt", subAlt)
 				}
 				s = strings.ReplaceAll(s, "'%", "")
 				s = strings.ReplaceAll(s, "%'", "")
@@ -233,19 +232,21 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			no = "NOT LIKE"
 		}
 		// LIKE
+		subAlt := ""
+
 		ssql := strings.Split(sql, " ")
 		for _, s := range ssql {
 			if strings.ReplaceAll(s, " ", "") == "" {
 				continue
 			}
-			if len(alterRestr) > 0 {
-				alterRestr += " AND "
-				fmt.Println("THERE AND", alterRestr)
+			if len(subAlt) > 0 {
+				subAlt += " AND "
 			}
 			s = strings.ReplaceAll(s, "'%", "")
 			s = strings.ReplaceAll(s, "%'", "")
-			alterRestr += "(LOWER(" + key + "::text) " + no + " LOWER('%" + strings.ReplaceAll(s, "'", "''") + "%'))"
+			subAlt += "(LOWER(" + key + "::text) " + no + " LOWER('%" + strings.ReplaceAll(s, "'", "''") + "%'))"
 		}
+		alterRestr += "(" + subAlt + ")"
 		return key, no, or, alterRestr
 	} else {
 		if strings.Contains(sql, "'") && !strings.Contains(typ, "enum") && !strings.Contains(typ, "many") {
