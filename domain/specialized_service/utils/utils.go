@@ -166,21 +166,9 @@ func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string
 	if !sch.HasField(fieldName) {
 		return
 	}
-	res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-		fieldName: id,
-	}, false)
-	if err == nil && len(res) > 0 {
-		for _, f := range sch.Fields {
-			if ff, err := schema.GetSchemaByID(f.GetLink()); err == nil && from != ff.Name {
-				for _, r := range res {
-					s.delete(&ff, sch.Name, ds.RootID(sch.Name), utils.GetString(r, utils.SpecialIDParam))
-				}
-			}
-		}
-	}
-	s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(sch.Name, map[string]interface{}{
-		fieldName: id,
-	}, false)
+	p := utils.AllParams(sch.Name).RootRaw()
+	p.Add(fieldName, id, func(v string) bool { return true })
+	s.Domain.DeleteSuperCall(p)
 }
 
 func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
@@ -266,9 +254,8 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 								newMM := map[string]interface{}{}
 								// cherchons dans T2 notre valeur si elle existe.
 								if t2Res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(t2.Name, map[string]interface{}{
-									utils.SpecialIDParam: utils.ToMap(mm)[utils.SpecialIDParam],
-									"name":               connector.Quote(utils.GetString(utils.ToMap(mm), "name")),
-								}, true); err == nil && len(t2Res) > 0 { // elle existe, alors le lien tuToTu = id
+									"name": connector.Quote(utils.GetString(utils.ToMap(mm), "name")),
+								}, false); err == nil && len(t2Res) > 0 { // elle existe, alors le lien tuToTu = id
 									newMM[tuToT2.Name] = t2Res[0][utils.SpecialIDParam]
 									if tu.HasField("name") { //si notre table de jonction peut contenir un nom filé le nom de la valeur qui en a forcément un
 										newMM["name"] = t2Res[0]["name"]
