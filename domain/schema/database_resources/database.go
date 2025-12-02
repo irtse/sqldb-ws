@@ -692,7 +692,7 @@ var DBShare = models.SchemaModel{
 	},
 } // TODO PERMISSION
 
-var OWNPERMISSIONEXCEPTION = []string{DBNotification.Name, DBDelegation.Name, DBDashboard.Name, DBDashboardElement.Name, DBDashboardMathField.Name}
+var OWNPERMISSIONEXCEPTION = []string{DBNotification.Name, DBDelegation.Name, DBDashboard.Name, DBDashboardVars.Name, DBDashboardFavorite.Name}
 var AllPERMISSIONEXCEPTION = []string{DBNotification.Name, DBViewAttribution.Name, DBUser.Name, DBFilter.Name, DBFilterField.Name, DBComment.Name}
 var POSTPERMISSIONEXCEPTION = []string{DBEmailSended.Name, DBEmailSendedUser.Name, DBRequest.Name, DBConsentResponse.Name, DBDelegation.Name, DBShare.Name}
 var PUPERMISSIONEXCEPTION = []string{DBTask.Name, DBEmailResponse.Name}
@@ -753,8 +753,8 @@ var FilterFieldDBField = RootID(DBFilterField.Name)
 var ViewFilterDBField = "view_" + RootID(DBFilter.Name)
 var ViewDBField = RootID(DBView.Name)
 var DashboardDBField = RootID(DBDashboard.Name)
-var DashboardMathDBField = RootID(DBDashboardMathField.Name)
-var DashboardElementDBField = RootID(DBDashboardElement.Name)
+var DashboardFavoriteDBField = RootID(DBDashboardFavorite.Name)
+var DashboardVarsDBField = RootID(DBDashboardVars.Name)
 var ViewAttributionDBField = RootID(DBViewAttribution.Name)
 var TriggerDBField = RootID(DBTrigger.Name)
 var EmailTemplateDBField = RootID(DBEmailTemplate.Name)
