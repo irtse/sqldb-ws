@@ -240,7 +240,9 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 
 	rules := t.GetTriggerRules(triggerID, fromSchema, toSchemaID, record)
 	for _, r := range rules {
+		fmt.Println("RULES", r, record)
 		if toSchemaID != utils.GetInt(r, "to_"+ds.SchemaDBField) {
+			fmt.Println("ERR", toSchemaID, utils.GetInt(r, "to_"+ds.SchemaDBField))
 			continue
 		}
 
@@ -285,12 +287,10 @@ func (t *TriggerService) GetTriggerRules(triggerID int64, fromSchema *sm.SchemaM
 	}, false); err == nil && len(res) > 0 {
 		for _, cond := range res {
 			if cond[ds.SchemaFieldDBField] == nil && utils.GetString(record, utils.SpecialIDParam) != utils.GetString(cond, "value") {
-				fmt.Println("!Value", utils.GetString(record, utils.SpecialIDParam), utils.GetString(cond, "value"))
 				return []map[string]interface{}{}
 			}
 			f, err := fromSchema.GetFieldByID(utils.GetInt(cond, ds.SchemaFieldDBField))
 			if err != nil || (record[f.Name] == nil && utils.GetBool(cond, "not_null")) || utils.GetString(record, f.Name) != utils.GetString(cond, "value") {
-				fmt.Println("!Value null", record, utils.GetString(record, f.Name), utils.GetString(cond, "value"))
 				return []map[string]interface{}{}
 			}
 		}
