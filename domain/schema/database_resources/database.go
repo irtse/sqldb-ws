@@ -674,6 +674,7 @@ var DBDataAccess = models.SchemaModel{
 		{Name: RootID("dest_table"), Type: models.INTEGER.String(), Required: false, Readonly: true, Label: "reference", Index: 3},
 		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template attached", Index: 4},
 		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Readonly: true, Label: "related user", Index: 5},
+		{Name: "patch_note", Type: models.TEXT.String(), Required: false, Index: 0},
 	},
 }
 
