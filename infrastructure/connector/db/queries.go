@@ -169,6 +169,9 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 	if err != nil {
 		return err
 	}
+	if strings.Contains(name, "poster") {
+		fmt.Println(q)
+	}
 	err = db.Query(q)
 	if err != nil && strings.Contains(err.Error(), "unique") {
 		splitted := strings.Split(err.Error(), "\"")
