@@ -84,7 +84,6 @@ func (t *TriggerService) Trigger(fromSchema *sm.SchemaModel, record utils.Record
 	}
 	if res, err := t.GetTriggers("auto", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
 		for _, r := range res {
-			fmt.Println("TRIGGERS ID ", r[utils.SpecialIDParam])
 			if !ShouldExecLater(r) {
 				t.ExecTrigger(fromSchema, record, r)
 				ShouldExecJob(r)
@@ -291,7 +290,7 @@ func (t *TriggerService) GetTriggerRules(triggerID int64, fromSchema *sm.SchemaM
 			}
 			f, err := fromSchema.GetFieldByID(utils.GetInt(cond, ds.SchemaFieldDBField))
 			if err != nil || (record[f.Name] == nil && utils.GetBool(cond, "not_null")) || utils.GetString(record, f.Name) != utils.GetString(cond, "value") {
-				fmt.Println("!Value null", utils.GetString(record, f.Name), utils.GetString(cond, "value"))
+				fmt.Println("!Value null", record, utils.GetString(record, f.Name), utils.GetString(cond, "value"))
 				return []map[string]interface{}{}
 			}
 		}
