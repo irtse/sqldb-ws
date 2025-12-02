@@ -199,11 +199,12 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			subAlt := ""
 			ssql := strings.Split(sql, " ")
 			for _, s := range ssql {
-				if s == "" {
+				if strings.ReplaceAll(s, " ", "") == "" {
 					continue
 				}
 				if len(subAlt) > 0 {
 					subAlt += " AND "
+					fmt.Println("THERE AND subAlt", subAlt)
 				}
 				s = strings.ReplaceAll(s, "'%", "")
 				s = strings.ReplaceAll(s, "%'", "")
@@ -234,11 +235,12 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 		// LIKE
 		ssql := strings.Split(sql, " ")
 		for _, s := range ssql {
-			if s == "" {
+			if strings.ReplaceAll(s, " ", "") == "" {
 				continue
 			}
 			if len(alterRestr) > 0 {
 				alterRestr += " AND "
+				fmt.Println("THERE AND", alterRestr)
 			}
 			s = strings.ReplaceAll(s, "'%", "")
 			s = strings.ReplaceAll(s, "%'", "")
