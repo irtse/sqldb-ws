@@ -197,7 +197,7 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 			newRecRequest["state"] = "running"
 			if s := utils.GetString(schemes[0], "custom_progressing_status"); s != "" {
 				newRecRequest["state"] = s
-				newRecRequest["current_index"] = current_index + 1
+				newRecRequest["current_index"] = -1
 			}
 		}
 		if (res["state"] == "refused") && !isOptionnal {
