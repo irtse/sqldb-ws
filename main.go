@@ -105,7 +105,7 @@ func GetResponse() {
 		}
 		var b map[string]interface{}
 		json.Unmarshal(body, &b)
-		fmt.Println("Retrieve Response", body)
+		fmt.Println("Retrieve Response", b)
 
 		if b["error"] != nil {
 			fmt.Println("GetResponse", b["error"])
