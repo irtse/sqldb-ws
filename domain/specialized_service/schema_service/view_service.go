@@ -130,7 +130,6 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 	if schema == nil {
 		channel <- nil
 	} else {
-		additionnal := ""
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
 			if val, operator, separator := connector.GetFieldInInjection(line, "type"); val != "" {
@@ -144,16 +143,11 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 					}
 				} else {
 					if operator == "=" {
-						if schema.Label != val && schema.Name != val {
-							fmt.Println("NOT FOUND TYPE FILTER", val, operator, schema.Name, schema.Label)
-							additionnal = " OR false "
-						} else {
-							additionnal = " OR true "
+						if schema.Label == val || schema.Name == val {
+							dp.Delete(func(s string) bool { return s == utils.RootFilterLine })
 						}
-					} else if schema.Name == val || schema.Label == val {
-						additionnal = " OR false "
-					} else {
-						additionnal = " OR true "
+					} else if schema.Name != val && schema.Label != val {
+						dp.Delete(func(s string) bool { return s == utils.RootFilterLine })
 					}
 				}
 			}
@@ -189,7 +183,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
-			params, datas, rec["max"] = s.fetchData(schema.Name, params, sqlFilter+additionnal)
+			params, datas, rec["max"] = s.fetchData(schema.Name, params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
