@@ -240,7 +240,6 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 
 	rules := t.GetTriggerRules(triggerID, fromSchema, toSchemaID, record)
 	for _, r := range rules {
-		fmt.Println("RULES", r, record)
 		if toSchemaID != utils.GetInt(r, "to_"+ds.SchemaDBField) {
 			fmt.Println("ERR", toSchemaID, utils.GetInt(r, "to_"+ds.SchemaDBField))
 			continue
@@ -278,6 +277,7 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		}, map[string]interface{}{
 			utils.SpecialIDParam: destID,
 		}, false)
+		fmt.Println(toSchema.Name, field.Name, value, destID, err)
 	}
 }
 

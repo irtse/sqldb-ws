@@ -25,7 +25,6 @@ func NewEmailResponseService() utils.SpecializedServiceITF {
 func (s *EmailResponseService) Entity() utils.SpecializedServiceInfo { return ds.DBEmailResponse }
 
 func (s *EmailResponseService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
-	fmt.Println("RESPONSE", record)
 	// check waiting for response
 	record["got_response"] = record["got_response"] == "true" || record["got_response"] == true
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
@@ -42,7 +41,6 @@ func (s *EmailResponseService) SpecializedUpdateRow(results []map[string]interfa
 }
 
 func (s *EmailResponseService) Write(record map[string]interface{}, tableName string) {
-	fmt.Println("RESPONSE Write", record)
 	if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailSended.Name, map[string]interface{}{
 		utils.SpecialIDParam: utils.GetString(record, ds.EmailSendedDBField),
 	}, false); err == nil {
@@ -110,7 +108,6 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 				if usr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					utils.SpecialIDParam: r["from_email"],
 				}, false); err == nil && len(usr) > 0 {
-					fmt.Println("FROM")
 					schMapped, _ := schema.GetSchemaByID(utils.GetInt(r, "mapped_withdbschema_id"))
 					if dests, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schMapped.Name, map[string]interface{}{
 						utils.SpecialIDParam: r["mapped_withdbdest_table_id"],
