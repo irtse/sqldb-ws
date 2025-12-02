@@ -130,18 +130,31 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 	if schema == nil {
 		channel <- nil
 	} else {
+		additionnal := ""
 		notFound := false
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
-			if val, operator := connector.GetFieldInInjection(line, "type"); val != "" {
-
-				if operator == "=" {
-					if schema.Label != val && schema.Name != val {
-						fmt.Println("NOT FOUND TYPE FILTER", val, operator, schema.Name, schema.Label)
+			if val, operator, separator := connector.GetFieldInInjection(line, "type"); val != "" {
+				if separator == "and" {
+					if operator == "=" {
+						if schema.Label != val && schema.Name != val {
+							notFound = true
+						}
+					} else if schema.Name == val || schema.Label == val {
 						notFound = true
 					}
-				} else if schema.Name == val || schema.Label == val {
-					fmt.Println("NOT FOUND TYPE FILTER", val, operator, schema.Name, schema.Label)
-					notFound = true
+				} else {
+					if operator == "=" {
+						if schema.Label != val && schema.Name != val {
+							fmt.Println("NOT FOUND TYPE FILTER", val, operator, schema.Name, schema.Label)
+							additionnal = " OR false "
+						} else {
+							additionnal = " OR true "
+						}
+					} else if schema.Name == val || schema.Label == val {
+						additionnal = " OR false "
+					} else {
+						additionnal = " OR true "
+					}
 				}
 			}
 		}
@@ -176,7 +189,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
-			params, datas, rec["max"] = s.fetchData(schema.Name, params, sqlFilter)
+			params, datas, rec["max"] = s.fetchData(schema.Name, params, sqlFilter+additionnal)
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
@@ -363,7 +376,7 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 			}
 		}
 		if line, ok := params.Get(utils.RootFilterLine); ok {
-			if val, operator := connector.GetFieldInInjection(line, ds.DestTableDBField); val != "" && utils.GetString(utils.ToMap(values), ds.DestTableDBField) != "" {
+			if val, operator, _ := connector.GetFieldInInjection(line, ds.DestTableDBField); val != "" && utils.GetString(utils.ToMap(values), ds.DestTableDBField) != "" {
 				if schemaDest, err := schserv.GetSchemaByID(utils.GetInt(utils.ToMap(values), ds.SchemaDBField)); err == nil {
 					cmd := "name" + operator + val
 					if strings.Contains(operator, "LIKE") {
