@@ -267,7 +267,7 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		}, map[string]interface{}{
 			utils.SpecialIDParam: destID,
 		}, false)
-		fmt.Println("RULES DONE", field.Name, value, destID, err)
+		fmt.Println("RULES DONE", toSchema.Name, field.Name, value, destID, err)
 		s := t.Domain.GetSpecialized(toSchema.Name)
 		s.SpecializedUpdateRow([]map[string]interface{}{
 			map[string]interface{}{
