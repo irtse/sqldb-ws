@@ -291,7 +291,7 @@ func (t *TriggerService) GetTriggerRules(triggerID int64, fromSchema *sm.SchemaM
 			}
 			f, err := fromSchema.GetFieldByID(utils.GetInt(cond, ds.SchemaFieldDBField))
 			if err != nil || (record[f.Name] == nil && utils.GetBool(cond, "not_null")) || utils.GetString(record, f.Name) != utils.GetString(cond, "value") {
-				fmt.Println("!Value null", utils.GetString(record, utils.SpecialIDParam), utils.GetString(cond, "value"))
+				fmt.Println("!Value null", utils.GetString(record, f.Name), utils.GetString(cond, "value"))
 				return []map[string]interface{}{}
 			}
 		}
