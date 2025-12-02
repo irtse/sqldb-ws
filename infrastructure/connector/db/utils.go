@@ -139,6 +139,7 @@ func FormatSQLRestrictionWhereInjection(injection string, getTypeAndLink func(st
 	alterRestr = strings.ReplaceAll(strings.ReplaceAll(alterRestr, " () OR ", ""), "() AND ", "")
 	alterRestr = strings.ReplaceAll(strings.ReplaceAll(alterRestr, " OR  OR ", ""), " AND  AND ", "")
 	alterRestr = strings.ReplaceAll(alterRestr, "()", "")
+	alterRestr = strings.ReplaceAll(strings.ReplaceAll(alterRestr, " OR AND", ""), " OR", "")
 	return alterRestr
 }
 
