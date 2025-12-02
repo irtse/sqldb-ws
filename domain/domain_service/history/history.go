@@ -71,8 +71,8 @@ func NewDataAccess(schemaID int64, destIDs []string, record utils.Record, domain
 					utils.SpecialIDParam: destID,
 				}, false); err == nil && len(res) > 0 {
 					for k, v := range domain.GetRecord() {
-						if f, err := sch.GetField(k); err == nil {
-							patchNote += f.Label + " : " + utils.GetString(res[0], k) + " -> " + utils.ToString(v) + "\n "
+						if f, err := sch.GetField(k); err == nil && utils.GetString(res[0], k) != utils.ToString(v) {
+							patchNote += f.Label + " : " + utils.GetString(res[0], k) + " -> " + utils.ToString(v) + "\n"
 						}
 
 					}
