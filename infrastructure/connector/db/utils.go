@@ -77,7 +77,7 @@ func GetFieldInInjection(injection string, searchField string) (string, string, 
 		if len(ors) == 0 {
 			continue
 		}
-		for _, or := range ors {
+		for i, or := range ors {
 			operator := "~"
 			keyVal := []string{}
 			if strings.Contains(or, "<>~") {
@@ -94,6 +94,9 @@ func GetFieldInInjection(injection string, searchField string) (string, string, 
 				continue
 			}
 			if keyVal[0] == searchField {
+				if i < len(ors)-1 {
+					beforeSeparator = "or"
+				}
 				return keyVal[1], operator, beforeSeparator
 			}
 			beforeSeparator = "or"
