@@ -23,6 +23,7 @@ services:
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_SERVER_ROOT_URL=http://${HOST_SHORT:-capitalisation.irt-aese.local}/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     ports:
       - '8080:3000'
     # adding the mount volume point which we create earlier
