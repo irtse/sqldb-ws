@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -73,7 +72,6 @@ func (s *AbstractSpecializedService) TransformToGenericView(results utils.Result
 
 func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]interface{}, tablename string) {
 	if sch, err := schema.GetSchema(tablename); err == nil {
-		fmt.Println(s.ManyToMany)
 		s.applyMany(sch, record, s.ManyToMany)
 		s.applyMany(sch, record, s.OneToMany)
 		triggers.NewTrigger(s.Domain).Trigger(&sch, record, utils.CREATE)
@@ -109,7 +107,6 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]interface{}, record map[string]interface{}) {
 	sche, err := schema.GetSchema(s.Domain.GetTable())
 	if err == nil {
-		fmt.Println(s.ManyToMany)
 		s.applyMany(sche, record, s.ManyToMany)
 		s.applyMany(sche, record, s.OneToMany)
 		for _, rec := range res {
@@ -249,7 +246,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							}
 						}
 						if t2 != nil {
-							fmt.Println("BEF mm", utils.ToList(record[field.Name]))
 							for _, mm := range utils.ToList(record[field.Name]) {
 								newMM := map[string]interface{}{}
 								// cherchons dans T2 notre valeur si elle existe.
@@ -289,7 +285,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				}
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) || strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) {
 					delete(record, field.Name)
-					fmt.Println(record)
 				}
 			}
 

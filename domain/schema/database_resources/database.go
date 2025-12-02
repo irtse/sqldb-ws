@@ -553,48 +553,27 @@ var DBDashboard = models.SchemaModel{
 	},
 }
 
-// DBDashboardElement express a dashboard element in the database, a dashboard element is a view on a table with a filter
-var DBDashboardElement = models.SchemaModel{
-	Name:     RootName("dashboard_element"),
-	Label:    "dashboard elements",
+var DBDashboardVars = models.SchemaModel{
+	Name:     RootName("dashboard_vars"),
+	Label:    "dashboard vars",
 	Category: "",
 	Fields: []models.FieldModel{
 		{Name: models.NAMEKEY, Type: models.VARCHAR.String(), Required: true, Index: 0},
-		{Name: "description", Type: models.BIGVARCHAR.String(), Required: false, Index: 1},
-		{Name: "type", Type: models.ENUMTIME.String(), Required: false, Index: 2},
-		{Name: "X", Type: models.INTEGER.String(), ForeignTable: DBDashboardLabel.Name, Required: true, Index: 3},
-		{Name: "Y", Type: models.VARCHAR.String(), ForeignTable: DBDashboardLabel.Name, Required: false, Index: 4},
-		{Name: "Z", Type: models.VARCHAR.String(), ForeignTable: DBDashboardLabel.Name, Required: false, Index: 5},
-		{Name: RootID(DBDashboardMathField.Name), Type: models.INTEGER.String(), ForeignTable: DBDashboardMathField.Name, Required: false, Index: 6},
-		{Name: RootID(DBFilter.Name), Type: models.INTEGER.String(), ForeignTable: DBFilter.Name, Required: false, Index: 7},
-		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Index: 8},                          // results if multiple must be ordered by
-		{Name: "order_by_" + RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: false, Index: 9}, // results if multiple must be ordered by
-		{Name: RootID(DBDashboard.Name), Type: models.INTEGER.String(), ForeignTable: DBDashboard.Name, Required: true, Index: 10},
+		{Name: "label", Type: models.VARCHAR.String(), Required: false, Index: 1},
+		{Name: "type", Type: models.VARCHAR.String(), Required: false, Index: 2},
+		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: false, Index: 3},
+		{Name: RootID(DBDashboard.Name), Type: models.INTEGER.String(), ForeignTable: DBDashboard.Name, Required: false, Index: 4},
 	},
 }
 
-// DBDashboardMathField express a dashboard math field in the database, a dashboard math field is a math operation on a column
-var DBDashboardLabel = models.SchemaModel{
-	Name:     RootName("dashboard_math_field"),
-	Label:    "dashboard math fields",
+var DBDashboardFavorite = models.SchemaModel{
+	Name:     RootName("dashboard_favorite"),
+	Label:    "dashboard favorite",
 	Category: "",
 	Fields: []models.FieldModel{
-		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: false, Index: 1},
-		{Name: RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: false, Index: 2},
-		{Name: "type", Type: models.VARCHAR.String(), Required: false, Index: 3},
-	},
-}
-
-// DBDashboardMathField express a dashboard math field in the database, a dashboard math field is a math operation on a column
-var DBDashboardMathField = models.SchemaModel{
-	Name:     RootName("dashboard_math_field"),
-	Label:    "dashboard math fields",
-	Category: "",
-	Fields: []models.FieldModel{
-		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Index: 1},
-		{Name: RootID(DBSchemaField.Name), Type: models.INTEGER.String(), ForeignTable: DBSchemaField.Name, Required: true, Index: 2},
-		{Name: "column_math_func", Type: models.ENUMMATHFUNC.String(), Required: false, Index: 3}, // func applied on operation added on column value ex: COUNT
-		{Name: "row_math_func", Type: models.VARCHAR.String(), Required: false, Index: 4},
+		{Name: "value", Type: models.VARCHAR.String(), Required: true, Index: 0},
+		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: true, Index: 1},
+		{Name: RootID(DBDashboardVars.Name), Type: models.INTEGER.String(), ForeignTable: DBDashboardVars.Name, Required: true, Index: 2},
 	},
 }
 

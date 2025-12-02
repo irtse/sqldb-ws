@@ -38,7 +38,7 @@ func (v *ViewConvertor) TransformToView(results utils.Results, tableName string,
 			}
 			ids = connector.RemoveLastChar(ids)
 		}
-		history.NewDataAccess(schema.GetID(), strings.Split(ids, ","), v.Domain)
+		history.NewDataAccess(schema.GetID(), strings.Split(ids, ","), utils.Record{}, v.Domain)
 
 	}
 	if v.Domain.IsShallowed() {
@@ -555,7 +555,6 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 			if !subTable.HasField(subField.Name) || strings.Contains(strings.ToLower(subField.Type), "many") {
 				continue
 			}
-			fmt.Println(subField.Name, subField.Type)
 			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
 				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 					subField.Name: sudId,

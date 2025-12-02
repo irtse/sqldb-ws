@@ -27,6 +27,11 @@ type AbstractDomain struct {
 	SearchInFiles      map[string]string
 	IsDraftToPublished bool
 	Mode               string
+	Record             Record
+}
+
+func (d *AbstractDomain) GetRecord() Record {
+	return d.Record
 }
 
 func (d *AbstractDomain) GetMode() string {

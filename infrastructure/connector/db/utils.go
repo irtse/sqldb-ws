@@ -132,7 +132,6 @@ func FormatSQLRestrictionWhereInjection(injection string, getTypeAndLink func(st
 				orRestr += " OR "
 			}
 			_, _, _, orRestr = MakeSqlItem(orRestr, typ, link, keyVal[0], keyVal[1], operator)
-			fmt.Println("OR OR", orRestr, keyVal[0], keyVal[1])
 		}
 		if len(orRestr) > 0 {
 			if len(strings.Trim(alterRestr, " ")) > 0 {
@@ -140,7 +139,6 @@ func FormatSQLRestrictionWhereInjection(injection string, getTypeAndLink func(st
 			}
 			alterRestr += "( " + orRestr + " )"
 		}
-		fmt.Println("OR", alterRestr)
 	}
 	alterRestr = strings.ReplaceAll(strings.ReplaceAll(alterRestr, " OR ()", ""), " AND ()", "")
 	alterRestr = strings.ReplaceAll(strings.ReplaceAll(alterRestr, " () OR ", ""), "() AND ", "")

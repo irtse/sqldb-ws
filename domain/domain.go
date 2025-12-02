@@ -128,6 +128,7 @@ func (d *SpecializedDomain) onBooleanValue(key string, sup func(bool)) {
 
 // Main process to call an Infra function
 func (d *SpecializedDomain) call(params utils.Params, record utils.Record, method utils.Method, args ...interface{}) (utils.Results, error) {
+	d.Record = record
 	d.Method = method
 	d.Params = params
 	d.Mode, _ = params.Get(utils.RootFilterMode)
@@ -226,6 +227,7 @@ func (d *SpecializedDomain) GetRowResults(
 			if ok, rr := GetInCache(d.UserID, tb, meth, cp); ok {
 				res = rr
 			} else {
+				d.Record = record
 				res, err = d.Invoke(record, d.Method, args...)
 			}
 			if err != nil {

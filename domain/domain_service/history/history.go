@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
+func NewDataAccess(schemaID int64, destIDs []string, record utils.Record, domain utils.DomainITF) {
 	for _, destID := range destIDs {
 		id := domain.GetUserID()
 		if sch, err := schema.GetSchemaByID(schemaID); err == nil && sch.Name == ds.DBTask.Name {
@@ -64,10 +64,26 @@ func NewDataAccess(schemaID int64, destIDs []string, domain utils.DomainITF) {
 			}
 			return
 		}
+		patchNote := ""
+		if domain.GetMethod() == utils.UPDATE {
+			if sch, err := schema.GetSchemaByID(schemaID); err == nil {
+				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+					utils.SpecialIDParam: destID,
+				}, false); err == nil && len(res) > 0 {
+					for k, v := range domain.GetRecord() {
+						if f, err := sch.GetField(k); err == nil {
+							patchNote += f.Label + " : " + utils.GetString(res[0], k) + " -> " + utils.ToString(v)
+						}
+
+					}
+				}
+			}
+		}
 		domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name,
 			utils.Record{
 				"write":             domain.GetMethod() == utils.CREATE,
 				"update":            domain.GetMethod() == utils.UPDATE,
+				"patch_note":        patchNote,
 				ds.DestTableDBField: destID,
 				ds.SchemaDBField:    schemaID,
 				ds.UserDBField:      id}, func(s string) (string, bool) {
