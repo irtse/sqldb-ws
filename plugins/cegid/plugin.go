@@ -261,7 +261,7 @@ func ImportVisibility() {
 				}, false, "name"),
 			}, false, utils.SpecialIDParam),
 			ds.UserDBField: d.GetDb().ClearQueryFilter().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-				"name": connector.Quote(data[1]),
+				"code": connector.Quote(data[1]),
 			}, false, utils.SpecialIDParam),
 		}, false); err == nil && len(res) == 0 {
 			if res, err := d.GetDb().ClearQueryFilter().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntity.Name, map[string]interface{}{
@@ -270,7 +270,7 @@ func ImportVisibility() {
 				}, false, "name"),
 			}, false); err == nil && len(res) > 0 {
 				if usr, err := d.GetDb().ClearQueryFilter().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-					"name": connector.Quote(data[1]),
+					"code": connector.Quote(data[1]),
 				}, false); err == nil && len(usr) > 0 {
 					d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntityUser.Name, map[string]interface{}{
 						ds.UserDBField:   usr[0][utils.SpecialIDParam],
