@@ -137,7 +137,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 }
 
 func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
-	fmt.Println("SpecializedDeleteRow")
+	fmt.Println("SpecializedDeleteRow", results)
 	for _, sch := range models.SchemaRegistry {
 		for _, r := range results {
 			if sch.HasField(ds.SchemaDBField) && sch.HasField(ds.DestTableDBField) {
