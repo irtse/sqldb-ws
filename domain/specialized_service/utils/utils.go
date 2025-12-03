@@ -89,12 +89,11 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 			isFirst := true
 			for _, fff := range ff.Fields {
 				if fff.GetLink() == sch.GetID() {
+					if isFirst {
+						s.delete(&ff, fff.Name, utils.GetString(record, utils.SpecialIDParam)) // supprimer toute les occurences précédente venant du parents
+						isFirst = false
+					}
 					for _, m := range om {
-						if isFirst {
-
-							s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam)) // supprimer toute les occurences précédente venant du parents
-							isFirst = false
-						}
 						m[fff.Name] = record[utils.SpecialIDParam] // on rajoute la référence au parent et si on a un parent c'est que tout est en ordre
 						delete(m, utils.SpecialIDParam)
 						s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
@@ -162,17 +161,18 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 	}
 }
 
-func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string, fieldName string, id string) {
+func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, fieldName string, id string) {
+	fmt.Println(sch.Name, fieldName)
 	if !sch.HasField(fieldName) {
 		return
 	}
 	p := utils.AllParams(sch.Name).RootRaw()
 	p.Add(fieldName, id, func(v string) bool { return true })
 	_, err := s.Domain.DeleteSuperCall(p)
-	s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(sch.Name, map[string]interface{}{
+	err = s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(sch.Name, map[string]interface{}{
 		fieldName: id,
 	}, false) // cetinrue bretelle
-	fmt.Println("DELETE", err, fieldName, id, sch.Name)
+	fmt.Println("DELETE", err, fieldName, id, sch.Name, err)
 
 }
 
