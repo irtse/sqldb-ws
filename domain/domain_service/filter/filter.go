@@ -211,13 +211,13 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 			restr = append(restr, "is_draft=false")
 		}
 	} else {
-		if (slices.Contains(ds.PERMISSIONEXCEPTION, schema.Name) && s.Domain.GetMethod() == utils.SELECT) || (slices.Contains(ds.AllPERMISSIONEXCEPTION, schema.Name)) || (s.Domain.IsShallowed() && s.Domain.GetMethod() == utils.SELECT) {
+		if (slices.Contains(ds.PERMISSIONEXCEPTION, schema.Name) && s.Domain.GetMethod() == utils.SELECT) || (slices.Contains(ds.AllPERMISSIONEXCEPTION, schema.Name)) {
 			return restr
 		}
 	}
 
 	isUser := false
-	isUser = (schema.HasField(ds.UserDBField) || s.Domain.GetTable() == ds.DBUser.Name)
+	isUser = (schema.HasField(ds.UserDBField))
 	if scope, ok := s.Domain.GetParams().Get(utils.RootScope); !(ok && scope == "enable" && schema.Name == ds.DBTask.Name) && !(ok && scope == "disable" && schema.Name == ds.DBUser.Name) {
 		if isUser {
 			key := ds.UserDBField
@@ -244,7 +244,7 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 				}
 			}
 		}
-		if schema.HasField(ds.EntityDBField) || s.Domain.GetTable() == ds.DBEntity.Name {
+		if schema.HasField(ds.EntityDBField) {
 			key := ds.EntityDBField
 			if s.Domain.GetTable() == ds.DBEntity.Name {
 				if !ok {

@@ -80,7 +80,6 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 }
 
 func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[string]interface{}, refMany map[string][]map[string]interface{}) {
-	fmt.Println(refMany)
 	for schemaName, om := range refMany {
 		field, err := sch.GetField(schemaName)
 		if err != nil {
@@ -92,6 +91,7 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 				for _, fff := range ff.Fields {
 					if fff.GetLink() == sch.GetID() {
 						if isFirst {
+
 							s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam)) // supprimer toute les occurences précédente venant du parents
 							isFirst = false
 						}
@@ -168,7 +168,9 @@ func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string
 	}
 	p := utils.AllParams(sch.Name).RootRaw()
 	p.Add(fieldName, id, func(v string) bool { return true })
-	s.Domain.DeleteSuperCall(p)
+	_, err := s.Domain.DeleteSuperCall(p)
+	fmt.Println("DELETE", err, fieldName, id, sch.Name)
+
 }
 
 func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
