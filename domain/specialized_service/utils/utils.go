@@ -151,6 +151,7 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 			}
 			for _, f := range sch.Fields {
 				if utils.ToString(f.GetLink()) == sch.ID {
+					fmt.Println("FOUND", sch.ID, f.Name)
 					if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 						f.Name: r[utils.SpecialIDParam],
 					}, false); err == nil {
@@ -165,18 +166,12 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 }
 
 func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, fieldName string, id string) {
-	fmt.Println(sch.Name, fieldName)
 	if !sch.HasField(fieldName) {
 		return
 	}
 	p := utils.AllParams(sch.Name).RootRaw()
 	p.Add(fieldName, id, func(v string) bool { return true })
-	_, err := s.Domain.DeleteSuperCall(p)
-	err = s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(sch.Name, map[string]interface{}{
-		fieldName: id,
-	}, false) // cetinrue bretelle
-	fmt.Println("DELETE", err, fieldName, id, sch.Name, err)
-
+	s.Domain.DeleteSuperCall(p)
 }
 
 func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
