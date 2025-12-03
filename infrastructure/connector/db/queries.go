@@ -22,7 +22,11 @@ func (db *Database) DeleteQueryWithRestriction(name string, restrictions map[str
 	if strings.Contains(name, "article") {
 		fmt.Println(q)
 	}
-	_, err := db.Conn.Exec(q)
+	res, err := db.Conn.Exec(q)
+	if err != nil {
+		return nil
+	}
+	fmt.Println(res.RowsAffected())
 	return err
 }
 
