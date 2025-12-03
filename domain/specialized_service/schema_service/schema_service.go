@@ -75,6 +75,7 @@ func (s *SchemaService) SpecializedDeleteRow(results []map[string]interface{}, t
 		}))
 		schserv.DeleteSchema(utils.ToString(res[sm.NAMEKEY]))
 	}
+	s.AbstractSpecializedService.SpecializedDeleteRow(results, tableName)
 }
 
 func (s *SchemaService) SpecializedCreateRow(record map[string]interface{}, tableName string) {

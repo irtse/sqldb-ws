@@ -33,6 +33,7 @@ func (s *FilterService) SpecializedDeleteRow(results []map[string]interface{}, t
 			ds.FilterDBField: utils.ToString(record[utils.SpecialIDParam]),
 		}, false)
 	}
+	s.AbstractSpecializedService.SpecializedDeleteRow(results, tableName)
 }
 
 func (s *FilterService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {

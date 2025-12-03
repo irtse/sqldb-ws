@@ -189,6 +189,7 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 		}
 		results[i] = task.SetClosureStatus(res)
 	}
+	s.AbstractSpecializedService.SpecializedDeleteRow(results, tableName)
 }
 
 func (s *DelegationService) SpecializedUpdateRow(results []map[string]interface{}, record map[string]interface{}) {

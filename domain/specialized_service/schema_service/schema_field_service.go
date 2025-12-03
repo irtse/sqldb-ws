@@ -127,4 +127,5 @@ func (s *SchemaFields) SpecializedDeleteRow(results []map[string]interface{}, ta
 			sch.DeleteSchemaField(schema.Name, utils.ToString(record[sm.NAMEKEY]))
 		}
 	}
+	s.AbstractSpecializedService.SpecializedDeleteRow(results, tableName)
 }

@@ -70,8 +70,10 @@ func GetHierarchical(domain utils.DomainITF) ([]map[string]interface{}, error) {
 	}, true)
 }
 
-func (s *RequestService) Entity() utils.SpecializedServiceInfo                                    { return ds.DBRequest }
-func (s *RequestService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {}
+func (s *RequestService) Entity() utils.SpecializedServiceInfo { return ds.DBRequest }
+func (s *RequestService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
+	s.AbstractSpecializedService.SpecializedDeleteRow(results, tableName)
+}
 func (s *RequestService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
 	if _, ok := record["is_draft"]; ok && utils.GetBool(record, "is_draft") {
 		return record, errors.New("can't create a request"), false
