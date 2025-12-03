@@ -97,6 +97,11 @@ func Autoload() []sm.SchemaModel {
 		models.DemoFR.Name, models.InternshipFR.Name, models.ThesisFR.Name, models.HDRFR.Name,
 		models.PosterFR.Name, models.PresentationFR.Name, models.ConferenceFR.Name,
 	}...)
+	ds.AVOIDUSERPERMISSIONEXCEPTION = append(ds.AVOIDUSERPERMISSIONEXCEPTION, []string{
+		models.CoCFR.Name, models.ProjectFR.Name, models.Axis.Name,
+		models.ProofreadingStatus.Name, models.MajorConference.Name,
+		models.PublicationStatusFR.Name, models.PublicationHistoryStatusFR.Name,
+	}...)
 	service.SERVICES = append(service.SERVICES, []func() utils.SpecializedServiceITF{
 		NewPublicationService(models.OtherPublicationFR),
 		NewPublicationService(models.ArticleFR),

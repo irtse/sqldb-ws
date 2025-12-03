@@ -692,6 +692,8 @@ var DBShare = models.SchemaModel{
 	},
 } // TODO PERMISSION
 
+var AVOIDUSERPERMISSIONEXCEPTION = []string{DBComment.Name}
+
 var OWNPERMISSIONEXCEPTION = []string{DBNotification.Name, DBDelegation.Name, DBDashboard.Name, DBDashboardVars.Name, DBDashboardFavorite.Name, DBDashboardFavorite.Name}
 var AllPERMISSIONEXCEPTION = []string{DBNotification.Name, DBViewAttribution.Name, DBUser.Name, DBFilter.Name, DBFilterField.Name, DBComment.Name}
 var POSTPERMISSIONEXCEPTION = []string{DBEmailSended.Name, DBEmailSendedUser.Name, DBDashboardFavorite.Name, DBRequest.Name, DBConsentResponse.Name, DBDelegation.Name, DBShare.Name}
