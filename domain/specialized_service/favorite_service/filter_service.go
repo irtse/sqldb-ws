@@ -208,7 +208,6 @@ func (s *FilterService) ProcessFields(record map[string]interface{}, fieldType s
 func (s *FilterService) HandleCreate(record map[string]interface{}) {
 	name := utils.GetString(record, sm.NAMEKEY)
 	if _, ok := record["view_fields"]; ok { // is a view filter
-		name += "view "
 		record["is_view"] = true
 	}
 	record[ds.UserDBField] = s.Domain.GetUserID()
