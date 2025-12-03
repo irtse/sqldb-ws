@@ -85,12 +85,9 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 		if err != nil {
 			continue
 		}
-		fmt.Println(sch.Name)
 		if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 			isFirst := true
 			for _, fff := range ff.Fields {
-				fmt.Println(sch.Name, fff.Name, sch.GetID(), sch.GetID())
-
 				if fff.GetLink() == sch.GetID() {
 					if isFirst {
 						s.delete(&ff, fff.Name, utils.GetString(record, utils.SpecialIDParam)) // supprimer toute les occurences précédente venant du parents
@@ -137,7 +134,6 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 }
 
 func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
-	fmt.Println("SpecializedDeleteRow", results)
 	if originSCH, err := schema.GetSchema(tableName); err == nil {
 		for _, sch := range models.SchemaRegistry {
 			for _, r := range results {
@@ -152,8 +148,7 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 					}
 				}
 				for _, f := range sch.Fields {
-					if utils.ToString(f.GetLink()) == originSCH.ID {
-						fmt.Println("FOUND", sch.ID, f.Name)
+					if utils.ToString(f.GetLink()) == originSCH.ID && !strings.Contains(strings.ToLower(f.Type), "many") {
 						if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
 							f.Name: r[utils.SpecialIDParam],
 						}, false); err == nil {
