@@ -22,7 +22,8 @@ func (db *Database) DeleteQueryWithRestriction(name string, restrictions map[str
 	if strings.Contains(name, "article") {
 		fmt.Println(q)
 	}
-	return db.Query(q)
+	_, err := db.Conn.Exec(q)
+	return err
 }
 
 func (db *Database) SelectQueryWithRestriction(name string, restrictions interface{}, isOr bool) ([]map[string]interface{}, error) {
@@ -195,7 +196,9 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 		name = name + " as main "
 		q = db.BuildDeleteQuery(name, colName)
 	}
-	return db.Query(q)
+	_, err := db.Conn.Exec(q)
+	return err
+
 }
 
 /*
