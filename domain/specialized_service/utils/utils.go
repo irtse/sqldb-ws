@@ -256,7 +256,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 						}
 						if t2 != nil {
 							fmt.Println("before", utils.ToList(record[field.Name]))
-
+							s.ManyToMany[field.Name] = []map[string]interface{}{}
 							for _, mm := range utils.ToList(record[field.Name]) {
 								newMM := map[string]interface{}{}
 								// cherchons dans T2 notre valeur si elle existe.
@@ -288,6 +288,7 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 					delete(record, field.Name)
 				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
+					s.OneToMany[field.Name] = []map[string]interface{}{}
 					for _, mm := range utils.ToList(record[field.Name]) {
 						s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
 					}
