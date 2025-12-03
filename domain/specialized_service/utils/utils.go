@@ -85,9 +85,12 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 		if err != nil {
 			continue
 		}
+		fmt.Println(sch.Name)
 		if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 			isFirst := true
 			for _, fff := range ff.Fields {
+				fmt.Println(sch.Name, fff.Name, sch.GetID(), sch.GetID())
+
 				if fff.GetLink() == sch.GetID() {
 					if isFirst {
 						s.delete(&ff, fff.Name, utils.GetString(record, utils.SpecialIDParam)) // supprimer toute les occurences précédente venant du parents
