@@ -138,26 +138,28 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 
 func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
 	fmt.Println("SpecializedDeleteRow", results)
-	for _, sch := range models.SchemaRegistry {
-		for _, r := range results {
-			if sch.HasField(ds.SchemaDBField) && sch.HasField(ds.DestTableDBField) {
-				if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-					ds.SchemaDBField:    sch.ID,
-					ds.DestTableDBField: utils.GetInt(r, utils.SpecialIDParam),
-				}, false); err == nil {
-					for _, rrr := range res {
-						go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
-					}
-				}
-			}
-			for _, f := range sch.Fields {
-				if utils.ToString(f.GetLink()) == sch.ID {
-					fmt.Println("FOUND", sch.ID, f.Name)
+	if originSCH, err := schema.GetSchema(tableName); err == nil {
+		for _, sch := range models.SchemaRegistry {
+			for _, r := range results {
+				if sch.HasField(ds.SchemaDBField) && sch.HasField(ds.DestTableDBField) {
 					if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-						f.Name: r[utils.SpecialIDParam],
+						ds.SchemaDBField:    sch.ID,
+						ds.DestTableDBField: utils.GetInt(r, utils.SpecialIDParam),
 					}, false); err == nil {
 						for _, rrr := range res {
 							go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+						}
+					}
+				}
+				for _, f := range sch.Fields {
+					if utils.ToString(f.GetLink()) == originSCH.ID {
+						fmt.Println("FOUND", sch.ID, f.Name)
+						if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+							f.Name: r[utils.SpecialIDParam],
+						}, false); err == nil {
+							for _, rrr := range res {
+								go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+							}
 						}
 					}
 				}
