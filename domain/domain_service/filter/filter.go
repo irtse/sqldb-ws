@@ -54,7 +54,12 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		}
 	}
 	SQLrestriction = f.RestrictionBySchema(tableName, SQLrestriction, domainParams)
-	SQLOrder = domainParams.GetOrder(func(el string) bool { return schema.HasField(el) }, SQLOrder)
+	SQLOrder = domainParams.GetOrder(func(el string) bool {
+		if f, err := schema.GetField(el); err == nil {
+			return !strings.Contains(strings.ToLower(f.Type), "many")
+		}
+		return schema.HasField(el)
+	}, SQLOrder)
 	SQLLimit = domainParams.GetLimit(SQLLimit)
 	SQLview = f.viewbyFields(schema, domainParams)
 

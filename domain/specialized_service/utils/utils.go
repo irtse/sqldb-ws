@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -79,6 +80,7 @@ func (s *AbstractSpecializedService) SpecializedCreateRow(record map[string]inte
 }
 
 func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[string]interface{}, refMany map[string][]map[string]interface{}) {
+	fmt.Println(refMany)
 	for schemaName, om := range refMany {
 		field, err := sch.GetField(schemaName)
 		if err != nil {
@@ -232,7 +234,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 				}
 
 				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) && record[field.Name] != nil {
-					s.ManyToMany[field.Name] = []map[string]interface{}{}
 					if tu, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 						var tuToT2 sm.FieldModel
 						var t2 *sm.SchemaModel
@@ -246,6 +247,8 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							}
 						}
 						if t2 != nil {
+							fmt.Println("before", utils.ToList(record[field.Name]))
+
 							for _, mm := range utils.ToList(record[field.Name]) {
 								newMM := map[string]interface{}{}
 								// cherchons dans T2 notre valeur si elle existe.
@@ -277,7 +280,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					}
 					delete(record, field.Name)
 				} else if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) && record[field.Name] != nil {
-					s.OneToMany[field.Name] = []map[string]interface{}{}
 					for _, mm := range utils.ToList(record[field.Name]) {
 						s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
 					}
