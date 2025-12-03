@@ -87,9 +87,9 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 		}
 		if ff, err := schema.GetSchemaByID(field.GetLink()); err == nil {
 			isFirst := true
-			for _, m := range om {
-				for _, fff := range ff.Fields {
-					if fff.GetLink() == sch.GetID() {
+			for _, fff := range ff.Fields {
+				if fff.GetLink() == sch.GetID() {
+					for _, m := range om {
 						if isFirst {
 
 							s.delete(&ff, s.Domain.GetTable(), fff.Name, utils.GetString(record, utils.SpecialIDParam)) // supprimer toute les occurences précédente venant du parents
@@ -169,6 +169,9 @@ func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, from string
 	p := utils.AllParams(sch.Name).RootRaw()
 	p.Add(fieldName, id, func(v string) bool { return true })
 	_, err := s.Domain.DeleteSuperCall(p)
+	s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(sch.Name, map[string]interface{}{
+		fieldName: id,
+	}, false) // cetinrue bretelle
 	fmt.Println("DELETE", err, fieldName, id, sch.Name)
 
 }
