@@ -139,13 +139,15 @@ var upgrader = websocket.Upgrader{
 var clients = make(map[*websocket.Conn]bool)
 var clientsLock = sync.Mutex{}
 
+type WebsocketController struct{ controller.AbstractController }
+
 // @Title WebSocket
 // @Description webSocketGet
 // @Param	table			path 	string	true		"Name of the table"
 // @Success 200 {string} success !
 // @Failure 403 no table
-// @router /websocket/:table/ [get]
-func (t *GenericController) WebSocket() {
+// @router /:table/ [get]
+func (t *WebsocketController) WebSocket() {
 	fmt.Println("WebSocket")
 	t.SafeCall(utils.WEBSOCKET)
 }
