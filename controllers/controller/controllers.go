@@ -155,6 +155,7 @@ func (t *AbstractController) Call(auth bool, method utils.Method, args ...interf
 	} // then proceed to exec by calling domain
 	d := domain.Domain(superAdmin, user, nil)
 	p, asLabel := t.Params()
+	fmt.Println("METH", method)
 	if method == utils.WEBSOCKET {
 		t.WebSocketController(t.Ctx.ResponseWriter, t.Ctx.Request, utils.NewParams(p), user)
 	} else if method == utils.IMPORT {
