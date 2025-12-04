@@ -359,6 +359,8 @@ type ViewItemModel struct {
 	Synthesis     string                   `json:"synthesis_path"`
 	New           bool                     `json:"new"`
 	MetaData      *MetaData                `json:"metadata"`
+	SharedBy      []string                 `json:"shared_by"`
+	SharedTo      []string                 `json:"shared_to"`
 }
 
 type SharingModel struct {

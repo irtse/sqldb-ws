@@ -33,6 +33,28 @@ func (v *ViewConvertor) GetShortcuts(schemaID string, actions []string) map[stri
 	return shortcuts
 }
 
+func (d *ViewConvertor) Shared(schemaID string, id string, from bool) []string {
+	k := "shared_" + ds.UserDBField
+	k2 := ds.UserDBField
+	if from {
+		k = ds.UserDBField
+		k2 = "shared_" + ds.UserDBField
+	}
+	users := []string{}
+	if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+		utils.SpecialIDParam: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+			k2:                  d.Domain.GetUserID(),
+			ds.SchemaDBField:    schemaID,
+			ds.DestTableDBField: id,
+		}, false, k),
+	}, false); err == nil {
+		for _, r := range res {
+			users = append(users, utils.GetString(r, "name"))
+		}
+	}
+	return users
+}
+
 func (d *ViewConvertor) FetchRecord(tableName string, m map[string]interface{}) []map[string]interface{} {
 	if len(m) == 0 {
 		return []map[string]interface{}{}
