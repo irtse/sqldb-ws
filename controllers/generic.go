@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"sqldb-ws/controllers/controller"
@@ -145,5 +146,6 @@ var clientsLock = sync.Mutex{}
 // @Failure 403 no table
 // @router /:table/websocket [get]
 func (t *GenericController) WebSocket() {
+	fmt.Println("WebSocket")
 	t.SafeCall(utils.WEBSOCKET)
 }
