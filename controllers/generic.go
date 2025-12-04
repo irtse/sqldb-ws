@@ -132,6 +132,14 @@ func (t *GenericController) Math() {
 	t.SafeCall(utils.Found(function))
 }
 
+// @Title Import
+// @Description import Datas
+// @Param	table			path 	string	true		"Import in columnName"
+// @Success 200 {string} success !
+// @Failure 403 no table
+// @router /:table/import [post]
+func (t *GenericController) Import() { t.SafeCall(utils.IMPORT) }
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true }, // allow all origins
 }
