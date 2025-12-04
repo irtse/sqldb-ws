@@ -97,15 +97,6 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"],
-        beego.ControllerComments{
-            Method: "WebSocket",
-            Router: `/websocket/:table/`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
     beego.GlobalControllerRouter["sqldb-ws/controllers:MainController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:MainController"],
         beego.ControllerComments{
             Method: "Main",
@@ -119,6 +110,15 @@ func init() {
         beego.ControllerComments{
             Method: "Download",
             Router: `/download/:path`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["sqldb-ws/controllers:WebsocketController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:WebsocketController"],
+        beego.ControllerComments{
+            Method: "WebSocket",
+            Router: `/:table/`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
