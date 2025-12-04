@@ -114,7 +114,10 @@ func (t *AbstractController) WebsocketTrigger(user string, params utils.Params, 
 		t.Response(utils.Results{}, errors.New("can't found row name"), "", "")
 		return
 	}
-	msgBytes, err := json.Marshal(resp)
+	msgBytes, err := json.Marshal(map[string]interface{}{
+		"data":  resp,
+		"event": domain.GetMethod().String(),
+	})
 	if err != nil {
 		fmt.Println("JSON marshal error:", err)
 		return

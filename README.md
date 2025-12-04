@@ -61,3 +61,6 @@ Super Admin DB Default
     Password : imnotthepwd (can be change at first start : DBPWD)
 
 Grafana wait for first conn.
+
+bee generate routers
+bee run -gendoc=true -downdoc=true
