@@ -22,10 +22,6 @@ var namespaceV1 = map[string]beego.ControllerInterface{
 	utils.MAIN_PREFIX: &controllers.GenericController{},
 }
 
-var namespaceV2 = map[string]beego.ControllerInterface{
-	"websocket": &controllers.WebsocketController{},
-}
-
 func init() {
 	var FilterUser = func(ctx *context.Context) {}
 	v1 := []beego.LinkNamespace{}
@@ -36,14 +32,5 @@ func init() {
 		))
 	}
 	ns := beego.NewNamespace("/v1", v1...)
-	beego.AddNamespace(ns)
-	v2 := []beego.LinkNamespace{}
-	for key, val := range namespaceV2 {
-		v2 = append(v2, beego.NSNamespace("/"+key,
-			beego.NSBefore(FilterUser),
-			beego.NSInclude(val),
-		))
-	}
-	ns = beego.NewNamespace("/v2", v2...)
 	beego.AddNamespace(ns)
 }
