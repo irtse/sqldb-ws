@@ -96,7 +96,6 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 						m[fff.Name] = record[utils.SpecialIDParam] // on rajoute la référence au parent et si on a un parent c'est que tout est en ordre
 						delete(m, utils.SpecialIDParam)
 						s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m, true)
-						break
 					}
 				}
 			}
@@ -283,9 +282,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 					for _, mm := range utils.ToList(record[field.Name]) {
 						s.OneToMany[field.Name] = append(s.OneToMany[field.Name], utils.ToMap(mm))
 					}
-					delete(record, field.Name)
-				}
-				if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.MANYTOMANY.String())) || strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) {
 					delete(record, field.Name)
 				}
 			}
