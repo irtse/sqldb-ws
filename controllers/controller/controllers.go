@@ -2,12 +2,17 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"sqldb-ws/domain"
 	"sqldb-ws/domain/utils"
 	"strings"
+	"sync"
 
 	beego "github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego/v2/server/web/context"
+	"github.com/gorilla/websocket"
 	"github.com/matthewhartstonge/argon2"
 	"github.com/rs/zerolog/log"
 )
@@ -35,6 +40,101 @@ func (t *AbstractController) UnSafeCall(method utils.Method, args ...interface{}
 	t.Call(false, method, args...)
 }
 
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true }, // allow all origins
+}
+
+// user/tableName/row
+var clients = map[string]map[string]map[string]map[*websocket.Conn]bool{}
+var clientsLock = sync.Mutex{}
+
+func (t *AbstractController) WebSocketController(w *context.Response, r *http.Request, params utils.Params, user string) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		t.Response(utils.Results{}, err, "", "")
+		return
+	}
+	defer conn.Close()
+	ok := false
+	var tableName, rowName string = "", ""
+	if tableName, ok = params.Get(utils.RootRowsParam); !ok {
+		t.Response(utils.Results{}, errors.New("can't found table name"), "", "")
+		return
+	}
+	if rowName, ok = params.Get(utils.RootRowsParam); !ok {
+		t.Response(utils.Results{}, errors.New("can't found row name"), "", "")
+		return
+	}
+	// register client
+	clientsLock.Lock()
+	if clients[user] == nil {
+		clients[user] = map[string]map[string]map[*websocket.Conn]bool{}
+	}
+	if clients[user][tableName] == nil {
+		clients[user][tableName] = map[string]map[*websocket.Conn]bool{}
+	}
+	if clients[user][tableName][rowName] == nil {
+		clients[user][tableName][rowName] = map[*websocket.Conn]bool{}
+	}
+	clients[user][tableName][rowName][conn] = true
+	clientsLock.Unlock()
+	for {
+		// Read message from client
+		msgType, msg, err := conn.ReadMessage()
+		if err != nil {
+			t.Response(utils.Results{}, err, "", "")
+			break
+		}
+		// Echo the message back
+		if err := conn.WriteMessage(msgType, msg); err != nil {
+			t.Response(utils.Results{}, err, "", "")
+			break
+		}
+	}
+	clientsLock.Lock()
+	delete(clients[user][tableName][rowName], conn)
+	clientsLock.Unlock()
+	t.Response(utils.Results{}, nil, "", "")
+}
+
+func (t *AbstractController) WebsocketTrigger(user string, params utils.Params, domain utils.DomainITF, args ...interface{}) {
+	// serialize the map to JSON
+	resp, err := domain.Call(params, utils.Record{}, utils.SELECT, args...)
+	if err != nil {
+		fmt.Println("Callerror:", err)
+		return
+	}
+	ok := false
+	var tableName, rowName string = "", ""
+	if tableName, ok = params.Get(utils.RootRowsParam); !ok {
+		t.Response(utils.Results{}, errors.New("can't found table name"), "", "")
+		return
+	}
+	if rowName, ok = params.Get(utils.RootRowsParam); !ok {
+		t.Response(utils.Results{}, errors.New("can't found row name"), "", "")
+		return
+	}
+	msgBytes, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Println("JSON marshal error:", err)
+		return
+	}
+
+	clientsLock.Lock()
+	defer clientsLock.Unlock()
+	if clients[user] == nil || clients[user][tableName] == nil || clients[user][tableName][rowName] == nil {
+		return
+	}
+
+	for conn := range clients[user][tableName][rowName] {
+		if err := conn.WriteMessage(websocket.TextMessage, msgBytes); err != nil {
+			fmt.Println("Write error, removing client:", err)
+			conn.Close()
+			delete(clients[user][tableName][rowName], conn)
+		}
+	}
+}
+
 // Call function invoke Domain service and ask for the proper function by function name & method
 func (t *AbstractController) Call(auth bool, method utils.Method, args ...interface{}) {
 	superAdmin := false
@@ -48,7 +148,9 @@ func (t *AbstractController) Call(auth bool, method utils.Method, args ...interf
 	} // then proceed to exec by calling domain
 	d := domain.Domain(superAdmin, user, nil)
 	p, asLabel := t.Params()
-	if method == utils.IMPORT {
+	if method == utils.WEBSOCKET {
+		t.WebSocketController(t.Ctx.ResponseWriter, t.Ctx.Request, utils.NewParams(p), user)
+	} else if method == utils.IMPORT {
 		file, header, err := t.Ctx.Request.FormFile("file")
 		if err != nil {
 			t.Response(utils.Results{}, err, "", d.GetUniqueRedirection())
@@ -61,6 +163,9 @@ func (t *AbstractController) Call(auth bool, method utils.Method, args ...interf
 		var error error
 		for _, file := range files {
 			response, err := d.Call(utils.NewParams(p), file, method, args...)
+			if method != utils.SELECT {
+				t.WebsocketTrigger(user, utils.NewParams(p), d, args...)
+			}
 			if err != nil {
 				error = fmt.Errorf("%v|%v", error, err)
 			} else {

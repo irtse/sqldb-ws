@@ -5,17 +5,18 @@ import "strings"
 type Method int64
 
 const (
-	UNKNOWN Method = 0
-	SELECT  Method = 1
-	CREATE  Method = 2
-	UPDATE  Method = 3
-	DELETE  Method = 4
-	COUNT   Method = 5
-	AVG     Method = 6
-	MIN     Method = 7
-	MAX     Method = 8
-	SUM     Method = 9
-	IMPORT  Method = 10
+	UNKNOWN   Method = 0
+	SELECT    Method = 1
+	CREATE    Method = 2
+	UPDATE    Method = 3
+	DELETE    Method = 4
+	COUNT     Method = 5
+	AVG       Method = 6
+	MIN       Method = 7
+	MAX       Method = 8
+	SUM       Method = 9
+	IMPORT    Method = 10
+	WEBSOCKET Method = 11
 )
 
 func Found(name string) Method {

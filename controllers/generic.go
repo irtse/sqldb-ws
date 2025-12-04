@@ -8,7 +8,10 @@ import (
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type MainController struct{ controller.AbstractController }
@@ -128,10 +131,19 @@ func (t *GenericController) Math() {
 	t.SafeCall(utils.Found(function))
 }
 
-// @Title Import
-// @Description import Datas
-// @Param	table			path 	string	true		"Import in columnName"
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true }, // allow all origins
+}
+
+var clients = make(map[*websocket.Conn]bool)
+var clientsLock = sync.Mutex{}
+
+// @Title WebSocket
+// @Description webSocketGet
+// @Param	table			path 	string	true		"Name of the table"
 // @Success 200 {string} success !
 // @Failure 403 no table
-// @router /:table/import [post]
-func (t *GenericController) Import() { t.SafeCall(utils.IMPORT) }
+// @router /:table/websocket [get]
+func (t *GenericController) WebSocket() {
+	t.SafeCall(utils.WEBSOCKET)
+}

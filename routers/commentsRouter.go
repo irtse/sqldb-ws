@@ -99,9 +99,9 @@ func init() {
 
     beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"],
         beego.ControllerComments{
-            Method: "Import",
-            Router: `/:table/import`,
-            AllowHTTPMethods: []string{"post"},
+            Method: "WebSocket",
+            Router: `/:table/websocket`,
+            AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
