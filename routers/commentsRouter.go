@@ -100,7 +100,7 @@ func init() {
     beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"] = append(beego.GlobalControllerRouter["sqldb-ws/controllers:GenericController"],
         beego.ControllerComments{
             Method: "WebSocket",
-            Router: `/:table/websocket`,
+            Router: `/websocket/:table/`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

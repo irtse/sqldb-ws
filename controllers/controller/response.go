@@ -13,12 +13,14 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func (t *AbstractController) Respond(params map[string]string, asLabel map[string]string, method utils.Method, domain utils.DomainITF, args ...interface{}) {
+func (t *AbstractController) Respond(user string, params map[string]string, asLabel map[string]string, method utils.Method, domain utils.DomainITF, args ...interface{}) {
 	if _, ok := params[utils.RootExport]; ok {
 		params[utils.RootRawView] = "disable"
 	}
 	response, err := domain.Call(utils.NewParams(params), t.Body(true), method, args...)
-
+	if method != utils.SELECT {
+		t.WebsocketTrigger(user, utils.NewParams(params), domain, args...)
+	}
 	if format, ok := params[utils.RootExport]; ok {
 		var cols, cmd, cmdCols string = "", "", ""
 		if pp, ok := params[utils.RootColumnsParam]; ok {

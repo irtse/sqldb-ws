@@ -144,7 +144,7 @@ var clientsLock = sync.Mutex{}
 // @Param	table			path 	string	true		"Name of the table"
 // @Success 200 {string} success !
 // @Failure 403 no table
-// @router /:table/websocket [get]
+// @router /websocket/:table/ [get]
 func (t *GenericController) WebSocket() {
 	fmt.Println("WebSocket")
 	t.SafeCall(utils.WEBSOCKET)

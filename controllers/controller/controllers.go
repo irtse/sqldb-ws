@@ -164,15 +164,12 @@ func (t *AbstractController) Call(auth bool, method utils.Method, args ...interf
 			return
 		}
 		d.SetFile(file, header)
-		t.Respond(p, asLabel, method, d, args...)
+		t.Respond(user, p, asLabel, method, d, args...)
 	} else if files, err := t.FormFile(asLabel); err == nil && len(files) > 0 {
 		resp := utils.Results{}
 		var error error
 		for _, file := range files {
 			response, err := d.Call(utils.NewParams(p), file, method, args...)
-			if method != utils.SELECT {
-				t.WebsocketTrigger(user, utils.NewParams(p), d, args...)
-			}
 			if err != nil {
 				error = fmt.Errorf("%v|%v", error, err)
 			} else {
@@ -181,7 +178,7 @@ func (t *AbstractController) Call(auth bool, method utils.Method, args ...interf
 		}
 		t.Response(resp, error, "", d.GetUniqueRedirection()) // send back response
 	} else {
-		t.Respond(p, asLabel, method, d, args...)
+		t.Respond(user, p, asLabel, method, d, args...)
 	}
 }
 
