@@ -49,6 +49,7 @@ var clients = map[string]map[string]map[string]map[*websocket.Conn]bool{}
 var clientsLock = sync.Mutex{}
 
 func (t *AbstractController) WebSocketController(w *context.Response, r *http.Request, params utils.Params, user string) {
+	fmt.Println("Upgrade")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println(err)
