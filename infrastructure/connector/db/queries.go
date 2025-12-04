@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"runtime/debug"
 	"strconv"
 	"strings"
 )
@@ -38,9 +37,6 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 	if strings.Contains(q, "main.") {
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
-	}
-	if len(strings.Split(q, "WHERE ")) > 2 && strings.Split(q, "WHERE ")[1] == "" {
-		return []map[string]interface{}{}, errors.New("no restriction")
 	}
 	return db.QueryAssociativeArray(q)
 }
@@ -275,7 +271,6 @@ func (db *Database) QueryAssociativeArray(query string) ([]map[string]interface{
 	}
 	rows, err := db.Conn.Query(query)
 	if err != nil {
-		debug.PrintStack()
 		fmt.Println(query, err)
 		return nil, err
 	}
