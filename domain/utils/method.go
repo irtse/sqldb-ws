@@ -39,6 +39,8 @@ func Found(name string) Method {
 		return MAX
 	case "sum":
 		return SUM
+	case "websocket":
+		return WEBSOCKET
 	}
 	return SELECT
 }
@@ -62,6 +64,8 @@ func (s Method) String() string {
 		return "max"
 	case SUM:
 		return "sum"
+	case WEBSOCKET:
+		return "websocket"
 	}
 	return "unknown"
 }
@@ -94,6 +98,8 @@ func (s Method) Method() string {
 		return "max"
 	case SUM:
 		return "sum"
+	case WEBSOCKET:
+		return "websocket"
 	}
 	return "unknown"
 }
@@ -118,6 +124,8 @@ func (s Method) Calling() string {
 		return "Math"
 	case SUM:
 		return "Math"
+	case WEBSOCKET:
+		return "Get"
 	}
 	return "unknown"
 }
