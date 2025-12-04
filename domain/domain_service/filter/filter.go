@@ -77,7 +77,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		SQLview = append(SQLview, "is_draft")
 	}
 	if state != "" {
-		SQLrestriction = f.LifeCycleRestriction(tableName, SQLrestriction, state)
+		SQLrestriction = f.LifeCycleRestriction(tableName, schema.ID, SQLrestriction, state)
 	}
 	if !(f.Domain.IsSuperAdmin() && !f.Domain.IsOwn(false, true, f.Domain.GetMethod())) {
 		if id, _ := f.Domain.GetParams().Get(utils.SpecialIDParam); id != "" && f.Domain.GetTable() != ds.DBView.Name {
