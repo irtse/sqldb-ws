@@ -137,7 +137,7 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 			for _, r := range results {
 				if sch.HasField(ds.SchemaDBField) && sch.HasField(ds.DestTableDBField) {
 					if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
-						ds.SchemaDBField:    sch.ID,
+						ds.SchemaDBField:    originSCH.ID,
 						ds.DestTableDBField: utils.GetInt(r, utils.SpecialIDParam),
 					}, false); err == nil {
 						for _, rrr := range res {
