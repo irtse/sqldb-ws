@@ -51,6 +51,7 @@ var clientsLock = sync.Mutex{}
 func (t *AbstractController) WebSocketController(w *context.Response, r *http.Request, params utils.Params, user string) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		fmt.Println(err)
 		t.Response(utils.Results{}, err, "", "")
 		return
 	}
@@ -82,11 +83,13 @@ func (t *AbstractController) WebSocketController(w *context.Response, r *http.Re
 		// Read message from client
 		msgType, msg, err := conn.ReadMessage()
 		if err != nil {
+			fmt.Println(err)
 			t.Response(utils.Results{}, err, "", "")
 			break
 		}
 		// Echo the message back
 		if err := conn.WriteMessage(msgType, msg); err != nil {
+			fmt.Println(err)
 			t.Response(utils.Results{}, err, "", "")
 			break
 		}
@@ -115,7 +118,7 @@ func (t *AbstractController) WebsocketTrigger(user string, params utils.Params, 
 		return
 	}
 	msgBytes, err := json.Marshal(map[string]interface{}{
-		"data":  resp,
+		"data":  len(resp),
 		"event": domain.GetMethod().String(),
 	})
 	if err != nil {
