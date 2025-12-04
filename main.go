@@ -142,7 +142,7 @@ func GetResponse() {
 					data["update_date"] = time.Now().UTC()
 					d.CreateSuperCall(utils.AllParams(ds.DBEmailResponse.Name).Enrich(map[string]interface{}{
 						"code": code,
-					}).RootRaw(), data)
+					}).RootRaw(), data, false)
 				}
 			}
 		}()

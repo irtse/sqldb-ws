@@ -128,7 +128,7 @@ func (s *RequestService) SpecializedUpdateRow(results []map[string]interface{}, 
 			if err == nil && len(res) > 0 {
 				for _, task := range res {
 					task := SetClosureStatus(task)
-					s.Domain.UpdateSuperCall(utils.AllParams(ds.DBTask.Name).RootRaw(), task)
+					s.Domain.UpdateSuperCall(utils.AllParams(ds.DBTask.Name).RootRaw(), task, true)
 				}
 			}
 		}

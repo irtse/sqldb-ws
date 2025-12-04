@@ -105,9 +105,9 @@ func (s *SchemaFields) Write(r map[string]interface{}, record map[string]interfa
 				sm.TYPEKEY: r[sm.TYPEKEY],
 				sm.NAMEKEY: r[sm.NAMEKEY],
 			})
-			s.Domain.UpdateSuperCall(utils.GetColumnTargetParameters(schema.Name, r[sm.NAMEKEY]).RootRaw(), newRecord)
+			s.Domain.UpdateSuperCall(utils.GetColumnTargetParameters(schema.Name, r[sm.NAMEKEY]).RootRaw(), newRecord, false)
 		} else {
-			s.Domain.CreateSuperCall(utils.GetColumnTargetParameters(schema.Name, r[sm.NAMEKEY]).RootRaw(), record)
+			s.Domain.CreateSuperCall(utils.GetColumnTargetParameters(schema.Name, r[sm.NAMEKEY]).RootRaw(), record, false)
 		}
 	}
 	schema = schema.SetField(r)
@@ -118,11 +118,11 @@ func (s *SchemaFields) SpecializedDeleteRow(results []map[string]interface{}, ta
 	for _, record := range results { // delete all columns
 		schema, err := sch.GetSchemaByID(utils.ToInt64(record[ds.SchemaDBField]))
 		if err != nil { // schema not found
-			s.Domain.DeleteSuperCall(utils.GetColumnTargetParameters(schema.Name, record[sm.NAMEKEY]).RootRaw())
+			s.Domain.DeleteSuperCall(utils.GetColumnTargetParameters(schema.Name, record[sm.NAMEKEY]).RootRaw(), false)
 			s.Domain.DeleteSuperCall(
 				utils.AllParams(ds.DBPermission.Name).Enrich(map[string]interface{}{
 					sm.NAMEKEY: "%" + schema.Name + ":" + utils.ToString(record[sm.NAMEKEY]) + "%",
-				}).RootRaw(),
+				}).RootRaw(), false,
 			)
 			sch.DeleteSchemaField(schema.Name, utils.ToString(record[sm.NAMEKEY]))
 		}

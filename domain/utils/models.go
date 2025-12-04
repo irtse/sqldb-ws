@@ -28,6 +28,11 @@ type AbstractDomain struct {
 	IsDraftToPublished bool
 	Mode               string
 	Record             Record
+	Trace              bool
+}
+
+func (d *AbstractDomain) SetTrace(trace bool) {
+	d.Trace = trace
 }
 
 func (d *AbstractDomain) GetRecord() Record {

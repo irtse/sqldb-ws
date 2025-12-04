@@ -58,7 +58,7 @@ func Load(domainInstance utils.DomainITF) {
 func InitializeTables(domainInstance utils.DomainITF, bar *progressbar.ProgressBar) {
 	for _, table := range ds.NOAUTOLOADROOTTABLES {
 		bar.AddDetail("Creating table " + table.Name)
-		domainInstance.CreateSuperCall(utils.GetTableTargetParameters(table.Name).RootRaw(), table.ToSchemaRecord())
+		domainInstance.CreateSuperCall(utils.GetTableTargetParameters(table.Name).RootRaw(), table.ToSchemaRecord(), false)
 		bar.Add(1)
 	}
 }
@@ -101,7 +101,7 @@ func InitializeRootTables(domainInstance utils.DomainITF, demoTable []sm.SchemaM
 
 func CreateRootTable(domainInstance utils.DomainITF, record utils.Record) bool {
 	params := utils.AllParams(ds.DBSchema.Name).RootRaw()
-	res, err := domainInstance.CreateSuperCall(params, record)
+	res, err := domainInstance.CreateSuperCall(params, record, false)
 	return !(err != nil || len(res) == 0)
 }
 
@@ -126,14 +126,14 @@ func CreateWorkflowView(domainInstance utils.DomainITF, schema sm.SchemaModel, b
 		"readonly":       false,
 		ds.SchemaDBField: schema.ID,
 	}
-	domainInstance.CreateSuperCall(params.RootRaw(), newWorkflow)
+	domainInstance.CreateSuperCall(params.RootRaw(), newWorkflow, false)
 }
 
 func CreateRootView(domainInstance utils.DomainITF, bar *progressbar.ProgressBar) {
 	for _, view := range ds.DBRootViews {
 		bar.AddDetail("Creating Root View " + utils.ToString(utils.ToMap(view)[sm.NAMEKEY]))
 		params := utils.AllParams(ds.DBView.Name).RootRaw()
-		r, err := domainInstance.CreateSuperCall(params, view)
+		r, err := domainInstance.CreateSuperCall(params, view, false)
 		if err != nil || len(r) == 0 {
 			bar.Add(1)
 			continue
@@ -154,7 +154,7 @@ func CreateRootView(domainInstance utils.DomainITF, bar *progressbar.ProgressBar
 					sm.NAMEKEY:       utils.ToString(mFilter[sm.NAMEKEY]),
 					"is_view":        attr == "view_fields",
 					ds.SchemaDBField: sch.ID,
-				}); err == nil && len(res) > 0 {
+				}, false); err == nil && len(res) > 0 {
 					if fields := mFilter[attr]; fields != nil {
 						f := utils.Record{ds.FilterDBField: res[0][utils.SpecialIDParam]}
 						for _, field := range utils.ToList(fields) {
@@ -168,7 +168,7 @@ func CreateRootView(domainInstance utils.DomainITF, bar *progressbar.ProgressBar
 								f[k] = v
 							}
 						}
-						domainInstance.CreateSuperCall(utils.AllParams(ds.DBFilterField.Name).RootRaw(), f)
+						domainInstance.CreateSuperCall(utils.AllParams(ds.DBFilterField.Name).RootRaw(), f, false)
 					}
 					realView[ds.FilterDBField] = res[0][utils.SpecialIDParam]
 				}
@@ -177,7 +177,7 @@ func CreateRootView(domainInstance utils.DomainITF, bar *progressbar.ProgressBar
 		delete(realView, "name")
 		domainInstance.UpdateSuperCall(utils.AllParams(ds.DBView.Name).Enrich(map[string]interface{}{
 			"id": realView["id"],
-		}).RootRaw(), realView)
+		}).RootRaw(), realView, false)
 		bar.Add(1)
 	}
 }
@@ -190,7 +190,7 @@ func CreateView(domainInstance utils.DomainITF, schema sm.SchemaModel, bar *prog
 		"description":    fmt.Sprintf("new %s workflow", ds.DBView.Name),
 		ds.SchemaDBField: schema.ID,
 	}
-	domainInstance.CreateSuperCall(params, newView)
+	domainInstance.CreateSuperCall(params, newView, false)
 }
 
 func CreateSuperAdmin(domainInstance utils.DomainITF, bar *progressbar.ProgressBar) {
@@ -200,7 +200,7 @@ func CreateSuperAdmin(domainInstance utils.DomainITF, bar *progressbar.ProgressB
 		"email":       os.Getenv("SUPERADMIN_EMAIL"),
 		"super_admin": true,
 		"password":    os.Getenv("SUPERADMIN_PASSWORD"),
-	})
+	}, false)
 	bar.AddDetail("")
 	bar.Add(1)
 }

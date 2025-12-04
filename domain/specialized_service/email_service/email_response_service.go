@@ -65,7 +65,7 @@ func (s *EmailResponseService) Write(record map[string]interface{}, tableName st
 									rec["state"] = "refused"
 								}
 								rec = task_service.SetClosureStatus(rec)
-								s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, rec[utils.SpecialIDParam]).RootRaw(), rec)
+								s.Domain.UpdateSuperCall(utils.GetRowTargetParameters(ds.DBTask.Name, rec[utils.SpecialIDParam]).RootRaw(), rec, true)
 							}
 						}
 					}

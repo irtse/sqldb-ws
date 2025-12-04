@@ -13,7 +13,6 @@ import (
 	ds "sqldb-ws/domain/schema/database_resources"
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
-	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
 )
 
@@ -30,16 +29,6 @@ func (v *ViewConvertor) TransformToView(results utils.Results, tableName string,
 	schema, err := scheme.GetSchema(tableName)
 	if err != nil {
 		return utils.Results{}
-	}
-	if ids, ok := params.Get(utils.SpecialIDParam); ok || v.Domain.GetMethod() != utils.SELECT {
-		if len(ids) == 0 {
-			for _, r := range results {
-				ids += r.GetString(utils.SpecialIDParam) + ","
-			}
-			ids = connector.RemoveLastChar(ids)
-		}
-		history.NewDataAccess(schema.GetID(), strings.Split(ids, ","), utils.Record{}, v.Domain)
-
 	}
 	if v.Domain.IsShallowed() {
 		return v.transformShallowedView(results, tableName, isWorkflow)

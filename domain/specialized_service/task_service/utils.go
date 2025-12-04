@@ -202,7 +202,7 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 		ds.SchemaDBField:    task[ds.SchemaDBField],
 		ds.DestTableDBField: task[ds.DestTableDBField],
 		ds.UserDBField:      utils.GetInt(task, ds.UserDBField),
-	})
+	}, true)
 }
 
 func CreateDelegated(record utils.Record, request utils.Record, id int64, initialRec map[string]interface{}, domain utils.DomainITF) {

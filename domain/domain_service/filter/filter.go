@@ -211,7 +211,7 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 			restr = append(restr, "is_draft=false")
 		}
 	}
-	if slices.Contains(ds.AVOIDUSERPERMISSIONEXCEPTION, schema.Name) {
+	if slices.Contains(ds.AVOIDUSERPERMISSIONEXCEPTION, schema.Name) && utils.SELECT == s.Domain.GetMethod() {
 		return restr
 	}
 

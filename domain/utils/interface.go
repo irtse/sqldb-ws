@@ -18,13 +18,14 @@ type DomainITF interface {
 	// Main Procedure of services at Domain level.
 	GetIsDraftToPublished() bool
 	GetRecord() Record
+	SetTrace(trace bool)
 	GetSpecialized(override string) infrastructure.InfraSpecializedServiceItf
 	AddDetectFileToSearchIn(fileField string, search string)
 	DetectFileToSearchIn() map[string]string
 	SuperCall(params Params, record Record, method Method, isOwn bool, args ...interface{}) (Results, error)
-	CreateSuperCall(params Params, record Record, args ...interface{}) (Results, error)
-	UpdateSuperCall(params Params, rec Record, args ...interface{}) (Results, error)
-	DeleteSuperCall(params Params, args ...interface{}) (Results, error)
+	CreateSuperCall(params Params, record Record, trace bool, args ...interface{}) (Results, error)
+	UpdateSuperCall(params Params, rec Record, trace bool, args ...interface{}) (Results, error)
+	DeleteSuperCall(params Params, trace bool, args ...interface{}) (Results, error)
 	Call(params Params, rec Record, m Method, args ...interface{}) (Results, error)
 
 	// Main accessor defined by DomainITF interface

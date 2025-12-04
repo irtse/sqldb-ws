@@ -7,12 +7,15 @@ import (
 	"slices"
 
 	"sqldb-ws/domain/domain_service"
+	"sqldb-ws/domain/domain_service/history"
 	permissions "sqldb-ws/domain/domain_service/permission"
+	"sqldb-ws/domain/schema"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	domain "sqldb-ws/domain/specialized_service"
 	"sqldb-ws/domain/utils"
 	conn "sqldb-ws/infrastructure/connector/db"
+	connector "sqldb-ws/infrastructure/connector/db"
 	infrastructure "sqldb-ws/infrastructure/service"
 	"strings"
 
@@ -87,15 +90,18 @@ func (d *SpecializedDomain) SetDb(db *conn.Database) {
 	d.Db = db
 }
 
-func (d *SpecializedDomain) CreateSuperCall(params utils.Params, record utils.Record, args ...interface{}) (utils.Results, error) {
+func (d *SpecializedDomain) CreateSuperCall(params utils.Params, record utils.Record, trace bool, args ...interface{}) (utils.Results, error) {
+	d.Trace = trace
 	return d.SuperCall(params, record, utils.CREATE, false, args...) // how to...
 }
 
-func (d *SpecializedDomain) UpdateSuperCall(params utils.Params, record utils.Record, args ...interface{}) (utils.Results, error) {
+func (d *SpecializedDomain) UpdateSuperCall(params utils.Params, record utils.Record, trace bool, args ...interface{}) (utils.Results, error) {
+	d.Trace = trace
 	return d.SuperCall(params, record, utils.UPDATE, false, args...) // how to...
 }
 
-func (d *SpecializedDomain) DeleteSuperCall(params utils.Params, args ...interface{}) (utils.Results, error) {
+func (d *SpecializedDomain) DeleteSuperCall(params utils.Params, trace bool, args ...interface{}) (utils.Results, error) {
+	d.Trace = trace
 	return d.SuperCall(params, utils.Record{}, utils.DELETE, false, args...) // how to...
 }
 
@@ -235,6 +241,19 @@ func (d *SpecializedDomain) GetRowResults(
 			}
 			AddInCache(d.UserID, tb, meth, cp, res)
 			p, _ = d.Params.Get(utils.RootRawView)
+			if ids, ok := d.Params.Get(utils.SpecialIDParam); ok || d.GetMethod() != utils.SELECT {
+				if len(ids) == 0 {
+					for _, r := range res {
+						ids += r.GetString(utils.SpecialIDParam) + ","
+					}
+					ids = connector.RemoveLastChar(ids)
+				}
+				trace := !d.IsSuperAdmin() || d.Trace
+				if trace {
+					sch, _ := schema.GetSchema(d.TableName)
+					history.NewDataAccess(sch.GetID(), strings.Split(ids, ","), utils.Record{}, d)
+				}
+			}
 			if p != "enable" && err == nil && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
 				res = specializedService.TransformToGenericView(res, d.TableName, d.Params.GetAsArgs(utils.RootDestIDParam)...)
 				d.Redirections = append(d.Redirections, d.GetRedirections(res)...)

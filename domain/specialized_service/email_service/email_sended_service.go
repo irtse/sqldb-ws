@@ -28,7 +28,7 @@ func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{},
 			if res, err := s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSendedUser.Name).RootRaw(), map[string]interface{}{
 				"name":                to,
 				ds.EmailSendedDBField: record[utils.SpecialIDParam],
-			}); err == nil && len(res) > 0 {
+			}, false); err == nil && len(res) > 0 {
 				record["to_email"] = res[0][utils.SpecialIDParam]
 				s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
 					utils.SpecialIDParam: record[utils.SpecialIDParam],
@@ -42,7 +42,7 @@ func (s *EmailSendedService) SpecializedCreateRow(record map[string]interface{},
 					"name":                to,
 					ds.UserDBField:        r[utils.SpecialIDParam],
 					ds.EmailSendedDBField: record[utils.SpecialIDParam],
-				}); err == nil && len(res) > 0 {
+				}, false); err == nil && len(res) > 0 {
 					record["to_email"] = res[0][utils.SpecialIDParam]
 					s.Domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBEmailSended.Name, record, map[string]interface{}{
 						utils.SpecialIDParam: record[utils.SpecialIDParam],
@@ -131,7 +131,7 @@ func (s *EmailSendedService) VerifyDataIntegrity(record map[string]interface{}, 
 			},
 		}
 		if i < len(s.To)-1 {
-			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name), record)
+			s.Domain.CreateSuperCall(utils.AllParams(ds.DBEmailSended.Name), record, false)
 		} else {
 			tos = append(tos, to)
 		}

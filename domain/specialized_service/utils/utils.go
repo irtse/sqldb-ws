@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -96,7 +95,7 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 					for _, m := range om {
 						m[fff.Name] = record[utils.SpecialIDParam] // on rajoute la référence au parent et si on a un parent c'est que tout est en ordre
 						delete(m, utils.SpecialIDParam)
-						s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m)
+						s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m, true)
 						break
 					}
 				}
@@ -126,7 +125,7 @@ func (s *AbstractSpecializedService) SpecializedUpdateRow(res []map[string]inter
 						ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
 						ds.DestTableDBField: rec[utils.SpecialIDParam],
 						ds.SchemaDBField:    sche.ID,
-					})
+					}, true)
 				}
 			}
 		}
@@ -143,7 +142,7 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 						ds.DestTableDBField: utils.GetInt(r, utils.SpecialIDParam),
 					}, false); err == nil {
 						for _, rrr := range res {
-							go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+							go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]), true)
 						}
 					}
 				}
@@ -153,7 +152,7 @@ func (s *AbstractSpecializedService) SpecializedDeleteRow(results []map[string]i
 							f.Name: r[utils.SpecialIDParam],
 						}, false); err == nil {
 							for _, rrr := range res {
-								go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]))
+								go s.Domain.DeleteSuperCall(utils.GetRowTargetParameters(sch.Name, rrr[utils.SpecialIDParam]), true)
 							}
 						}
 					}
@@ -169,7 +168,7 @@ func (s *AbstractSpecializedService) delete(sch *models.SchemaModel, fieldName s
 	}
 	p := utils.AllParams(sch.Name).RootRaw()
 	p.Add(fieldName, id, func(v string) bool { return true })
-	s.Domain.DeleteSuperCall(p)
+	s.Domain.DeleteSuperCall(p, true)
 }
 
 func (t *AbstractSpecializedService) fromITF(val interface{}) interface{} {
@@ -248,7 +247,6 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 							}
 						}
 						if t2 != nil {
-							fmt.Println("before", utils.ToList(record[field.Name]))
 							s.ManyToMany[field.Name] = []map[string]interface{}{}
 							for _, mm := range utils.ToList(record[field.Name]) {
 								newMM := map[string]interface{}{}
