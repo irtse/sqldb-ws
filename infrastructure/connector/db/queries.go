@@ -39,6 +39,9 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
+	if len(strings.Split(q, "WHERE ")) > 2 && strings.Split(q, "WHERE ")[1] == "" {
+		return []map[string]interface{}{}, errors.New("no restriction")
+	}
 	return db.QueryAssociativeArray(q)
 }
 
