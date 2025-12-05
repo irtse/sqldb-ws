@@ -306,7 +306,7 @@ func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, 
 	if state == "all" || tableName == ds.DBView.Name {
 		return SQLrestriction
 	}
-	if strings.Contains(state, "shared by") {
+	if strings.Contains(state, "shared_by") {
 		SQLrestriction = append(SQLrestriction, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!0": d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 				ds.SchemaDBField:           schemaID,
@@ -314,7 +314,7 @@ func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, 
 				"shared_" + ds.UserDBField: d.Domain.GetUserID(),
 			}, false, "COUNT(0)"),
 		}, false))
-	} else if strings.Contains(state, "shared to") {
+	} else if strings.Contains(state, "shared_to") {
 		SQLrestriction = append(SQLrestriction, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!0": d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 				ds.SchemaDBField:    schemaID,
