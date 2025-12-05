@@ -19,9 +19,6 @@ func (db *Database) DeleteQueryWithRestriction(name string, restrictions map[str
 		q = db.BuildDeleteQueryWithRestriction(name, restrictions, isOr)
 	}
 	_, err := db.Conn.Exec(q)
-	if strings.Contains(name, "article") {
-		fmt.Println(q)
-	}
 	if err != nil {
 		return nil
 	}
@@ -37,6 +34,9 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 	if strings.Contains(q, "main.") {
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
+	}
+	if strings.Contains(name, "article") {
+		fmt.Println(q)
 	}
 	return db.QueryAssociativeArray(q)
 }
