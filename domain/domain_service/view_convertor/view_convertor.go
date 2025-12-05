@@ -238,8 +238,8 @@ func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel
 	}
 	vals = d.GetFieldsFill(schema, vals)
 	channel <- sm.ViewItemModel{
-		SharedTo:      d.Shared(schema.ID, utils.GetString(record, utils.SpecialIDParam), false),
-		SharedBy:      d.Shared(schema.ID, utils.GetString(record, utils.SpecialIDParam), true),
+		SharedTo:      d.Shared(*schema, utils.GetString(record, utils.SpecialIDParam), false),
+		SharedBy:      d.Shared(*schema, utils.GetString(record, utils.SpecialIDParam), true),
 		Values:        vals,
 		DataPaths:     datapath,
 		ValueShallow:  shallowVals,

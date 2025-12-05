@@ -33,21 +33,29 @@ func (v *ViewConvertor) GetShortcuts(schemaID string, actions []string) map[stri
 	return shortcuts
 }
 
-func (d *ViewConvertor) Shared(schemaID string, id string, from bool) []string {
+func (d *ViewConvertor) Shared(schema sm.SchemaModel, id string, from bool) []string {
 	k := "shared_" + ds.UserDBField
 	k2 := ds.UserDBField
 	if from {
 		k = ds.UserDBField
 		k2 = "shared_" + ds.UserDBField
 	}
-	users := []string{}
-	if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+	m := map[string]interface{}{
 		utils.SpecialIDParam: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 			k2:                  d.Domain.GetUserID(),
-			ds.SchemaDBField:    schemaID,
+			ds.SchemaDBField:    schema.ID,
 			ds.DestTableDBField: id,
 		}, false, k),
-	}, false); err == nil {
+	}
+	if schema.HasField(ds.DestTableDBField) && schema.HasField(ds.SchemaDBField) {
+		m[utils.SpecialIDParam+"_1"] = d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+			k2:                  d.Domain.GetUserID(),
+			ds.SchemaDBField:    "main." + ds.SchemaDBField,
+			ds.DestTableDBField: "main." + ds.DestTableDBField,
+		}, false, k)
+	}
+	users := []string{}
+	if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, m, true); err == nil {
 		for _, r := range res {
 			users = append(users, utils.GetString(r, "name"))
 		}
