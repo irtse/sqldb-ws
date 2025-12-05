@@ -305,7 +305,7 @@ func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, 
 	if state == "all" || tableName == ds.DBView.Name {
 		return SQLrestriction
 	}
-	if state == "shared by" {
+	if strings.Contains(state, "shared by") {
 		SQLrestriction = append(SQLrestriction, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!0": d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 				ds.SchemaDBField:           schemaID,
@@ -313,7 +313,7 @@ func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, 
 				"shared_" + ds.UserDBField: d.Domain.GetUserID(),
 			}, false, "COUNT(0)"),
 		}, false))
-	} else if state == "shared to" {
+	} else if strings.Contains(state, "shared to") {
 		SQLrestriction = append(SQLrestriction, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!0": d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 				ds.SchemaDBField:    schemaID,
@@ -321,7 +321,8 @@ func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, 
 				ds.UserDBField:      d.Domain.GetUserID(),
 			}, false, "COUNT(0)"),
 		}, false))
-	} else if state == "draft" {
+	}
+	if strings.Contains(state, "draft") {
 		for _, restr := range SQLrestriction {
 			restr = strings.ReplaceAll(restr, "is_draft=false OR", "")
 			restr = strings.ReplaceAll(restr, "is_draft=false AND", "")
@@ -331,7 +332,7 @@ func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, 
 		SQLrestriction = append(SQLrestriction, "is_draft=true")
 	} else {
 		k := utils.SpecialIDParam
-		if state == "new" {
+		if strings.Contains(state, "new") {
 			k = "!" + k
 		}
 		SQLrestriction = append(SQLrestriction, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
