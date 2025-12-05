@@ -302,7 +302,7 @@ func (s *FilterService) ProcessViewAndOrder(viewfilterID string, schemaID string
 }
 
 func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, SQLrestriction []string, state string) []string {
-	fmt.Println("TEST", state)
+	fmt.Println("TEST", state, tableName)
 	if state == "all" || tableName == ds.DBView.Name {
 		return SQLrestriction
 	}
