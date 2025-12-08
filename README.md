@@ -62,5 +62,7 @@ Super Admin DB Default
 
 Grafana wait for first conn.
 
+# GENERATE NEW ROUTES ON DEV MODE
+
 bee generate routers
 bee run -gendoc=true -downdoc=true

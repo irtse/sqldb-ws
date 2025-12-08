@@ -13,8 +13,8 @@ import (
 var IsMaintenance = false
 
 func SetToken(superAdmin bool, user string, token interface{}) (utils.Results, error) {
-	return Domain(superAdmin, user, nil).Call( // replace token by a nil
-		utils.AllParams(ds.DBUser.Name).RootRaw(), utils.Record{"token": token}, utils.UPDATE, GetQueryFilter(user))
+	return Domain(superAdmin, user, nil).UpdateSuperCall( // replace token by a nil
+		utils.AllParams(ds.DBUser.Name).RootRaw(), utils.Record{"token": token}, false, GetQueryFilter(user))
 }
 
 func IsLogged(superAdmin bool, user string, token string) (utils.Results, error) {
