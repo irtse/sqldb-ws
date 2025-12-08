@@ -106,7 +106,7 @@ func (t *Token) Create(user_id string, superAdmin bool) (string, error) {
 }
 
 func (t *Token) Verify(tokenStr string) (*jwt.Token, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return secret, nil
 	})
 	if err != nil {
@@ -115,6 +115,5 @@ func (t *Token) Verify(tokenStr string) (*jwt.Token, error) {
 	if !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
-	tokenStr, err = token.SignedString(secret)
 	return token, err
 }
