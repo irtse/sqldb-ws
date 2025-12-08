@@ -96,7 +96,7 @@ func (t *Token) Create(user_id string, superAdmin bool) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		SESSIONS_KEY: user_id,
 		ADMIN_KEY:    superAdmin,
-		"exp":        time.Now().Add(time.Hour * 2).Unix(),
+		"exp":        time.Now().Add(time.Hour * 24).Unix(),
 	})
 	tokenStr, err := token.SignedString(secret)
 	if err != nil {
@@ -106,18 +106,15 @@ func (t *Token) Create(user_id string, superAdmin bool) (string, error) {
 }
 
 func (t *Token) Verify(tokenStr string) (*jwt.Token, error) {
-	claims := &jwt.RegisteredClaims{}
-
-	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return secret, nil
 	})
 	if err != nil {
-		return nil, err // includes expiry errors
+		return nil, err
 	}
-
 	if !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
-
-	return token, nil
+	tokenStr, err = token.SignedString(secret)
+	return token, err
 }
