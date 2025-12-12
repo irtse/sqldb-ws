@@ -575,18 +575,17 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 				continue
 			}
 			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
-				fmt.Println(subTable.Name, subField.Name, sudId)
 				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 					subField.Name: sudId,
 				}, false); err == nil {
 					for _, ff := range sch.Fields {
-						if ff.GetLink() == sch.GetID() {
+						if ff.GetLink() == subTable.GetID() {
 							subField = ff
 						}
 					}
 					for _, r := range res {
+						fmt.Println("T", subTable.Name, subField.Name, utils.GetString(r, utils.SpecialIDParam), manyVals)
 						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, subField, utils.GetString(r, utils.SpecialIDParam))
-						fmt.Println(subTable.Name, subField.Name, utils.GetString(r, utils.SpecialIDParam), manyVals)
 					}
 				}
 			}
