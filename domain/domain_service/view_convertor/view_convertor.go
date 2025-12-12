@@ -68,7 +68,6 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	}
 	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
 	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
-	fmt.Println("ACTIONS", view.Actions, schema.Name, len(results))
 	if !readOnly && !slices.Contains(view.Actions, "put") {
 		if len(results) == 1 {
 			if res, err := v.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
@@ -554,6 +553,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		if !subTable.HasField(subField.Name) {
 			return manyVals
 		}
+		fmt.Println("ERR, ", subTable.Name, subField.Name, sudId)
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 			subField.Name: sudId,
 		}, false); err == nil {
@@ -595,6 +595,7 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 		l, _ := scheme.GetSchemaByID(field.GetLink())
 		for _, f := range l.Fields {
 			if strings.Contains(strings.ToUpper(field.Type), strings.ToUpper(sm.ONETOMANY.String())) {
+				fmt.Println("MANY", field.Name, field.Type)
 				if f.GetLink() == schema.GetID() {
 					manyPathVals[field.Name] = utils.BuildPath(
 						link, utils.ReservedParam,
