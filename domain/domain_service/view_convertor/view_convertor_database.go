@@ -33,7 +33,7 @@ func (v *ViewConvertor) GetShortcuts(schemaID string, actions []string) map[stri
 	return shortcuts
 }
 
-func (d *ViewConvertor) Shared(schema sm.SchemaModel, id string, from bool) []string {
+func (d *ViewConvertor) Shared(schema sm.SchemaModel, id string, from bool, record utils.Record) []string {
 	k := "shared_" + ds.UserDBField
 	k2 := ds.UserDBField
 	if from {
@@ -50,8 +50,8 @@ func (d *ViewConvertor) Shared(schema sm.SchemaModel, id string, from bool) []st
 	if schema.HasField(ds.DestTableDBField) && schema.HasField(ds.SchemaDBField) {
 		m[utils.SpecialIDParam+"_1"] = d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
 			k2:                  d.Domain.GetUserID(),
-			ds.SchemaDBField:    "main." + ds.SchemaDBField,
-			ds.DestTableDBField: "main." + ds.DestTableDBField,
+			ds.SchemaDBField:    record[ds.SchemaDBField],
+			ds.DestTableDBField: record[ds.DestTableDBField],
 		}, false, k)
 	}
 	users := []string{}
