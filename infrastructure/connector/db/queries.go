@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"strconv"
 	"strings"
 )
@@ -269,6 +270,7 @@ func (db *Database) QueryAssociativeArray(query string) ([]map[string]interface{
 	rows, err := db.Conn.Query(query)
 	if err != nil {
 		fmt.Println(query, err)
+		fmt.Println(string(debug.Stack()))
 		return nil, err
 	}
 	defer rows.Close()
