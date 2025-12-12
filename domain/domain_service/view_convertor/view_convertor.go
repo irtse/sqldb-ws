@@ -96,6 +96,9 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 			utils.ToMap(sch)["active"] = true
 		}
 	}
+	if len(view.Actions) == 0 {
+		view.Readonly = true
+	}
 	if view.Readonly { // if the view is readonly, we remove the actions
 		view.Actions = []string{"get"}
 		view.Consents = []map[string]interface{}{}
