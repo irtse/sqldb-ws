@@ -72,6 +72,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
+	fmt.Println("SHC", schemas)
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
