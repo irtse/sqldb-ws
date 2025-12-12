@@ -69,7 +69,18 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
 	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
 	if !readOnly && !slices.Contains(view.Actions, "put") {
-		view.Actions = append(view.Actions, "put")
+		
+		if len(results) == 1 {
+			if res, err := v.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
+				ds.DestTableDBField: res[0][utils.SpecialIDParam],
+				ds.SchemaDBField: schema.ID,
+				"write": true,
+			}, false); err == nil && len(res) == 0 {
+				view.Actions = append(view.Actions, "put")
+			}
+		} else {
+			view.Actions = append(view.Actions, "put")
+		}
 	}
 	idParamsOk := len(v.Domain.GetParams().GetAsArgs(utils.SpecialSubIDParam)) > 0
 	if idParamsOk && slices.Contains(ds.PUPERMISSIONEXCEPTION, schema.Name) {
