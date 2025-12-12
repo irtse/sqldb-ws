@@ -580,7 +580,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 						}
 					}
 					for _, r := range res {
-						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, f, utils.GetString(r, utils.SpecialIDParam))
+						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, subField, utils.GetString(r, utils.SpecialIDParam))
 						fmt.Println(subTable.Name, subField.Name, utils.GetString(r, utils.SpecialIDParam), manyVals)
 					}
 				}

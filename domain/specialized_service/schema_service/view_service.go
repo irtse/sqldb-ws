@@ -62,7 +62,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	params := s.Domain.GetParams().Copy()
 	schemas := []*models.SchemaModel{}
 	if len(results) == 1 && !utils.GetBool(results[0], "is_empty") && !s.Domain.IsShallowed() {
-		fmt.Println("RETRIEVE SCHEMES")
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBViewSchema.Name, map[string]interface{}{
 			ds.ViewDBField: results[0][utils.SpecialIDParam],
 		}, false); err == nil {
@@ -82,8 +81,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			res = append(res, rec)
 		}
 	}
-	fmt.Println("SHC", schemas, results)
-
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
 		for _, schema := range schemas {
