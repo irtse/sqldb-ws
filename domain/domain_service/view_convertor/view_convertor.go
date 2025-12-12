@@ -69,7 +69,6 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
 	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
 	if !readOnly && !slices.Contains(view.Actions, "put") {
-		fmt.Println("Actions special Add", view.Actions)
 		if len(results) == 1 {
 			if res, err := v.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 				ds.DestTableDBField: results[0][utils.SpecialIDParam],
@@ -89,7 +88,6 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 		} else {
 			view.Actions = append(view.Actions, "put")
 		}
-		fmt.Println("Actions special Add After", view.Actions)
 	}
 	idParamsOk := len(v.Domain.GetParams().GetAsArgs(utils.SpecialSubIDParam)) > 0
 	if idParamsOk && slices.Contains(ds.PUPERMISSIONEXCEPTION, schema.Name) {
@@ -100,6 +98,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	}
 	if view.Readonly { // if the view is readonly, we remove the actions
 		view.Actions = []string{"get"}
+		view.Consents = []map[string]interface{}{}
 	} else {
 		for _, record := range results {
 			view.Triggers = append(view.Triggers, triggers.NewTrigger(v.Domain).GetViewTriggers(
