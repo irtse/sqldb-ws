@@ -72,7 +72,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
-	fmt.Println("SHC", schemas)
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
 		go s.TransformToView(record, false, nil, params, channel, dest_id...)
@@ -82,6 +81,8 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			res = append(res, rec)
 		}
 	}
+	fmt.Println("SHC", schemas, results)
+
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		subChan := make(chan utils.Record, len(schemas))
 		for _, schema := range schemas {
