@@ -72,7 +72,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 		
 		if len(results) == 1 {
 			if res, err := v.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
-				ds.DestTableDBField: res[0][utils.SpecialIDParam],
+				ds.DestTableDBField: results[0][utils.SpecialIDParam],
 				ds.SchemaDBField: schema.ID,
 				"write": true,
 			}, false); err == nil && len(res) == 0 {
