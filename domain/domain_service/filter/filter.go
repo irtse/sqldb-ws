@@ -32,12 +32,7 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	if restr != "" && !f.Domain.IsSuperAdmin() {
 		SQLrestriction = append(SQLrestriction, restr)
 	}
-	later := []string{}
 	for _, restr := range innerRestriction {
-		if strings.Contains(restr, " IN ") {
-			later = append(later, restr)
-			continue
-		}
 		if restr != "" {
 			r := []string{"(" + restr + ")"}
 			r = append(r, SQLrestriction...)
@@ -72,7 +67,6 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 	if s, ok := domainParams.Get(utils.RootFilterNewState); ok && s != "" {
 		state = s
 	}
-	SQLrestriction = append(SQLrestriction, later...)
 	if len(SQLview) > 0 {
 		SQLview = append(SQLview, "is_draft")
 	}
@@ -173,7 +167,7 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 }
 
 func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []string, overrideOwn bool, hierarch bool) []string {
-	if s.Domain.GetMethod() == utils.UPDATE || s.Domain.GetMethod() == utils.DELETE  || schema.Name == ds.DBView.Name {
+	if s.Domain.GetMethod() == utils.UPDATE || s.Domain.GetMethod() == utils.DELETE || schema.Name == ds.DBView.Name {
 		return restr
 	}
 	newRestr := map[string]interface{}{}
