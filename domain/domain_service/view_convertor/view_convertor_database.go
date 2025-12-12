@@ -195,11 +195,22 @@ func (d *ViewConvertor) ProcessPermissions(
 				additionalActions = append(additionalActions, meth.Method())
 			}
 		} else if d.Domain.VerifyAuth(tableName, "", "", meth) && (((meth == utils.SELECT || meth == utils.CREATE) && d.Domain.GetEmpty()) || !d.Domain.GetEmpty()) {
-			if !slices.Contains(additionalActions, meth.Method()) {
-				additionalActions = append(additionalActions, meth.Method())
-			}
-			if meth == utils.CREATE && !slices.Contains(additionalActions, "import") {
-				additionalActions = d.CheckAndAddImportAction(additionalActions, schema)
+			if schema.CanOwned {
+				createdIds := history.GetCreatedAccessData(schema.ID, d.Domain)
+				if !slices.Contains(additionalActions, meth.Method()) && slices.Contains(createdIds, utils.GetString(record[0], utils.SpecialIDParam)) {
+					additionalActions = append(additionalActions, meth.Method())
+				}
+				if meth == utils.CREATE && !slices.Contains(additionalActions, "import") && slices.Contains(createdIds, utils.GetString(record[0], utils.SpecialIDParam)) {
+					additionalActions = d.CheckAndAddImportAction(additionalActions, schema)
+				}
+
+			} else {
+				if !slices.Contains(additionalActions, meth.Method()) {
+					additionalActions = append(additionalActions, meth.Method())
+				}
+				if meth == utils.CREATE && !slices.Contains(additionalActions, "import") {
+					additionalActions = d.CheckAndAddImportAction(additionalActions, schema)
+				}
 			}
 		}
 		if scheme.GetLink() > 0 && !noRecursive {
