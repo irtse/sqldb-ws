@@ -39,7 +39,7 @@ func (s *ViewService) VerifyDataIntegrity(record map[string]interface{}, tablena
 func (s *ViewService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
 	if !s.Domain.IsSuperAdmin() {
 		innerestr = append(innerestr, "only_super_admin=false")
-		innerestr = append(innerestr, conn.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
+		innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"only_super_admin": false,
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBViewAttribution.Name, map[string]interface{}{
 				"is_favorize": false,
