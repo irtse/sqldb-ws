@@ -546,14 +546,18 @@ func (d *ViewConvertor) HandleLinkField(record utils.Record, field sm.FieldModel
 }
 
 func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sudId string) map[string]utils.Results {
-	fmt.Println("NAME", subTable.Name, subField.Name, sudId, subField.Type)
 	if subField.GetLink() != bfTable.GetID() || strings.Contains(strings.ToLower(subField.Type), "many") {
 		return manyVals
 	}
+	fmt.Println("NAME OV", subTable.Name, subField.Name, sudId, subField.Type, subTable.HasField("name"))
+
 	if subTable.HasField("name") {
+		fmt.Println("NAME", subTable.Name, subField.Name, sudId, subField.Type)
 		if !subTable.HasField(subField.Name) {
 			return manyVals
 		}
+		fmt.Println("NAME 2", subTable.Name, subField.Name, sudId, subField.Type)
+
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 			subField.Name: sudId,
 		}, false); err == nil {
