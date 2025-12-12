@@ -566,7 +566,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		}
 	} else {
 		for _, f := range subTable.Fields {
-			if !subTable.HasField(subField.Name) || strings.Contains(strings.ToLower(subField.Type), "many") {
+			if !subTable.HasField(subField.Name) {
 				continue
 			}
 			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
