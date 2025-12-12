@@ -68,7 +68,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	}
 	view.Order, view.Schema, readOnly = CompareOrder(schema, order, schemes, results, view.Readonly, v.Domain)
 	view.SchemaNew = GetNewSchema(view.SchemaID, view.Schema, v.Domain)
-	fmt.Println("ACTIONS", view.Actions, schema.Name, results[0][utils.SpecialIDParam])
+	fmt.Println("ACTIONS", view.Actions, schema.Name, len(results))
 	if !readOnly && !slices.Contains(view.Actions, "put") {
 		if len(results) == 1 {
 			if res, err := v.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
