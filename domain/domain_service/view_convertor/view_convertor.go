@@ -62,6 +62,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	view.Shortcuts = v.GetShortcuts(schema.ID, addAction)
 	view.Consents = v.getConsent(schema.ID, results)
 	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
+	fmt.Println("Actions", view.Actions)
 	// if there is only one item in the view, we can set the view readonly to the item readonly
 	if len(view.Items) == 1 {
 		view.Readonly = view.Items[0].Readonly
