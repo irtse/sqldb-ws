@@ -41,7 +41,7 @@ func (s *ViewService) GenerateQueryFilter(tableName string, innerestr ...string)
 		innerestr = append(innerestr, "only_super_admin=false")
 		innerestr = append(innerestr, conn.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"only_super_admin": false,
-			utils.SpecialIDParam: s.Domain.GetDB().BuildSelectQueryWithRestriction(ds.DBViewAttribution.Name, map[string]interface{}{
+			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBViewAttribution.Name, map[string]interface{}{
 				"is_favorize": false,
 				ds.UserDBField: s.Domain.GetUserID(),
 			}, false, ds.ViewDBField),
