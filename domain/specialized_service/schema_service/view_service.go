@@ -38,16 +38,21 @@ func (s *ViewService) VerifyDataIntegrity(record map[string]interface{}, tablena
 
 func (s *ViewService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
 	if !s.Domain.IsSuperAdmin() {
-		innerestr = append(innerestr, "only_super_admin=false")
 		innerestr = append(innerestr, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"only_super_admin": false,
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBViewAttribution.Name, map[string]interface{}{
-				"is_favorize": false,
+				"is_favorize":  false,
 				ds.UserDBField: s.Domain.GetUserID(),
+			}, false, ds.ViewDBField),
+			utils.SpecialIDParam + "_1": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBViewAttribution.Name, map[string]interface{}{
+				"is_favorize": false,
+				ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+					ds.UserDBField: s.Domain.GetUserID(),
+				}, false, ds.EntityDBField),
 			}, false, ds.ViewDBField),
 		}, true))
 	}
-	
+
 	restr, _, _, _ := filterserv.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 	return restr, "", "", ""
 }
@@ -248,7 +253,7 @@ func (s *ViewService) addFavorizeInfo(record utils.Record, rec utils.Record) uti
 	rec["favorize_body"] = utils.Record{
 		ds.ViewDBField: record.GetInt(utils.SpecialIDParam),
 		ds.UserDBField: s.Domain.GetUserID(),
-		"is_favorize": true,
+		"is_favorize":  true,
 	}
 	rec["favorize_path"] = fmt.Sprintf("/%s/%s?%s=%s",
 		utils.MAIN_PREFIX, ds.DBViewAttribution.Name, utils.RootRowsParam, utils.ReservedParam)
@@ -256,7 +261,7 @@ func (s *ViewService) addFavorizeInfo(record utils.Record, rec utils.Record) uti
 	attributions, _ := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
 		ds.DBViewAttribution.Name,
 		map[string]interface{}{
-			"is_favorize": true,
+			"is_favorize":  true,
 			ds.UserDBField: s.Domain.GetUserID(),
 			ds.ViewDBField: record[utils.SpecialIDParam],
 		}, false)
