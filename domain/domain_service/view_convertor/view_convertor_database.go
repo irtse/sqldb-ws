@@ -195,7 +195,6 @@ func (d *ViewConvertor) ProcessPermissions(
 				additionalActions = append(additionalActions, meth.Method())
 			}
 		} else if d.Domain.VerifyAuth(tableName, "", "", meth) && (((meth == utils.SELECT || meth == utils.CREATE) && d.Domain.GetEmpty()) || !d.Domain.GetEmpty()) {
-			fmt.Println("CanOwned", schema.CanOwned, schema.Name)
 			if schema.CanOwned && len(record) > 0 {
 				createdIds := history.GetCreatedAccessData(schema.ID, d.Domain)
 				if !slices.Contains(additionalActions, meth.Method()) && slices.Contains(createdIds, utils.GetString(record[0], utils.SpecialIDParam)) {

@@ -62,7 +62,6 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	view.Shortcuts = v.GetShortcuts(schema.ID, addAction)
 	view.Consents = v.getConsent(schema.ID, results)
 	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
-	fmt.Println("Actions", view.Actions)
 	// if there is only one item in the view, we can set the view readonly to the item readonly
 	if len(view.Items) == 1 {
 		view.Readonly = view.Items[0].Readonly
@@ -75,13 +74,22 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 			if res, err := v.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDataAccess.Name, map[string]interface{}{
 				ds.DestTableDBField: results[0][utils.SpecialIDParam],
 				ds.SchemaDBField:    schema.ID,
+				ds.UserDBField:      v.Domain.GetUserID(),
 				"write":             true,
+			}, false); err == nil && len(res) > 0 {
+				view.Actions = append(view.Actions, "put")
+			}
+			if res, err := v.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+				ds.DestTableDBField:        results[0][utils.SpecialIDParam],
+				ds.SchemaDBField:           schema.ID,
+				"shared_" + ds.UserDBField: v.Domain.GetUserID(),
 			}, false); err == nil && len(res) > 0 {
 				view.Actions = append(view.Actions, "put")
 			}
 		} else {
 			view.Actions = append(view.Actions, "put")
 		}
+		fmt.Println("Actions special Add After", view.Actions)
 	}
 	idParamsOk := len(v.Domain.GetParams().GetAsArgs(utils.SpecialSubIDParam)) > 0
 	if idParamsOk && slices.Contains(ds.PUPERMISSIONEXCEPTION, schema.Name) {
