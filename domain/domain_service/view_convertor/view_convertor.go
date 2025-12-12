@@ -546,7 +546,8 @@ func (d *ViewConvertor) HandleLinkField(record utils.Record, field sm.FieldModel
 }
 
 func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sudId string) map[string]utils.Results {
-	fmt.Println("NAME VEF", bfTable.Name, subField.GetLink() != bfTable.GetID(), strings.Contains(strings.ToLower(subField.Type), "many"), subTable.Name, subField.Name, sudId, subField.Type, subTable.HasField("name"))
+	fmt.Println("NAME VEF", bfTable.Name, subField.GetLink() != bfTable.GetID(), strings.Contains(strings.ToLower(subField.Type), "many"),
+		subTable.Name, subField.Name, sudId, subField.Type, subTable.HasField("name"))
 	if subField.GetLink() != bfTable.GetID() || strings.Contains(strings.ToLower(subField.Type), "many") {
 		return manyVals
 	}
@@ -569,17 +570,19 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 				manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
 			}
 		}
-	} else {
-		for _, f := range subTable.Fields {
-			if !subTable.HasField(subField.Name) || strings.Contains(strings.ToLower(subField.Type), "many") {
-				continue
-			}
-			if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
-				if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
-					subField.Name: sudId,
-				}, false); err == nil {
+	} else if !(!subTable.HasField(subField.Name) || strings.Contains(strings.ToLower(subField.Type), "many")) {
+		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
+			subField.Name: sudId,
+		}, false); err == nil {
+			for _, f := range subTable.Fields {
+				if f.Name == subField.Name {
+					continue
+				}
+				// should find authors
+				if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
 					for _, ff := range sch.Fields {
 						if ff.GetLink() == subTable.GetID() {
+							fmt.Println("FOUND", ff.Name, ff.Type)
 							subField = ff
 						}
 					}
