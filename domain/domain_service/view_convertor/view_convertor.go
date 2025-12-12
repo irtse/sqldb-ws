@@ -550,10 +550,10 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 		return manyVals
 	}
 	if subTable.HasField("name") {
+		fmt.Println("NAME", subTable.Name, subField.Name, sudId)
 		if !subTable.HasField(subField.Name) {
 			return manyVals
 		}
-		fmt.Println("ERR, ", subTable.Name, subField.Name, sudId)
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 			subField.Name: sudId,
 		}, false); err == nil {
@@ -581,7 +581,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 					}
 					for _, r := range res {
 						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, f, utils.GetString(r, utils.SpecialIDParam))
-						fmt.Println(subTable.Name, subField.Name, sudId, manyVals)
+						fmt.Println(subTable.Name, subField.Name, utils.GetString(r, utils.SpecialIDParam), manyVals)
 					}
 				}
 			}
