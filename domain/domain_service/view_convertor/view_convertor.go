@@ -546,20 +546,13 @@ func (d *ViewConvertor) HandleLinkField(record utils.Record, field sm.FieldModel
 }
 
 func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sudId string) map[string]utils.Results {
-	fmt.Println("NAME VEF", bfTable.Name, subField.GetLink() != bfTable.GetID(), strings.Contains(strings.ToLower(subField.Type), "many"),
-		subTable.Name, subField.Name, sudId, subField.Type, subTable.HasField("name"))
 	if subField.GetLink() != bfTable.GetID() || strings.Contains(strings.ToLower(subField.Type), "many") {
 		return manyVals
 	}
-	fmt.Println("NAME OV", subTable.Name, subField.Name, sudId, subField.Type, subTable.HasField("name"))
-
 	if subTable.HasField("name") {
-		fmt.Println("NAME", subTable.Name, subField.Name, sudId, subField.Type)
 		if !subTable.HasField(subField.Name) {
 			return manyVals
 		}
-		fmt.Println("NAME 2", subTable.Name, subField.Name, sudId, subField.Type)
-
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
 			subField.Name: sudId,
 		}, false); err == nil {
@@ -582,12 +575,10 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 				if sch, err := scheme.GetSchemaByID(f.GetLink()); err == nil && !strings.Contains(strings.ToLower(f.Type), strings.ToLower(sm.ONETOMANY.String())) {
 					for _, ff := range sch.Fields {
 						if ff.GetLink() == subTable.GetID() {
-							fmt.Println("FOUND", ff.Name, ff.Type)
 							subField = ff
 						}
 					}
 					for _, r := range res {
-						fmt.Println("T", subTable.Name, subField.Name, utils.GetString(r, utils.SpecialIDParam), manyVals)
 						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, subField, utils.GetString(r, utils.SpecialIDParam))
 					}
 				}
