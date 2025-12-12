@@ -623,6 +623,7 @@ var DBViewAttribution = models.SchemaModel{
 		{Name: RootID(DBView.Name), Type: models.INTEGER.String(), ForeignTable: DBView.Name, Required: true, Index: 0},
 		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Index: 1},
 		{Name: RootID(DBEntity.Name), Type: models.INTEGER.String(), ForeignTable: DBEntity.Name, Required: false, Index: 2},
+		{Name: "is_favorize", Label: "is favorize", Type: models.BOOLEAN.String(), Required: false, Default: true, Index: 3},
 	},
 }
 

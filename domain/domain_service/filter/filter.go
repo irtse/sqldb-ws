@@ -173,7 +173,7 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 }
 
 func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []string, overrideOwn bool, hierarch bool) []string {
-	if s.Domain.GetMethod() == utils.UPDATE || s.Domain.GetMethod() == utils.DELETE {
+	if s.Domain.GetMethod() == utils.UPDATE || s.Domain.GetMethod() == utils.DELETE  || schema.Name == ds.DBView.Name {
 		return restr
 	}
 	newRestr := map[string]interface{}{}
