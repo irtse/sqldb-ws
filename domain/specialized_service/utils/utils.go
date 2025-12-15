@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/history"
@@ -95,7 +96,8 @@ func (s *AbstractSpecializedService) applyMany(sch sm.SchemaModel, record map[st
 					for _, m := range om {
 						m[fff.Name] = record[utils.SpecialIDParam] // on rajoute la référence au parent et si on a un parent c'est que tout est en ordre
 						delete(m, utils.SpecialIDParam)
-						s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m, true)
+						_, err := s.Domain.CreateSuperCall(utils.AllParams(ff.Name).RootRaw(), m, true)
+						fmt.Println("Create", m, err)
 					}
 				}
 			}
