@@ -202,6 +202,7 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			// LIKE
 			subAlt := ""
 			ssql := strings.Split(sql, " ")
+			fmt.Println("filter", ssql)
 			for _, s := range ssql {
 				if strings.ReplaceAll(s, " ", "") == "" {
 					continue
@@ -239,6 +240,7 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 		subAlt := ""
 
 		ssql := strings.Split(sql, " ")
+		fmt.Println("filter", ssql)
 		for _, s := range ssql {
 			if strings.ReplaceAll(s, " ", "") == "" {
 				continue
