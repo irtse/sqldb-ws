@@ -204,7 +204,6 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			ssql := strings.Split(strings.Trim(strings.ReplaceAll(strings.ReplaceAll(sql, "%", ""), "'", ""), " "), " ")
 
 			for _, s := range ssql {
-				fmt.Println(s)
 				if strings.ReplaceAll(s, " ", "") == "" {
 					continue
 				}
@@ -216,7 +215,6 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 				s = strings.ReplaceAll(s, "'", "''")
 				subAlt += "(LOWER(name::text) LIKE LOWER('%" + s + "%') OR LOWER(id::text) LIKE LOWER('%" + s + "%'))"
 			}
-			fmt.Println(subAlt)
 			alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE " + subAlt + ")"
 			return key, "IN", "(SELECT id FROM " + foreignName + " WHERE " + subAlt + ")", alterRestr
 		} else {
@@ -243,7 +241,6 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 
 		ssql := strings.Split(strings.Trim(strings.ReplaceAll(strings.ReplaceAll(sql, "%", ""), "'", ""), " "), " ")
 		for _, s := range ssql {
-			fmt.Println(s)
 			if strings.ReplaceAll(s, " ", "") == "" {
 				continue
 			}
@@ -254,7 +251,6 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 			s = strings.ReplaceAll(s, "%'", "")
 			subAlt += "(LOWER(" + key + "::text) " + no + " LOWER('%" + strings.ReplaceAll(s, "'", "''") + "%'))"
 		}
-		fmt.Println(subAlt)
 		alterRestr += "(" + subAlt + ")"
 		return key, no, or, alterRestr
 	} else {

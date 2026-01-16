@@ -36,9 +36,6 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 		name = name + " as main "
 		q = db.BuildSelectQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(name, "tags") {
-		fmt.Println("Prospection Filter", q)
-	}
 	return db.QueryAssociativeArray(q)
 }
 
@@ -272,7 +269,6 @@ func (db *Database) QueryAssociativeArray(query string) ([]map[string]interface{
 	}
 	rows, err := db.Conn.Query(query)
 	if err != nil {
-		fmt.Println(query, err)
 		fmt.Println(string(debug.Stack()))
 		return nil, err
 	}
