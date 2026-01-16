@@ -93,6 +93,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				for _, i := range utils.ToList(rec["items"]) {
 					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
 				}
+				fmt.Println("Found Schema After application", rec["schema_name"], utils.ToList(res[0]["items"]))
 				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
 				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
 			}
