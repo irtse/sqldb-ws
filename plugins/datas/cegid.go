@@ -166,6 +166,8 @@ var ConferenceFR = models.SchemaModel{
 			Index: -20, Label: "la production a-t-elle fait l'objet d'une dsitinction ?"},
 		{Name: "finalized_publication", Type: models.UPLOAD.String(), Required: true, Translatable: false,
 			Index: -10, Label: "publication finalisée", Subsection: "acte de publication"},
+		{Name: "abstract_publication", Type: models.UPLOAD.String(), Required: false, Translatable: false,
+			Index: -15, Label: "abstract finalisée", Subsection: "acte de publication"},
 		{Name: "effective_publishing_date", Label: "date effective de publication", Type: models.TIMESTAMP.String(), Required: true, Readonly: false, Index: -9, Subsection: "acte de publication"},
 		{Name: "major_conference", Translatable: false, Label: "la conférence visée est-elle incontournable dans ton domaine scientifique ?", Type: models.ENUMBOOLEAN.String(), Required: false, Default: false, Readonly: false, Index: -8},
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: ConferenceAffiliationAuthorsFR.Name},
