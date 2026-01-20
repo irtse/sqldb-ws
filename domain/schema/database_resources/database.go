@@ -210,6 +210,7 @@ var DBTrigger = models.SchemaModel{
 		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template attached", Index: 3},
 		{Name: "on_write", Type: models.BOOLEAN.String(), Required: true, Readonly: false, Default: false, Label: "on creation", Index: 2},
 		{Name: "on_update", Type: models.BOOLEAN.String(), Required: true, Readonly: false, Default: false, Label: "on update", Index: 3},
+		{Name: "on_update_step", Type: models.INTEGER.String(), ForeignTable: DBWorkflowSchema.Name, Required: false, Label: "consent on step", Index: 4},
 	},
 }
 
@@ -433,6 +434,7 @@ var DBConsent = models.SchemaModel{
 		{Name: "optionnal", Type: models.BOOLEAN.String(), Required: true, Default: false, Index: 1},
 		{Name: "on_create", Type: models.BOOLEAN.String(), Required: true, Default: true, Index: 2},
 		{Name: "on_update", Type: models.BOOLEAN.String(), Required: true, Default: true, Index: 3},
+		{Name: "on_update_step", Type: models.INTEGER.String(), ForeignTable: DBWorkflowSchema.Name, Required: false, Label: "consent on step", Index: 4},
 		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "template attached", Index: 4},
 	},
 }
@@ -534,6 +536,7 @@ var DBFilterField = models.SchemaModel{
 
 		{Name: "is_task_concerned", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 8},
 		{Name: "is_hierarch_concerned", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 8},
+		{Name: "is_hierarch_only", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 8},
 		{Name: RootID(DBFilter.Name), Type: models.INTEGER.String(), ForeignTable: DBFilter.Name, Required: false, Index: 9},
 	},
 }

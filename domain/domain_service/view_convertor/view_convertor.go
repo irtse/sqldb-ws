@@ -397,6 +397,7 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 	if s.Domain.GetMethod() == utils.UPDATE || (s.Domain.GetMethod() == utils.SELECT && !s.Domain.GetEmpty() && !utils.GetBool(results[0], "is_draft")) {
 		key = "on_update"
 	}
+	newConsent := []map[string]interface{}{}
 	if consents, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBConsent.Name, map[string]interface{}{
 		ds.SchemaDBField: schemaID,
 		utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBConsent.Name, map[string]interface{}{
@@ -405,6 +406,24 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 	}, false); err == nil {
 		if len(results) > 0 {
 			for _, c := range consents {
+				if key == "on_update" && c["on_update_step"] != nil {
+					if taskFound, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
+						ds.DBTask.Name,
+						map[string]interface{}{
+							"is_close": false,
+							utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+								ds.EntityDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+									ds.UserDBField: s.Domain.GetUserID(),
+								}, false, ds.EntityDBField),
+								ds.UserDBField: s.Domain.GetUserID(),
+							}, true, utils.SpecialIDParam),
+							ds.SchemaDBField:         schemaID,
+							ds.DestTableDBField:      results[0][utils.SpecialIDParam],
+							ds.WorkflowSchemaDBField: utils.GetString(c, "on_update_step"),
+						}, false); err == nil && len(taskFound) == 0 {
+						continue
+					}
+				}
 				if consentsResp, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
 					ds.DBConsentResponse.Name,
 					map[string]interface{}{
@@ -412,12 +431,13 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 						ds.DestTableDBField: results[0][utils.SpecialIDParam],
 						ds.ConsentDBField:   utils.GetString(c, utils.SpecialIDParam),
 					}, false); err == nil && len(consentsResp) > 0 {
-					return []map[string]interface{}{}
+					continue
 				}
+				newConsent = append(newConsent, c)
 			}
 		}
 		cst := []map[string]interface{}{}
-		for _, r := range consents {
+		for _, r := range newConsent {
 			c := map[string]interface{}{}
 			c["name"] = utils.GetString(r, "name")
 			c["optionnal"] = utils.GetBool(r, "optionnal")
@@ -545,27 +565,43 @@ func (d *ViewConvertor) HandleLinkField(record utils.Record, field sm.FieldModel
 	return shallowVals, manyVals, manyPathVals
 }
 
-func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sudId string) map[string]utils.Results {
+func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, field sm.FieldModel, manyVals map[string]utils.Results, subTable sm.SchemaModel, subField sm.FieldModel, sub map[string]interface{}, otherField []string) map[string]utils.Results {
 	if subField.GetLink() != bfTable.GetID() || strings.Contains(strings.ToLower(subField.Type), "many") {
 		return manyVals
+	}
+	otherFields := []string{}
+	for _, f := range subTable.Fields {
+		if f.Name != subField.Name && !strings.Contains(strings.ToLower(f.Type), strings.ToLower("many")) {
+			otherFields = append(otherFields, f.Name)
+		}
 	}
 	if subTable.HasField("name") {
 		if !subTable.HasField(subField.Name) {
 			return manyVals
 		}
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
-			subField.Name: sudId,
+			subField.Name: utils.GetString(sub, utils.SpecialIDParam),
 		}, false); err == nil {
 			if _, ok := manyVals[field.Name]; !ok {
 				manyVals[field.Name] = utils.Results{}
 			}
 			for _, r := range res {
-				manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": utils.GetString(r, "name")})
+				name := utils.GetString(r, "name")
+				others := []string{}
+				for _, field := range otherField {
+					if sub[field] != nil {
+						others = append(others, utils.ToString(sub[field]))
+					}
+				}
+				if len(others) > 0 {
+					name += " (" + strings.Join(others, ", ") + ")"
+				}
+				manyVals[field.Name] = append(manyVals[field.Name], utils.Record{"name": name})
 			}
 		}
 	} else if !(!subTable.HasField(subField.Name) || strings.Contains(strings.ToLower(subField.Type), "many")) {
 		if res, err := d.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(subTable.Name, map[string]interface{}{
-			subField.Name: sudId,
+			subField.Name: utils.GetString(sub, utils.SpecialIDParam),
 		}, false); err == nil {
 			for _, f := range subTable.Fields {
 				if f.Name == subField.Name {
@@ -579,7 +615,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 						}
 					}
 					for _, r := range res {
-						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, subField, utils.GetString(r, utils.SpecialIDParam))
+						manyVals = d.recursiveFoundNameOneToMany(subTable, field, manyVals, sch, subField, r, otherFields)
 					}
 				}
 			}
@@ -599,7 +635,7 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 						link, utils.ReservedParam,
 						f.Name+"="+record.GetString(utils.SpecialIDParam))
 				}
-				manyVals = d.recursiveFoundNameOneToMany(*schema, field, manyVals, l, f, utils.GetString(record, utils.SpecialIDParam))
+				manyVals = d.recursiveFoundNameOneToMany(*schema, field, manyVals, l, f, record, []string{})
 				continue
 			}
 			if f.Name == utils.SpecialIDParam || f.GetLink() <= 0 {

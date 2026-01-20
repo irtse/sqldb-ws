@@ -284,9 +284,6 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 		if col != "" && !strings.Contains(col, key) && !(additionnalCol == "" || strings.Contains(additionnalCol, key)) {
 			continue
 		}
-		if scheme, ok := schema[key]; ok && strings.Contains(utils.ToString(utils.ToMap(scheme)["type"]), "many") {
-			continue
-		}
 		label := key
 		/*if scheme, ok := schema[key]; ok {
 			label = strings.Replace(utils.ToString(utils.ToMap(scheme)["label"]), "_", " ", -1)
@@ -312,7 +309,15 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 			if mapKey, ok := mapping[key]; ok && mapKey != "" {
 				label = mapKey
 			}
-			if v, ok := utils.ToMap(it["values_shallow"])[key]; ok {
+			if v, ok := utils.ToMap(it["values_many"])[key]; ok {
+				l := utils.ToList(v)
+				s := []string{}
+				for _, ll := range l {
+					m := utils.ToMap(ll)
+					s = append(s, utils.GetString(m, "name"))
+				}
+				record[label] = strings.Join(s, ", ")
+			} else if v, ok := utils.ToMap(it["values_shallow"])[key]; ok {
 				record[label] = utils.ToString(utils.ToMap(v)["name"])
 			} else if v, ok := utils.ToMap(it["values"])[key]; ok && v != nil {
 				record[label] = utils.ToString(v)

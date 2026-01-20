@@ -1,7 +1,6 @@
 package triggers
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"sqldb-ws/domain/schema"
@@ -60,22 +59,43 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		restr := []interface{}{
 			ds.SchemaDBField + "=" + fromSchemaID,
 			ds.DestTableDBField + "=" + recordID,
+			"is_close=false",
 			"current_index > 1",
 		}
 		if recordID != "" {
 			if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, restr, false); err == nil && len(res) > 0 {
-				return []map[string]interface{}{}, errors.New("can't select a trigger create on a upper after first task of request's workflow")
+				method = utils.UPDATE
 			}
 		}
-
 	}
-
-	// TODO if it's the first task
-	return t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTrigger.Name, map[string]interface{}{
+	trgs := []map[string]interface{}{}
+	if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTrigger.Name, map[string]interface{}{
 		"on_" + method.String(): true,
 		"mode":                  conn.Quote(mode),
 		ds.SchemaDBField:        fromSchemaID,
-	}, false)
+	}, false); err == nil {
+		for _, r := range res {
+			if method.String() == "update" && r["on_update_step"] != nil && recordID != "" {
+				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
+					map[string]interface{}{
+						"is_close": false,
+						utils.SpecialIDParam: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
+							ds.EntityDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+								ds.UserDBField: t.Domain.GetUserID(),
+							}, false, ds.EntityDBField),
+							ds.UserDBField: t.Domain.GetUserID(),
+						}, true, utils.SpecialIDParam),
+						ds.SchemaDBField:         fromSchemaID,
+						ds.DestTableDBField:      recordID,
+						ds.WorkflowSchemaDBField: utils.GetString(r, "on_update_step"),
+					}, false); err == nil && len(res) == 0 {
+					continue
+				}
+			}
+			trgs = append(trgs, r)
+		}
+	}
+	return trgs, nil
 }
 
 func (t *TriggerService) Trigger(fromSchema *sm.SchemaModel, record utils.Record, method utils.Method) {
