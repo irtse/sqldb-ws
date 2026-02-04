@@ -147,9 +147,10 @@ func (t *AbstractController) csv(d utils.DomainITF, colsFunc map[string]string, 
 			v := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(
 				utils.ToString(r[c]), "(completed)", ""), "(pending)", ""), "(refused)", ""), "(dismiss)", ""), "(running)", "")
 			row = append(row, v)
-			if v == "true" {
+			switch v {
+			case "true":
 				v = "yes"
-			} else if v == "false" {
+			case "false":
 				v = "no"
 			}
 		}
@@ -309,6 +310,7 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 			if mapKey, ok := mapping[key]; ok && mapKey != "" {
 				label = mapKey
 			}
+			fmt.Println(it, key)
 			if v, ok := utils.ToMap(it["values_many"])[key]; ok {
 				l := utils.ToList(v)
 				s := []string{}
