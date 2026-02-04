@@ -299,18 +299,13 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 		for _, o := range order {
 			key := utils.ToString(o)
 			it := utils.ToMap(item)
-			if scheme, ok := schema[key]; ok && key != "id" && strings.Contains(
-				utils.ToString(utils.ToMap(scheme)["type"]), "many") {
+			if _, ok := schema[key]; !ok {
 				continue
 			}
 			label := key
-			/*if scheme, ok := schema[key]; ok {
-				label = strings.Replace(utils.ToString(utils.ToMap(scheme)["label"]), "_", " ", -1)
-			}*/
 			if mapKey, ok := mapping[key]; ok && mapKey != "" {
 				label = mapKey
 			}
-			fmt.Println(it, key)
 			if v, ok := utils.ToMap(it["values_many"])[key]; ok {
 				l := utils.ToList(v)
 				s := []string{}

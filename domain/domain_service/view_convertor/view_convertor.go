@@ -590,7 +590,7 @@ func (d *ViewConvertor) recursiveFoundNameOneToMany(bfTable sm.SchemaModel, fiel
 				others := []string{}
 				for _, field := range otherField {
 					if sub[field] != nil {
-						others = append(others, utils.ToString(sub[field]))
+						others = append(others, strings.Trim(utils.ToString(sub[field]), " "))
 					}
 				}
 				if len(others) > 0 {
