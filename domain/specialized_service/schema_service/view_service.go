@@ -94,17 +94,16 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				}
 				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
 				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
+				for k, v := range utils.ToMap(rec["schema"]) {
+					if utils.ToMap(res[0]["schema"])[k] == nil {
+						utils.ToMap(res[0]["schema"])[k] = v
+					}
+				}
 			}
 		}
 		for _, schema := range schemas {
 			if len(res) == 0 {
 				continue
-			}
-			newSchema := map[string]interface{}{}
-			for k, v := range res[0]["schema"].(map[string]interface{}) {
-				if schema.HasField(k) {
-					newSchema[k] = v
-				}
 			}
 			typ := models.ViewFieldModel{
 				Label:    "type",
@@ -114,13 +113,12 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				Active:   true,
 			}
 			if utils.ToMap(res[0]["schema"])["type"] == nil {
-				newSchema["type"] = typ
+				utils.ToMap(res[0]["schema"])["type"] = typ
 			} else {
 				typ = utils.ToMap(res[0]["schema"])["type"].(models.ViewFieldModel)
 				typ.Type += "_" + strings.ReplaceAll(schema.Label, "_", " ")
-				newSchema["type"] = typ
+				utils.ToMap(res[0]["schema"])["type"] = typ
 			}
-			res[0]["schema"] = newSchema
 			res[0]["multi_view_path"] = append(res[0]["multi_view_path"].([]interface{}), utils.BuildPath(schema.Name, utils.ReservedParam))
 		}
 	}
