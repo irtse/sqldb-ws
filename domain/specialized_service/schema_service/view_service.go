@@ -94,7 +94,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				}
 				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
 				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
+				fmt.Println(utils.ToMap(rec["schema_name"]))
 				for k, v := range utils.ToMap(rec["schema"]) {
+					fmt.Println(k)
 					if utils.ToMap(res[0]["schema"])[k] == nil {
 						utils.ToMap(res[0]["schema"])[k] = v
 					}
