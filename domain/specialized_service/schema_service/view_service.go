@@ -1,6 +1,7 @@
 package schema_service
 
 import (
+	"encoding/json"
 	"fmt"
 	"runtime"
 	"slices"
@@ -94,13 +95,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				}
 				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
 				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
-				fmt.Println(utils.ToMap(rec["schema_name"]))
-				for k, v := range utils.ToMap(rec["schema"]) {
-					fmt.Println(k)
-					if utils.ToMap(res[0]["schema"])[k] == nil {
-						utils.ToMap(res[0]["schema"])[k] = v
-					}
-				}
 			}
 		}
 		for _, schema := range schemas {
@@ -113,6 +107,15 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				Index:    2,
 				Readonly: true,
 				Active:   true,
+			}
+			for _, v := range schema.Fields {
+				if utils.ToMap(res[0]["schema"])[v.Name] == nil {
+					fmt.Println("FIELD FOUND !", v.Name)
+					var m map[string]interface{}
+					b, _ := json.Marshal(v)
+					json.Unmarshal(b, &m)
+					utils.ToMap(res[0]["schema"])[v.Name] = m
+				}
 			}
 			if utils.ToMap(res[0]["schema"])["type"] == nil {
 				utils.ToMap(res[0]["schema"])["type"] = typ
