@@ -116,6 +116,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 					json.Unmarshal(b, &m)
 					utils.ToMap(res[0]["schema"])[v.Name] = m
 				}
+				if !slices.Contains(res[0]["order"].([]string), v.Name) {
+					res[0]["order"] = append(res[0]["order"].([]string), v.Name)
+				}
 			}
 			if utils.ToMap(res[0]["schema"])["type"] == nil {
 				utils.ToMap(res[0]["schema"])["type"] = typ
