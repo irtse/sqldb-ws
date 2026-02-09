@@ -433,9 +433,7 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 	order := []string{}
 	direction := []string{}
 	if orderBy, ok := p.Values[utils.RootOrderParam]; ok {
-		fmt.Println(orderBy)
 		if dir, ok2 := p.Values[utils.RootDirParam]; ok2 {
-			fmt.Println(dir)
 			direction = strings.Split(utils.ToString(dir), ",")
 		}
 		for i, o := range strings.Split(utils.ToString(orderBy), ",") {
@@ -451,6 +449,7 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 			m2 := utils.ToMap(utils.ToMap(results[j])["values"])
 			if m[o] != m2[o] {
 				if strings.Contains(strings.ToLower(o), "asc") {
+					fmt.Println(m[o], m2[o], fmt.Sprintf("%v", m[o]) < fmt.Sprintf("%v", m2[o]))
 					return fmt.Sprintf("%v", m[o]) < fmt.Sprintf("%v", m2[o])
 				} else {
 					return fmt.Sprintf("%v", m[o]) > fmt.Sprintf("%v", m2[o])
