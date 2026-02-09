@@ -447,6 +447,7 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 		for _, o := range order {
 			m := utils.ToMap(utils.ToMap(results[i])["values"])
 			m2 := utils.ToMap(utils.ToMap(results[j])["values"])
+			fmt.Println(m[o], m2[o], o)
 			if m[o] != m2[o] {
 				if strings.Contains(strings.ToLower(o), "asc") {
 					fmt.Println(m[o], m2[o], fmt.Sprintf("%v", m[o]) < fmt.Sprintf("%v", m2[o]))
