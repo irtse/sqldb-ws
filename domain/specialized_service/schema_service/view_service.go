@@ -447,13 +447,14 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 		for _, o := range order {
 			m := utils.ToMap(utils.ToMap(results[i])["values"])
 			m2 := utils.ToMap(utils.ToMap(results[j])["values"])
+			o2 := strings.Split(o, " ")[0]
 			fmt.Println(m[o], m2[o], o)
-			if m[o] != m2[o] {
+			if m[o2] != m2[o2] {
 				if strings.Contains(strings.ToLower(o), "asc") {
-					fmt.Println(m[o], m2[o], fmt.Sprintf("%v", m[o]) < fmt.Sprintf("%v", m2[o]))
-					return fmt.Sprintf("%v", m[o]) < fmt.Sprintf("%v", m2[o])
+					fmt.Println(m[o2], m2[o2], fmt.Sprintf("%v", m[o2]) < fmt.Sprintf("%v", m2[o2]))
+					return fmt.Sprintf("%v", m[o2]) < fmt.Sprintf("%v", m2[o2])
 				} else {
-					return fmt.Sprintf("%v", m[o]) > fmt.Sprintf("%v", m2[o])
+					return fmt.Sprintf("%v", m[o2]) > fmt.Sprintf("%v", m2[o2])
 				}
 			}
 		}
