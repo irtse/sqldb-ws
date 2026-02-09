@@ -439,7 +439,7 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 			direction = strings.Split(utils.ToString(dir), ",")
 		}
 		for i, o := range strings.Split(utils.ToString(orderBy), ",") {
-			if len(direction) < i {
+			if len(direction) > i {
 				order = append(order, o+" "+direction[i])
 			}
 		}
