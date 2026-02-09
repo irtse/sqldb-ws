@@ -112,7 +112,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 			for _, v := range schema.Fields {
 				if utils.ToMap(res[0]["schema"])[v.Name] == nil {
-					fmt.Println("FIELD FOUND !", v.Name)
 					var m map[string]interface{}
 					b, _ := json.Marshal(v)
 					json.Unmarshal(b, &m)
@@ -442,7 +441,6 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 			}
 		}
 	}
-	fmt.Println(order)
 	sort.Slice(results, func(i, j int) bool {
 		for _, o := range order {
 			m := utils.ToMap(utils.ToMap(results[i])["values"])
@@ -450,7 +448,6 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 			o2 := strings.Split(o, " ")[0]
 			if m[o2] != m2[o2] {
 				if strings.Contains(strings.ToLower(o), "asc") {
-					fmt.Println(m[o2], m2[o2], fmt.Sprintf("%v", m[o2]) < fmt.Sprintf("%v", m2[o2]))
 					return fmt.Sprintf("%v", m[o2]) < fmt.Sprintf("%v", m2[o2])
 				} else {
 					return fmt.Sprintf("%v", m[o2]) > fmt.Sprintf("%v", m2[o2])
@@ -463,6 +460,5 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 	for _, r := range results {
 		names = append(names, fmt.Sprintf("%v", utils.ToMap(utils.ToMap(r)["values"])["name"]))
 	}
-	fmt.Println("PROSPECt", names)
 	return results
 }
