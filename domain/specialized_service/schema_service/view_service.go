@@ -97,6 +97,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
 			}
 		}
+
 		for _, schema := range schemas {
 			if len(res) == 0 {
 				continue
@@ -127,6 +128,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 			res[0]["multi_view_path"] = append(res[0]["multi_view_path"].([]interface{}), utils.BuildPath(schema.Name, utils.ReservedParam))
 		}
+		res[0]["items"] = s.Sort(utils.ToList(res[0]["items"]), s.Domain.GetParams())
 	}
 	sort.SliceStable(res, func(i, j int) bool {
 		return utils.ToInt64(res[i]["index"]) <= utils.ToInt64(res[j]["index"])
@@ -208,8 +210,8 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 			rec["order"] = newOrder
 		}
 		// complexify to verify if a request is active about... then... to redirect on...
-		rec["export_path"] = "/" + utils.MAIN_PREFIX + "/" + fmt.Sprintf(ds.DBView.Name) + "?rows=" + utils.ToString(record[utils.SpecialIDParam])
-		rec["link_path"] = "/" + utils.MAIN_PREFIX + "/" + fmt.Sprintf(ds.DBView.Name) + "?rows=" + utils.ToString(record[utils.SpecialIDParam])
+		rec["export_path"] = "/" + utils.MAIN_PREFIX + "/" + ds.DBView.Name + "?rows=" + utils.ToString(record[utils.SpecialIDParam])
+		rec["link_path"] = "/" + utils.MAIN_PREFIX + "/" + ds.DBView.Name + "?rows=" + utils.ToString(record[utils.SpecialIDParam])
 		if _, ok := record["group_by"]; ok { // express by each column we are foldered TODO : if not in view add it
 			field, err := schema.GetFieldByID(record.GetInt("group_by"))
 			if err == nil {
@@ -307,6 +309,7 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 	}
 	return params, datas, max
 }
+
 func (s *ViewService) processData(rec utils.Record, multiple bool, datas utils.Results, schema *sm.SchemaModel,
 	record utils.Record, newOrder []string, params utils.Params) (utils.Record, utils.Record, []string) {
 	if utils.Compare(record["is_empty"], true) {
@@ -424,4 +427,32 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 		rec[key] = append(rec[key].([]interface{}), newItem...)
 	}
 	return rec, newOrder
+}
+
+func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} {
+	order := []string{}
+	direction := []string{}
+	if orderBy, ok := p.Values[utils.RootOrderParam]; ok {
+		if dir, ok2 := p.Values[utils.RootDirParam]; ok2 {
+			direction = strings.Split(utils.ToString(dir), ",")
+		}
+		for i, o := range strings.Split(utils.ToString(orderBy), ",") {
+			if len(direction) < i {
+				order = append(order, o+" "+direction[i])
+			}
+		}
+	}
+	sort.Slice(results, func(i, j int) bool {
+		for _, o := range order {
+			if utils.ToMap(results[i])[o] != utils.ToMap(results[j])[o] {
+				if strings.Contains(strings.ToLower(o), "asc") {
+					return fmt.Sprintf("%v", utils.ToMap(results[i])[o]) < fmt.Sprintf("%v", utils.ToMap(results[j])[o])
+				} else {
+					return fmt.Sprintf("%v", utils.ToMap(results[i])[o]) > fmt.Sprintf("%v", utils.ToMap(results[j])[o])
+				}
+			}
+		}
+		return true
+	})
+	return results
 }
