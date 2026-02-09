@@ -97,6 +97,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
 			}
 		}
+		res[0]["items"] = s.Sort(utils.ToList(res[0]["items"]), params)
 
 		for _, schema := range schemas {
 			if len(res) == 0 {
@@ -128,7 +129,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 			res[0]["multi_view_path"] = append(res[0]["multi_view_path"].([]interface{}), utils.BuildPath(schema.Name, utils.ReservedParam))
 		}
-		res[0]["items"] = s.Sort(utils.ToList(res[0]["items"]), s.Domain.GetParams())
 	}
 	sort.SliceStable(res, func(i, j int) bool {
 		return utils.ToInt64(res[i]["index"]) <= utils.ToInt64(res[j]["index"])
@@ -433,7 +433,9 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 	order := []string{}
 	direction := []string{}
 	if orderBy, ok := p.Values[utils.RootOrderParam]; ok {
+		fmt.Println(orderBy)
 		if dir, ok2 := p.Values[utils.RootDirParam]; ok2 {
+			fmt.Println(dir)
 			direction = strings.Split(utils.ToString(dir), ",")
 		}
 		for i, o := range strings.Split(utils.ToString(orderBy), ",") {
@@ -445,11 +447,13 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 	fmt.Println(order)
 	sort.Slice(results, func(i, j int) bool {
 		for _, o := range order {
-			if utils.ToMap(results[i])[o] != utils.ToMap(results[j])[o] {
+			m := utils.ToMap(utils.ToMap(results[i])["values"])
+			m2 := utils.ToMap(utils.ToMap(results[j])["values"])
+			if m[o] != m2[o] {
 				if strings.Contains(strings.ToLower(o), "asc") {
-					return fmt.Sprintf("%v", utils.ToMap(results[i])[o]) < fmt.Sprintf("%v", utils.ToMap(results[j])[o])
+					return fmt.Sprintf("%v", m[o]) < fmt.Sprintf("%v", m2[o])
 				} else {
-					return fmt.Sprintf("%v", utils.ToMap(results[i])[o]) > fmt.Sprintf("%v", utils.ToMap(results[j])[o])
+					return fmt.Sprintf("%v", m[o]) > fmt.Sprintf("%v", m2[o])
 				}
 			}
 		}
@@ -457,7 +461,7 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 	})
 	names := []string{}
 	for _, r := range results {
-		names = append(names, fmt.Sprintf("%v", utils.ToMap(r)["name"]))
+		names = append(names, fmt.Sprintf("%v", utils.ToMap(utils.ToMap(r)["values"])["name"]))
 	}
 	fmt.Println("PROSPECt", names)
 	return results
