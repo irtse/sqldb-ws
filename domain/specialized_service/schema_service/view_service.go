@@ -442,6 +442,7 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 			}
 		}
 	}
+	fmt.Println(order)
 	sort.Slice(results, func(i, j int) bool {
 		for _, o := range order {
 			if utils.ToMap(results[i])[o] != utils.ToMap(results[j])[o] {
@@ -454,5 +455,10 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 		}
 		return true
 	})
+	names := []string{}
+	for _, r := range results {
+		names = append(names, fmt.Sprintf("%v", utils.ToMap(r)["name"]))
+	}
+	fmt.Println("PROSPECt", names)
 	return results
 }
