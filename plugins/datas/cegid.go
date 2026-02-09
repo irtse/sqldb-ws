@@ -85,7 +85,7 @@ var PublicationHistoryStatusFR = models.SchemaModel{
 
 var publicationFields = []models.FieldModel{
 	{Name: "name", Label: "intitulé de la publication", Translatable: false,
-		Type: models.VARCHAR.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
+		Type: models.TEXT.String(), Constraint: "unique", Required: true, Readonly: false, Index: 0},
 	{Name: "state", Default: 1, Type: models.INTEGER.String(), ForeignTable: PublicationStatusFR.Name, Required: false, Readonly: true, Label: "statut de publication", Index: 1},
 
 	{Name: "manager_" + ds.RootID(ds.DBUser.Name), Type: models.INTEGER.String(), Required: true, Translatable: false,

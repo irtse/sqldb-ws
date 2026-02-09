@@ -220,6 +220,7 @@ type FieldModel struct { // definition a db table columns
 	Transform    string      `json:"transform_function"`
 	GroupBy      string      `json:"group_by"`
 	SchemaID     string      `json:"dbschema_id"`
+	Info         string      `json:"info"`
 }
 
 func (t FieldModel) Map(m map[string]interface{}) *FieldModel {
@@ -243,6 +244,7 @@ func (t FieldModel) Map(m map[string]interface{}) *FieldModel {
 		Hidden:       utils.Compare(m["hidden"], true),
 		Transform:    utils.ToString(m["transform"]),
 		SchemaID:     utils.ToString(m["dbschema_id"]),
+		Info:         utils.ToString(m["info"]),
 	}
 }
 
@@ -389,6 +391,7 @@ type ViewFieldModel struct { // lightest struct based on FieldModel dedicate to 
 	DataSchema   map[string]interface{} `json:"data_schema"`
 	Subsection   string                 `json:"subsection"`
 	Active       bool                   `json:"active"`
+	Info         string                 `json:"info"`
 }
 
 type WorkflowModel struct { // lightest struct based on SchemaModel dedicate to view

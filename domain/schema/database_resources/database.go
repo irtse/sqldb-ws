@@ -51,6 +51,7 @@ var DBSchemaField = models.SchemaModel{
 		{Name: "translatable", Type: models.BOOLEAN.String(), Default: true, Required: false, Index: 14, Label: "is translatable"},
 		{Name: "transform_function", Type: models.ENUMTRANSFORM.String(), Required: false, Index: 15, Label: "transformation function"},
 		{Name: "group_by", Type: models.VARCHAR.String(), Required: false, Index: 16, Label: "group by"},
+		{Name: "info", Type: models.TEXT.String(), Required: false, Index: 16, Label: "info"},
 	},
 }
 
