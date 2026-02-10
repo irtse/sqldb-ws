@@ -293,7 +293,7 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 			continue
 		}
 		if f, err := schema.GetField(strings.TrimSpace(colsF)); err == nil {
-			if strings.Contains(strings.ToLower(f.Name), "many") {
+			if strings.Contains(strings.ToLower(f.Type), "many") {
 				continue
 			}
 			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
@@ -324,7 +324,7 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 			}
 		}
 		for _, ff := range fields {
-			if strings.Contains(strings.ToLower(ff.Name), "many") {
+			if strings.Contains(strings.ToLower(ff.Type), "many") {
 				continue
 			}
 			if f, err := schema.GetField(strings.TrimSpace(ff.Name)); err == nil {
