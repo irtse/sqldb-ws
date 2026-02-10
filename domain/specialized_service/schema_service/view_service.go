@@ -295,17 +295,15 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
 		f := filterserv.NewFilterService(s.Domain)
-		fields := map[string]models.FieldModel{}
+		f.FieldOrder = []models.FieldModel{}
+		fields := []string{}
 		for _, s := range unionsAlls {
-			for _, f := range s.Fields {
-				if _, ok := fields[f.Name]; !ok {
-					fields[f.Name] = f
+			for _, ff := range s.Fields {
+				if !slices.Contains(fields, ff.Name) {
+					fields = append(fields, ff.Name)
+					f.FieldOrder = append(f.FieldOrder, ff)
 				}
 			}
-		}
-		f.FieldOrder = []models.FieldModel{}
-		for _, v := range fields {
-			f.FieldOrder = append(f.FieldOrder, v)
 		}
 		us := []string{}
 		for _, union := range unionsAlls {
