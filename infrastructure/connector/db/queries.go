@@ -270,8 +270,7 @@ func (db *Database) QueryAssociativeArray(query string) ([]map[string]interface{
 	rows, err := db.Conn.Query(query)
 	if err != nil {
 		fmt.Println(string(debug.Stack()))
-		fmt.Println(err)
-
+		fmt.Println(query)
 		return nil, err
 	}
 	defer rows.Close()
