@@ -14,8 +14,8 @@ import (
 
 // DONE - ~ 260 LINES - NOT TESTED
 type FilterService struct {
-	Domain            utils.DomainITF
-	AdditionnalSchema []*models.SchemaModel
+	Domain     utils.DomainITF
+	FieldOrder map[string]models.FieldModel
 }
 
 func NewFilterService(domain utils.DomainITF) *FilterService {
@@ -288,19 +288,25 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	SQLview := []string{}
 	views, _ := domainParams.Get(utils.RootColumnsParam)
 
-	for _, colsF := range strings.Split(views, ",") { // only on filter columns.
-		if colsF == "" {
+	for _, f := range schema.Fields {
+		d.FieldOrder[f.Name] = f
+	}
+
+	cols := []string{}
+	if views != "" {
+		cols = strings.Split(views, ",")
+	}
+
+	for _, ff := range d.FieldOrder {
+		if strings.Contains(strings.ToLower(ff.Type), "many") || slices.Contains(cols, ff.Name) {
 			continue
 		}
-		if f, err := schema.GetField(strings.TrimSpace(colsF)); err == nil {
-			if strings.Contains(strings.ToLower(f.Type), "many") {
-				continue
-			}
+		if f, err := schema.GetField(strings.TrimSpace(ff.Name)); err == nil {
 			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
 				SQLview = append(SQLview, f.Name)
 			}
 		} else {
-			SQLview = append(SQLview, "NULL as "+colsF)
+			SQLview = append(SQLview, "NULL as "+ff.Name)
 		}
 	} // now we want empty if needed but with no pub...
 
@@ -312,32 +318,6 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	}
 	if len(SQLview) > 0 { // if not found... precise id on all data
 		SQLview = append(SQLview, "id")
-	} else {
-		fields := map[string]models.FieldModel{}
-		schs := d.AdditionnalSchema
-		schs = append(schs, &schema)
-		for _, s := range schs {
-			for _, f := range s.Fields {
-				if _, ok := fields[f.Name]; !ok {
-					fields[f.Name] = f
-				}
-			}
-		}
-		for _, ff := range fields {
-			if strings.Contains(strings.ToLower(ff.Type), "many") {
-				continue
-			}
-			if f, err := schema.GetField(strings.TrimSpace(ff.Name)); err == nil {
-				if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
-					SQLview = append(SQLview, f.Name)
-				}
-			} else {
-				SQLview = append(SQLview, "NULL as "+ff.Name)
-			}
-		}
-		if len(SQLview) > 0 { // if not found... precise id on all data
-			SQLview = append(SQLview, "id")
-		}
 	}
 	return SQLview
 }
