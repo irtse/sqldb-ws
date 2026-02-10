@@ -287,6 +287,9 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	views, _ := domainParams.Get(utils.RootColumnsParam)
 
 	for _, colsF := range strings.Split(views, ",") { // only on filter columns.
+		if colsF == "" {
+			continue
+		}
 		if f, err := schema.GetField(strings.TrimSpace(colsF)); err == nil {
 			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
 				SQLview = append(SQLview, f.Name)
