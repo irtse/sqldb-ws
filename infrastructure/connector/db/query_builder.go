@@ -40,7 +40,7 @@ func (db *Database) BuildSimpleMathQueryWithRestriction(algo string, name string
 
 func (db *Database) buildSimpleMathQueryWithRestriction(name string,
 	restrictions interface{}, isOr bool) string {
-	col := "*" // default to all columns
+	col := "id" // default to all columns
 	query := "SELECT " + col + " FROM " + name
 	kind := reflect.TypeOf(restrictions).Kind()
 	if kind == reflect.Map && len(restrictions.(map[string]interface{})) > 0 {
