@@ -18,6 +18,7 @@ func (db *Database) BuildDeleteQueryWithRestriction(name string, restrictions ma
 	if t := FormatSQLRestrictionWhereByMap(db.SQLRestriction, restrictions, isOr); t != "" {
 		query += " WHERE " + t
 	}
+	query = db.applyUnionAll(query)
 	query = db.applyOrderAndLimit(query)
 	return query
 }
@@ -28,7 +29,17 @@ func (db *Database) BuildSimpleMathQueryWithRestriction(algo string, name string
 		db = Open(db)
 		defer db.Close()
 	}
+	query := db.buildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr, restr...)
+	if len(db.GetSQLUnionAll()) > 0 {
+		for _, union := range db.GetSQLUnionAll() {
+			query += " UNION ALL " + db.buildSimpleMathQueryWithRestriction(algo, union, restrictions, isOr, restr...)
+		}
+	}
+	return query
+}
 
+func (db *Database) buildSimpleMathQueryWithRestriction(algo string, name string,
+	restrictions interface{}, isOr bool, restr ...string) string {
 	col := "*" // default to all columns
 	query := "SELECT " + strings.ToUpper(algo) + "(" + col + ") as result FROM " + name
 	kind := reflect.TypeOf(restrictions).Kind()
@@ -88,6 +99,7 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 	if len(query) > 5 && (query[len(query)-5:len(query)-1] == " AND") {
 		query = query[0 : len(query)-5]
 	}
+	query = db.applyUnionAll(query)
 	query = db.applyOrderAndLimit(query)
 	return strings.ReplaceAll(query, "WHERE  ", "")
 }
@@ -120,6 +132,7 @@ func (db *Database) BuildMathQuery(algo string, name string, naming ...string) s
 	if db.SQLRestriction != "" {
 		query += " WHERE " + db.SQLRestriction
 	}
+	query = db.applyUnionAll(query)
 	query = db.applyOrderAndLimit(query)
 	return query
 }
@@ -321,7 +334,7 @@ func (db *Database) BuildUpdateRowQuery(tableName string, record map[string]inte
 	if db.SQLRestriction != "" {
 		query += " WHERE " + db.SQLRestriction
 	}
-
+	query = db.applyUnionAll(query)
 	query = db.applyOrderAndLimit(query)
 	return query, nil
 }
@@ -364,6 +377,19 @@ func (db *Database) applyOrderAndLimit(query string) string {
 	}
 	if db.SQLLimit != "" {
 		query += " " + db.SQLLimit
+	}
+	return query
+}
+
+func (db *Database) applyUnionAll(query string) string {
+	if db == nil || db.Conn == nil {
+		db = Open(db)
+		defer db.Close()
+	}
+	if len(db.SQLUnionAll) > 0 {
+		for _, union := range db.SQLUnionAll {
+			query += " UNION ALL " + union
+		}
 	}
 	return query
 }

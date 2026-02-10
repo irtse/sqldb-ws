@@ -36,6 +36,7 @@ type Database struct {
 	SQLDir         string
 	SQLLimit       string
 	SQLRestriction string
+	SQLUnionAll    []string
 	LogQueries     bool
 	Conn           *sql.DB
 }
@@ -102,6 +103,22 @@ func (d *Database) GetSQLRestriction() string {
 		defer d.Close()
 	}
 	return d.SQLRestriction
+}
+
+func (d *Database) GetSQLUnionAll() []string {
+	if d == nil || d.Conn == nil {
+		d = Open(d)
+		defer d.Close()
+	}
+	return d.SQLUnionAll
+}
+
+func (d *Database) SetSQLUnionAll(unions []string) {
+	if d == nil || d.Conn == nil {
+		d = Open(d)
+		defer d.Close()
+	}
+	d.SQLUnionAll = unions
 }
 
 func (d *Database) SetSQLView(s string) {
@@ -214,6 +231,8 @@ type DB interface {
 	GetSQLDir() string
 	GetSQLLimit() string
 	GetSQLRestriction() string
+	GetSQLUnionAll() []string
+	SetSQLUnionAll(s []string)
 	SetSQLView(s string)
 	SetSQLOrder(s string)
 	SetSQLLimit(s string)

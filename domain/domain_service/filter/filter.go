@@ -286,22 +286,23 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	SQLview := []string{}
 	views, _ := domainParams.Get(utils.RootColumnsParam)
 
-	for _, field := range schema.Fields {
-		manyOK := strings.Contains(field.Type, "many")
-		if len(views) > 0 && !strings.Contains(views, field.Name) || manyOK {
-			continue
+	for _, colsF := range strings.Split(views, ",") { // only on filter columns.
+		if f, err := schema.GetField(strings.TrimSpace(colsF)); err == nil {
+			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
+				SQLview = append(SQLview, f.Name)
+			}
+		} else {
+			SQLview = append(SQLview, "NULL as "+colsF)
 		}
-		if d.Domain.VerifyAuth(d.Domain.GetTable(), field.Name, field.Level, utils.SELECT) {
-			SQLview = append(SQLview, field.Name)
-		}
-	}
+	} // now we want empty if needed but with no pub...
+
 	if p, ok := domainParams.Get(utils.RootCommandRow); ok {
 		decodedLine, err := url.QueryUnescape(p)
 		if err == nil {
 			SQLview = append(SQLview, decodedLine)
 		}
 	}
-	if len(SQLview) > 0 {
+	if len(SQLview) > 0 { // if not found... precise id on all data
 		SQLview = append(SQLview, "id")
 	}
 	return SQLview

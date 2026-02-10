@@ -61,7 +61,8 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 		perms = 1
 	}
 	subrestr := []string{}
-	if schema.Name == ds.DBRequest.Name {
+	switch schema.Name {
+	case ds.DBRequest.Name:
 		subrestr := append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!is_close": true,
 			utils.SpecialIDParam: s.Domain.GetDb().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
@@ -88,7 +89,7 @@ func (s *FilterService) getFilterReadonly(schema sm.SchemaModel, isUpdate bool) 
 			}, true, ds.RequestDBField),
 		}, false)+")")
 		return subrestr
-	} else if schema.Name == ds.DBTask.Name {
+	case ds.DBTask.Name:
 		subrestr := append(subrestr, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			"!is_close": true,
 		}, false)+")")

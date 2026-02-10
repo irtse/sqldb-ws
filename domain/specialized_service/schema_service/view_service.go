@@ -73,9 +73,11 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
+	// additionnal scheme... make up an UNION.
+
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
-		go s.TransformToView(record, false, nil, params, channel, dest_id...)
+		go s.TransformToView(schemas, record, false, nil, params, channel, dest_id...)
 	}
 	for range results {
 		if rec := <-channel; rec != nil {
@@ -83,7 +85,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		}
 	}
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
-		subChan := make(chan utils.Record, len(schemas))
+		/*subChan := make(chan utils.Record, len(schemas))
 		for _, schema := range schemas {
 			go s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
 		}
@@ -96,8 +98,8 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
 				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
 			}
-		}
-		res[0]["items"] = s.Sort(utils.ToList(res[0]["items"]), params)
+		}*/
+		//res[0]["items"] = s.Sort(utils.ToList(res[0]["items"]), params)
 
 		for _, schema := range schemas {
 			if len(res) == 0 {
@@ -135,7 +137,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	return
 }
 
-func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema *models.SchemaModel, domainParams utils.Params,
+func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record utils.Record, multiple bool, schema *models.SchemaModel, domainParams utils.Params,
 	channel chan utils.Record, dest_id ...string) {
 	s.Domain.SetOwn(record.GetBool("own_view"))
 	if schema == nil {
@@ -201,7 +203,7 @@ func (s *ViewService) TransformToView(record utils.Record, multiple bool, schema
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
-			params, datas, rec["max"] = s.fetchData(schema.Name, params, sqlFilter)
+			params, datas, rec["max"] = s.fetchData(schemas, schema.Name, params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
@@ -285,13 +287,27 @@ func (s *ViewService) getFilterDetails(record utils.Record, schema *models.Schem
 		filter, viewFilter, *schema, s.Domain.GetParams())
 	return sqlFilter, view, dir
 }
-func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter string) (utils.Params, utils.Results, int64) {
+func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename string, params utils.Params, sqlFilter string) (utils.Params, utils.Results, int64) {
 	datas := utils.Results{}
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
-		sqlrestr, sqlorder, sqllimit, sqlview := filterserv.NewFilterService(s.Domain).GetQueryFilter(tablename, params, false, sqlFilter)
+		f := filterserv.NewFilterService(s.Domain)
+
+		us := []string{}
+		for _, union := range unionsAlls {
+			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
+			s.Domain.GetDb().ClearQueryFilter()
+			s.Domain.GetDb().SetSQLView(sqlview)
+			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
+			us = append(us, s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false))
+		}
+
+		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
+
 		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
+		s.Domain.GetDb().SetSQLUnionAll(us)
+
 		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false)
 		if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
 			max = utils.ToInt64(res[0]["result"])
@@ -301,6 +317,8 @@ func (s *ViewService) fetchData(tablename string, params utils.Params, sqlFilter
 		s.Domain.GetDb().SetSQLOrder(sqlorder)
 		s.Domain.GetDb().SetSQLLimit(sqllimit)
 		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
+		s.Domain.GetDb().SetSQLUnionAll(us)
+
 		dd, _ := s.Domain.GetDb().SelectQueryWithRestriction(tablename, map[string]interface{}{}, false)
 		for _, d := range dd {
 			datas = append(datas, d)
@@ -462,3 +480,25 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 	}
 	return results
 }
+
+// CORRIGER LE SORT PB MAJEURS :
+/*
+Le tir ne peut fonctionner qu'en UNION si ASC, DESC.
+Donc on doit changer la mécanique de tri.
+
+Si, un schema est enrichie on ne va pas pouvoir filter l'order par cet élément... s'il n'y figure pas, on doit pouvoir
+indiqué à la vue de l'interdire...
+
+l'idée se serait de prefetch... les ID stricts
+
+Si les tables sont compatibles sur les champs de tri :
+
+SELECT id, name, 'tableA' AS source FROM tableA
+UNION ALL
+SELECT id, name, 'tableB' AS source FROM tableB
+UNION ALL
+SELECT id, name, 'tableC' AS source FROM tableC
+ORDER BY name ASC, id ASC
+LIMIT 10
+
+*/
