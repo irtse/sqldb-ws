@@ -303,7 +303,10 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 				}
 			}
 		}
-		f.FieldOrder = fields
+		f.FieldOrder = []models.FieldModel{}
+		for _, v := range fields {
+			f.FieldOrder = append(f.FieldOrder, v)
+		}
 		us := []string{}
 		for _, union := range unionsAlls {
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
