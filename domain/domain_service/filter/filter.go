@@ -289,6 +289,7 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	views, _ := domainParams.Get(utils.RootColumnsParam)
 
 	if len(d.FieldOrder) == 0 {
+		d.FieldOrder = map[string]sm.FieldModel{}
 		for _, f := range schema.Fields {
 			d.FieldOrder[f.Name] = f
 		}
