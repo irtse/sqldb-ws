@@ -301,6 +301,7 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
 			us = append(us, s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false))
 		}
+		fmt.Println("UNIONS ALL", us)
 
 		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
