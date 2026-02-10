@@ -24,15 +24,15 @@ func (db *Database) BuildDeleteQueryWithRestriction(name string, restrictions ma
 }
 
 func (db *Database) BuildSimpleMathQueryWithRestriction(algo string, name string,
-	restrictions interface{}, isOr bool, restr ...string) string {
+	restrictions interface{}, isOr bool, names []string, restr ...string) string {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
 	}
 	query := db.buildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr, restr...)
-	if len(db.GetSQLUnionAll()) > 0 {
-		for _, union := range db.GetSQLUnionAll() {
-			query += " UNION ALL " + db.buildSimpleMathQueryWithRestriction(algo, union, restrictions, isOr, restr...)
+	if len(names) > 0 {
+		for _, name := range names {
+			query += " UNION ALL " + db.buildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr, restr...)
 		}
 	}
 	return query

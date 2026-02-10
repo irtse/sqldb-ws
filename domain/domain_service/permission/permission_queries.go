@@ -49,12 +49,12 @@ func (p *PermDomainService) checkUpdateCreatePermissions(tableName, destID strin
 		utils.RootDestTableIDParam: destID,
 		ds.UserDBField:             domain.GetUserID(),
 		"write":                    true,
-	}, true); err == nil && len(res) > 0 && res[0]["result"] != nil && utils.ToInt64(res[0]["result"]) > 0 {
+	}, true, []string{}); err == nil && len(res) > 0 && res[0]["result"] != nil && utils.ToInt64(res[0]["result"]) > 0 {
 		if res, err := p.db.ClearQueryFilter().SimpleMathQuery("COUNT", ds.DBRequest.Name, map[string]interface{}{
 			ds.SchemaDBField:           sch.ID,
 			utils.RootDestTableIDParam: destID,
 			"is_close":                 false,
-		}, true); err == nil && len(res) > 0 && res[0]["result"] != nil && utils.ToInt64(res[0]["result"]) > 0 {
+		}, true, []string{}); err == nil && len(res) > 0 && res[0]["result"] != nil && utils.ToInt64(res[0]["result"]) > 0 {
 			return true
 		}
 	}
@@ -67,6 +67,6 @@ func (p *PermDomainService) checkUpdateCreatePermissions(tableName, destID strin
 		ds.SchemaDBField:           sch.ID,
 		utils.RootDestTableIDParam: destID,
 		"is_close":                 false,
-	}, false)
+	}, false, []string{})
 	return err == nil && len(res) > 0 && res[0]["result"] != nil && utils.ToInt64(res[0]["result"]) > 0
 }

@@ -39,15 +39,15 @@ func (db *Database) SelectQueryWithRestriction(name string, restrictions interfa
 	return db.QueryAssociativeArray(q)
 }
 
-func (db *Database) SimpleMathQuery(algo string, name string, restrictions interface{}, isOr bool) ([]map[string]interface{}, error) {
+func (db *Database) SimpleMathQuery(algo string, name string, restrictions interface{}, isOr bool, names []string) ([]map[string]interface{}, error) {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
 	}
-	q := db.BuildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr)
+	q := db.BuildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr, names)
 	if strings.Contains(q, "main.") {
 		name = name + " as main "
-		q = db.BuildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr)
+		q = db.BuildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr, names)
 	}
 	return db.QueryAssociativeArray(q)
 }
@@ -98,7 +98,7 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 			n := strings.ReplaceAll(fmt.Sprintf("%v", record["name"]), "'", "''")
 			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
 				"LOWER(REPLACE(name::text, ' ', '')) = LOWER(REPLACE('" + n + "', ' ', ''))",
-			}, false); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) != "0" {
+			}, false, []string{}); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) != "0" {
 				return 0, errors.New("we found a <name> already existing, it should be unique !")
 			}
 		}
@@ -160,7 +160,7 @@ func (db *Database) UpdateQuery(name string, record map[string]interface{}, rest
 			if res, err := db.SimpleMathQuery("COUNT", name, []interface{}{
 				"id=" + fmt.Sprintf("%v", restriction["id"]),
 				"LOWER(REPLACE(name::text, ' ', '')) = LOWER(REPLACE('" + n + "', ' ', ''))",
-			}, false); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) != "0" {
+			}, false, []string{}); err != nil || len(res) == 0 || fmt.Sprintf("%v", res[0]["result"]) != "0" {
 				return errors.New("we found a <name> already existing, it should be unique !")
 			}
 		}
