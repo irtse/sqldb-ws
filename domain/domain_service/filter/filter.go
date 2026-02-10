@@ -306,11 +306,11 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 				SQLview = append(SQLview, f.Name)
 			}
 		} else {
-			typ := strings.ReplaceAll(f.Type, "_add", "")
+			typ := strings.ReplaceAll(ff.Type, "_add", "")
 			if strings.Contains(typ, "link") || strings.Contains(typ, "url") || strings.Contains(typ, "html") || strings.Contains(typ, "upload") {
 				typ = "text"
 			}
-			SQLview = append(SQLview, "NULL::"+ff.Type+" as "+ff.Name)
+			SQLview = append(SQLview, "NULL::"+typ+" as "+ff.Name)
 		}
 	} // now we want empty if needed but with no pub...
 
