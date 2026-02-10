@@ -307,8 +307,10 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 			}
 		} else {
 			typ := strings.ReplaceAll(ff.Type, "_add", "")
-			if strings.Contains(typ, "link") || strings.Contains(typ, "url") || strings.Contains(typ, "html") || strings.Contains(typ, "upload") {
+			if strings.Contains(typ, "url") || strings.Contains(typ, "html") || strings.Contains(typ, "upload") {
 				typ = "text"
+			} else if strings.Contains(typ, "link") {
+				typ = "integer"
 			}
 			SQLview = append(SQLview, "NULL::"+typ+" as "+ff.Name)
 		}
