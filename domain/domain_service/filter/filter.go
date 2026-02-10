@@ -293,6 +293,9 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 			continue
 		}
 		if f, err := schema.GetField(strings.TrimSpace(colsF)); err == nil {
+			if strings.Contains(strings.ToLower(f.Name), "many") {
+				continue
+			}
 			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
 				SQLview = append(SQLview, f.Name)
 			}
@@ -320,9 +323,16 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 				}
 			}
 		}
-		for _, f := range fields {
-			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
-				SQLview = append(SQLview, f.Name)
+		for _, ff := range fields {
+			if strings.Contains(strings.ToLower(ff.Name), "many") {
+				continue
+			}
+			if f, err := schema.GetField(strings.TrimSpace(ff.Name)); err == nil {
+				if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
+					SQLview = append(SQLview, f.Name)
+				}
+			} else {
+				SQLview = append(SQLview, "NULL as "+ff.Name)
 			}
 		}
 		if len(SQLview) > 0 { // if not found... precise id on all data
