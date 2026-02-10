@@ -292,7 +292,7 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
 		f := filterserv.NewFilterService(s.Domain)
-
+		f.AdditionnalSchema = unionsAlls
 		us := []string{}
 		for _, union := range unionsAlls {
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)

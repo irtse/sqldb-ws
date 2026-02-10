@@ -220,6 +220,7 @@ func (db *Database) ClearQueryFilter() *Database {
 	db.SQLView = ""
 	db.SQLLimit = ""
 	db.SQLDir = ""
+	db.SQLUnionAll = []string{}
 	return db
 }
 

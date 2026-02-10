@@ -5,6 +5,7 @@ import (
 	"slices"
 	sch "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	"sqldb-ws/domain/schema/models"
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
@@ -13,7 +14,8 @@ import (
 
 // DONE - ~ 260 LINES - NOT TESTED
 type FilterService struct {
-	Domain utils.DomainITF
+	Domain            utils.DomainITF
+	AdditionnalSchema []*models.SchemaModel
 }
 
 func NewFilterService(domain utils.DomainITF) *FilterService {
@@ -307,6 +309,25 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	}
 	if len(SQLview) > 0 { // if not found... precise id on all data
 		SQLview = append(SQLview, "id")
+	} else {
+		fields := map[string]models.FieldModel{}
+		schs := d.AdditionnalSchema
+		schs = append(schs, &schema)
+		for _, s := range schs {
+			for _, f := range s.Fields {
+				if _, ok := fields[f.Name]; !ok {
+					fields[f.Name] = f
+				}
+			}
+		}
+		for _, f := range fields {
+			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
+				SQLview = append(SQLview, f.Name)
+			}
+		}
+		if len(SQLview) > 0 { // if not found... precise id on all data
+			SQLview = append(SQLview, "id")
+		}
 	}
 	return SQLview
 }
