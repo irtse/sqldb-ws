@@ -288,10 +288,11 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	SQLview := []string{}
 	views, _ := domainParams.Get(utils.RootColumnsParam)
 
-	for _, f := range schema.Fields {
-		d.FieldOrder[f.Name] = f
+	if len(d.FieldOrder) == 0 {
+		for _, f := range schema.Fields {
+			d.FieldOrder[f.Name] = f
+		}
 	}
-
 	cols := []string{}
 	if views != "" {
 		cols = strings.Split(views, ",")

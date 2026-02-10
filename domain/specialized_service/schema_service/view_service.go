@@ -203,6 +203,9 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 		}
 		datas := utils.Results{}
 		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
+			if len(schemas) > 0 {
+				schemas = append(schemas, schema)
+			}
 			params, datas, rec["max"] = s.fetchData(schemas, schema.Name, params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
