@@ -293,15 +293,12 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
 
 			sqlview += sqlview + ",'" + union.Name + "' as source"
-			fmt.Println(sqlview)
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
 			uss = append(uss, union.Name)
 			us = append(us, s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false))
 		}
-		fmt.Println("UNIONS ALL", us)
-
 		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
 
@@ -474,25 +471,3 @@ func (s *ViewService) Sort(results []interface{}, p utils.Params) []interface{} 
 	}
 	return results
 }
-
-// CORRIGER LE SORT PB MAJEURS :
-/*
-Le tir ne peut fonctionner qu'en UNION si ASC, DESC.
-Donc on doit changer la mécanique de tri.
-
-Si, un schema est enrichie on ne va pas pouvoir filter l'order par cet élément... s'il n'y figure pas, on doit pouvoir
-indiqué à la vue de l'interdire...
-
-l'idée se serait de prefetch... les ID stricts
-
-Si les tables sont compatibles sur les champs de tri :
-
-SELECT id, name, 'tableA' AS source FROM tableA
-UNION ALL
-SELECT id, name, 'tableB' AS source FROM tableB
-UNION ALL
-SELECT id, name, 'tableC' AS source FROM tableC
-ORDER BY name ASC, id ASC
-LIMIT 10
-
-*/

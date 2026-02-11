@@ -49,7 +49,6 @@ func (db *Database) SimpleMathQuery(algo string, name string, restrictions inter
 		name = name + " as main "
 		q = db.BuildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr, names)
 	}
-	fmt.Println(q)
 	return db.QueryAssociativeArray(q)
 }
 

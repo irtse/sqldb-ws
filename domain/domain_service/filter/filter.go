@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"fmt"
 	"net/url"
 	"slices"
 	sch "sqldb-ws/domain/schema"
@@ -296,14 +297,15 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	if views != "" {
 		cols = strings.Split(views, ",")
 	}
-
+	fmt.Println("SQLview", SQLview, views)
 	for _, ff := range d.FieldOrder {
 		if strings.Contains(strings.ToLower(ff.Type), "many") || slices.Contains(cols, ff.Name) {
 			continue
 		}
+		fmt.Println("FOUND", ff.Name)
 		if f, err := schema.GetField(strings.TrimSpace(ff.Name)); err == nil {
 			if d.Domain.VerifyAuth(d.Domain.GetTable(), f.Name, f.Level, utils.SELECT) {
-				SQLview = append(SQLview, f.Name)
+				SQLview = append(SQLview, ff.Name)
 			}
 		} else {
 			typ := strings.ReplaceAll(ff.Type, "_add", "")
