@@ -291,7 +291,9 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 		us := []string{}
 		for _, union := range unionsAlls {
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
+
 			sqlview += sqlview + ",'" + union.Name + "' as source"
+			fmt.Println(sqlview)
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
