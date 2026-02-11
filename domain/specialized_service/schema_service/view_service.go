@@ -343,7 +343,7 @@ func (s *ViewService) processData(rec utils.Record, schemas []*models.SchemaMode
 			}
 			switch k {
 			case "items":
-				rec, newOrder = s.extractItems(schemas, utils.ToList(v), k, rec, record, schema, params)
+				rec, newOrder = s.extractItems(utils.ToList(v), k, rec, record, schema, params)
 			default:
 				if recValue, exists := rec[k]; !exists || recValue == "" {
 					rec[k] = v
@@ -368,12 +368,13 @@ func (s *ViewService) extractSchema(value map[string]interface{}, record utils.R
 	return newV
 }
 
-func (s *ViewService) extractItems(schemas []*sm.SchemaModel, value []interface{}, key string, rec utils.Record, record utils.Record,
+func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Record, record utils.Record,
 	schema *sm.SchemaModel, params utils.Params) (utils.Record, []string) {
 	newOrder := []string{}
 	newItem := []interface{}{}
 	for _, item := range value {
 		values := utils.ToMap(item)["values"]
+		fmt.Println(values)
 		if len(s.Domain.DetectFileToSearchIn()) > 0 {
 			isOK := false
 			for search, field := range s.Domain.DetectFileToSearchIn() {
