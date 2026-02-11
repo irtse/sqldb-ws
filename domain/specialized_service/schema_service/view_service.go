@@ -121,9 +121,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 
 func (s *ViewService) filterFilterLine(schema *models.SchemaModel, line string, operator string, params utils.Params, delete bool) (bool, utils.Params) {
 	ok := false
-	if line == "" {
-		return true, params
-	}
 	if operator == "=" {
 		if schema.Label == line || schema.Name == line {
 			ok = true
@@ -161,16 +158,17 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 				}
 			}
 		}
-	}
-	if schema == nil {
-		if len(rschemas) > 0 {
-			schema = rschemas[len(rschemas)-1]
-			rschemas = rschemas[0:(len(rschemas) - 1)]
-		} else {
-			return
+		if schema == nil {
+			if len(rschemas) > 0 {
+				schema = rschemas[len(rschemas)-1]
+				rschemas = rschemas[0:(len(rschemas) - 1)]
+			} else {
+				return
+			}
 		}
+		schemas = rschemas
 	}
-	schemas = rschemas
+
 	dp := domainParams.Copy()
 	if schema == nil {
 		channel <- nil
