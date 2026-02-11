@@ -70,10 +70,6 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 		viewStr = strings.Join(view, ",")
 	}
 
-	if len(db.GetSQLUnionAll()) > 0 {
-		viewStr += viewStr + ",'" + name + "' as source"
-	}
-
 	query := fmt.Sprintf("SELECT %s FROM %s", viewStr, name)
 	kind := reflect.TypeOf(restrictions).Kind()
 	if (kind == reflect.Map && len(restrictions.(map[string]interface{})) > 0) || ((kind == reflect.Array || kind == reflect.Slice) && len(restrictions.([]interface{})) > 0) || db.SQLRestriction != "" {
