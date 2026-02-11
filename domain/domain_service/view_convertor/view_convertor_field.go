@@ -20,6 +20,11 @@ func (s *ViewConvertor) GetFieldsFill(sch *sm.SchemaModel, values map[string]int
 			values[k], _ = s.GetFieldInfo(&f, ds.DBFieldAutoFill.Name)
 		}
 	}
+	if sch.Label == "" {
+		values["type"] = sch.Name
+	} else {
+		values["type"] = sch.Label
+	}
 	return values
 }
 

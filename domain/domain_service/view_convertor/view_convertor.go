@@ -283,6 +283,7 @@ func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel
 		Draft:         utils.GetBool(record, "is_draft"),
 		Synthesis:     synthesisPath,
 		MetaData:      d.getMetaData(l, record, schema),
+		SchemaID:      schema.ID,
 		New:           history.GetNew(utils.GetString(record, utils.SpecialIDParam), schema.ID, d.Domain),
 	}
 }

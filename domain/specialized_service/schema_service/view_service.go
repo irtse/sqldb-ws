@@ -343,8 +343,7 @@ func (s *ViewService) processData(rec utils.Record, schemas []*models.SchemaMode
 			}
 			switch k {
 			case "items":
-
-				rec, newOrder = s.extractItems(schemas, utils.ToList(v), k, rec, record, schema, params, false)
+				rec, newOrder = s.extractItems(schemas, utils.ToList(v), k, rec, record, schema, params)
 			default:
 				if recValue, exists := rec[k]; !exists || recValue == "" {
 					rec[k] = v
@@ -370,18 +369,11 @@ func (s *ViewService) extractSchema(value map[string]interface{}, record utils.R
 }
 
 func (s *ViewService) extractItems(schemas []*sm.SchemaModel, value []interface{}, key string, rec utils.Record, record utils.Record,
-	schema *sm.SchemaModel, params utils.Params, main bool) (utils.Record, []string) {
+	schema *sm.SchemaModel, params utils.Params) (utils.Record, []string) {
 	newOrder := []string{}
 	newItem := []interface{}{}
 	for _, item := range value {
 		values := utils.ToMap(item)["values"]
-		sch := schema
-		if len(schemas) > 0 {
-			sch = view_convertor.NewViewConvertor(s.Domain).SelectSchema(
-				utils.ToString(utils.ToMap(values)["source"]), schema, schemas)
-		}
-		utils.ToMap(item)["schema_id"] = sch.ID
-		utils.ToMap(values)["type"] = sch.Label
 		if len(s.Domain.DetectFileToSearchIn()) > 0 {
 			isOK := false
 			for search, field := range s.Domain.DetectFileToSearchIn() {
@@ -426,11 +418,14 @@ func (s *ViewService) extractItems(schemas []*sm.SchemaModel, value []interface{
 			if strings.Contains(path, ds.DBView.Name) {
 				path = utils.RootDestTableIDParam
 			}
-			utils.ToMap(item)["link_path"] = fmt.Sprintf("/%s/%s?%s=%v", utils.MAIN_PREFIX, sch.Name,
-				utils.RootRowsParam, utils.ToMap(values)[utils.SpecialIDParam])
+			schemaID := utils.ToMap(item)["schema_id"]
+			if sch, err := models.GetSchemaByID(utils.ToInt64(schemaID)); err == nil {
+				utils.ToMap(item)["link_path"] = fmt.Sprintf("/%s/%s?%s=%v", utils.MAIN_PREFIX, sch.Name,
+					utils.RootRowsParam, utils.ToMap(values)[utils.SpecialIDParam])
+			}
 		}
-		rec, record, values = s.getFilter(rec, record, utils.ToMap(values), sch)
-		newOrder, values = view_convertor.GetOrder(sch, record, utils.ToMap(values), newOrder, s.Domain)
+		rec, record, values = s.getFilter(rec, record, utils.ToMap(values), schema)
+		newOrder, values = view_convertor.GetOrder(schema, record, utils.ToMap(values), newOrder, s.Domain)
 		newItem = append(newItem, item)
 		// here its to format by filter depending on task running about this document of viewing, if enable.
 	}

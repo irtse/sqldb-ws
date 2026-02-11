@@ -363,6 +363,7 @@ type ViewItemModel struct {
 	MetaData      *MetaData                `json:"metadata"`
 	SharedBy      []string                 `json:"shared_by"`
 	SharedTo      []string                 `json:"shared_to"`
+	SchemaID      string                   `json:"schema_id"`
 }
 
 type SharingModel struct {
