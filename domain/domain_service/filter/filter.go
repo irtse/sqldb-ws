@@ -317,7 +317,7 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 			SQLview = append(SQLview, "NULL::"+typ+" as "+ff.Name)
 		}
 	} // now we want empty if needed but with no pub...
-
+	fmt.Println("SQLview2", SQLview)
 	if p, ok := domainParams.Get(utils.RootCommandRow); ok {
 		decodedLine, err := url.QueryUnescape(p)
 		if err == nil {
@@ -327,5 +327,6 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 	if len(SQLview) > 0 { // if not found... precise id on all data
 		SQLview = append(SQLview, "id")
 	}
+	fmt.Println("SQLview3", SQLview)
 	return SQLview
 }
