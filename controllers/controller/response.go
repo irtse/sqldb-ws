@@ -266,7 +266,8 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 			order = append(order, utils.ToString(o))
 		}
 	}
-	fmt.Println(colsCmd)
+	fmt.Println(params[utils.RootColumnsParam])
+	fmt.Println(order)
 	if cmd != "" {
 		decodedLine, _ := url.QueryUnescape(cmd)
 		re := strings.Split(decodedLine, " as ")
