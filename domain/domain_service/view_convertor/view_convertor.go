@@ -46,7 +46,7 @@ func (v *ViewConvertor) SelectSchema(source string, schema *sm.SchemaModel, sche
 			return schema
 		}
 	}
-	return nil
+	return schema
 }
 
 func (v *ViewConvertor) transformFullView(schemas []*models.SchemaModel, results utils.Results, schema *sm.SchemaModel, isWorkflow bool, params utils.Params) utils.Results {
@@ -266,6 +266,7 @@ func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel
 	if len(newOrder) > 0 {
 		view.Order = newOrder
 	}
+	fmt.Println("SCHEMA", schema.Name)
 	vals = d.GetFieldsFill(schema, vals)
 	channel <- sm.ViewItemModel{
 		SharedTo:      d.Shared(*schema, utils.GetString(record, utils.SpecialIDParam), false, record),
