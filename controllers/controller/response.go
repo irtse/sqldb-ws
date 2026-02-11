@@ -32,7 +32,7 @@ func (t *AbstractController) Respond(user string, params map[string]string, asLa
 		if pp, ok := params[utils.RootCommandCols]; ok {
 			cmdCols = pp
 		}
-		t.download(domain, cols, cmdCols, cmd, format, params[utils.RootFilename], asLabel, response, err)
+		t.download(domain, cols, cmdCols, cmd, format, params[utils.RootFilename], params, asLabel, response, err)
 		return
 	}
 	t.Response(response, err, "", domain.GetUniqueRedirection()) // send back response
@@ -68,8 +68,8 @@ func (t *AbstractController) Response(resp utils.Results, err error, format stri
 	t.ServeJSON() // then serve response by beego
 }
 
-func (t *AbstractController) download(d utils.DomainITF, col string, colsCmd string, cmd string, format string, name string, mapping map[string]string, resp utils.Results, error error) {
-	cols, lastLine, results := t.mapping(col, colsCmd, cmd, mapping, resp) // mapping
+func (t *AbstractController) download(d utils.DomainITF, col string, colsCmd string, cmd string, format string, name string, params map[string]string, mapping map[string]string, resp utils.Results, error error) {
+	cols, lastLine, results := t.mapping(col, colsCmd, cmd, mapping, params, resp) // mapping
 	t.Ctx.ResponseWriter.Header().Set("Content-Type", "text/"+format)
 	t.Ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename="+name+"_"+strings.Replace(time.Now().Format(time.RFC3339), " ", "_", -1)+"."+format)
 	switch format {
@@ -250,7 +250,7 @@ func (t *AbstractController) xlsx(d utils.DomainITF, colsFunc, mapping map[strin
 	}
 }
 
-func (t *AbstractController) mapping(col string, colsCmd string, cmd string, mapping map[string]string, resp utils.Results) ([]string, map[string]string, utils.Results) {
+func (t *AbstractController) mapping(col string, colsCmd string, cmd string, mapping map[string]string, params map[string]string, resp utils.Results) ([]string, map[string]string, utils.Results) {
 	cols, colsFunc := []string{}, map[string]string{}
 	results := utils.Results{}
 	if len(resp) == 0 {
@@ -258,8 +258,14 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 	}
 	r := resp[0]
 	additionnalCol := ""
-	order := []interface{}{"id"}
-	order = append(order, utils.ToList(r["order"])...)
+	order := []string{"id"}
+	if params[utils.RootColumnsParam] != "" {
+		order = strings.Split(params[utils.RootColumnsParam], ",")
+	} else {
+		for _, o := range utils.ToList(r["order"]) {
+			order = append(order, utils.ToString(o))
+		}
+	}
 	fmt.Println(colsCmd)
 	if cmd != "" {
 		decodedLine, _ := url.QueryUnescape(cmd)
