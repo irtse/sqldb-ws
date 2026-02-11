@@ -6,6 +6,7 @@ import (
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	"sqldb-ws/domain/schema/models"
 	sm "sqldb-ws/domain/schema/models"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	"sqldb-ws/domain/utils"
@@ -22,7 +23,7 @@ func NewRequestService() utils.SpecializedServiceITF {
 
 func (s *RequestService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
 	// TODO: here send back my passive task...
-	res := view_convertor.NewViewConvertor(s.Domain).TransformToView(results, tableName, true, s.Domain.GetParams().Copy())
+	res := view_convertor.NewViewConvertor(s.Domain).TransformToView([]*models.SchemaModel{}, results, tableName, true, s.Domain.GetParams().Copy())
 	if len(results) == 1 && s.Domain.GetMethod() == utils.CREATE {
 		// retrieve... tasks affected to you
 		if r, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{

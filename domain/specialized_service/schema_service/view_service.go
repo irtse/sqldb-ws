@@ -73,8 +73,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
-	// additionnal scheme... make up an UNION.
-
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
 		go s.TransformToView(schemas, record, false, nil, params, channel, dest_id...)
@@ -85,22 +83,6 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 		}
 	}
 	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
-		/*subChan := make(chan utils.Record, len(schemas))
-		for _, schema := range schemas {
-			go s.TransformToView(results[0], true, schema, params, subChan, dest_id...)
-		}
-		res[0]["order"] = append([]interface{}{"type"}, utils.ToList(res[0]["order"])...)
-		for range schemas {
-			if rec := <-subChan; rec != nil {
-				for _, i := range utils.ToList(rec["items"]) {
-					res[0]["items"] = append(utils.ToList(res[0]["items"]), i)
-				}
-				res[0]["new"] = utils.GetInt(res[0], "new") + utils.GetInt(rec, "new")
-				res[0]["max"] = utils.GetInt(res[0], "max") + utils.GetInt(rec, "max")
-			}
-		}*/
-		//res[0]["items"] = s.Sort(utils.ToList(res[0]["items"]), params)
-
 		for _, schema := range schemas {
 			if len(res) == 0 {
 				continue
@@ -209,7 +191,7 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 			params, datas, rec["max"] = s.fetchData(schemas, schema.Name, params, sqlFilter)
 		}
 		newOrder := strings.Split(view, ",")
-		record, rec, newOrder = s.processData(rec, multiple, datas, schema, record, newOrder, params)
+		record, rec, newOrder = s.processData(rec, schemas, datas, schema, record, newOrder, params)
 		if len(newOrder) > 0 {
 			rec["order"] = newOrder
 		}
@@ -340,33 +322,27 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 	return params, datas, max
 }
 
-func (s *ViewService) processData(rec utils.Record, multiple bool, datas utils.Results, schema *sm.SchemaModel,
+func (s *ViewService) processData(rec utils.Record, schemas []*models.SchemaModel, datas utils.Results, schema *sm.SchemaModel,
 	record utils.Record, newOrder []string, params utils.Params) (utils.Record, utils.Record, []string) {
 	if utils.Compare(record["is_empty"], true) {
 		datas = append(datas, utils.Record{})
 	}
 	if !s.Domain.IsShallowed() {
-		treated := utils.Results{}
-		if !multiple {
-			treated = view_convertor.NewViewConvertor(s.Domain).TransformToView(datas, schema.Name, false, params)
-		} else {
-			treated = view_convertor.NewViewConvertor(s.Domain).TransformMultipleSchema(datas, schema, false, params)
+		treated := view_convertor.NewViewConvertor(s.Domain).TransformToView(schemas, datas, schema.Name, false, params)
+		if len(treated) == 0 {
+			return record, rec, newOrder
 		}
-
-		if len(treated) > 0 {
-			if !multiple {
-				rec["schema"] = s.extractSchema(utils.ToMap(treated[0]["schema"]), record, schema, params, newOrder)
+		rec["schema"] = s.extractSchema(utils.ToMap(treated[0]["schema"]), record, schema, params, newOrder)
+		for k, v := range treated[0] {
+			if v == nil {
+				continue
 			}
-			for k, v := range treated[0] {
-				if v != nil {
-					switch k {
-					case "items":
-						rec, newOrder = s.extractItems(utils.ToList(v), k, rec, record, schema, params, false)
-					default:
-						if recValue, exists := rec[k]; !exists || recValue == "" {
-							rec[k] = v
-						}
-					}
+			switch k {
+			case "items":
+				rec, newOrder = s.extractItems(utils.ToList(v), k, rec, record, schema, params, false)
+			default:
+				if recValue, exists := rec[k]; !exists || recValue == "" {
+					rec[k] = v
 				}
 			}
 		}

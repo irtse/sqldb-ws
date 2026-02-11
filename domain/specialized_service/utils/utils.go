@@ -36,7 +36,7 @@ func (s *AbstractSpecializedService) GenerateQueryFilter(tableName string, inner
 }
 
 func (s *AbstractSpecializedService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
-	t := view_convertor.NewViewConvertor(s.Domain).TransformToView(results, tableName, true, s.Domain.GetParams().Copy())
+	t := view_convertor.NewViewConvertor(s.Domain).TransformToView([]*models.SchemaModel{}, results, tableName, true, s.Domain.GetParams().Copy())
 	if scheme, err := schema.GetSchema(tableName); err == nil {
 		if s.Domain.GetMethod() == utils.CREATE && len(results) == 1 && utils.GetBool(results[0], "is_draft") {
 			for _, tt := range t {
@@ -342,7 +342,7 @@ func (s *AbstractSpecializedService) SetDomain(d utils.DomainITF) utils.Speciali
 type SpecializedService struct{ AbstractSpecializedService }
 
 func (s *SpecializedService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
-	t := view_convertor.NewViewConvertor(s.Domain).TransformToView(results, tableName, true, s.Domain.GetParams().Copy())
+	t := view_convertor.NewViewConvertor(s.Domain).TransformToView([]*models.SchemaModel{}, results, tableName, true, s.Domain.GetParams().Copy())
 	if scheme, err := schema.GetSchema(tableName); err == nil {
 		if s.Domain.GetMethod() == utils.CREATE && len(results) == 1 && utils.GetBool(results[0], "is_draft") {
 			for _, tt := range t {

@@ -11,6 +11,7 @@ import (
 	"sqldb-ws/domain/domain_service/triggers"
 	scheme "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	"sqldb-ws/domain/schema/models"
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
 	"strings"
@@ -25,7 +26,7 @@ func NewViewConvertor(domain utils.DomainITF) *ViewConvertor {
 	return &ViewConvertor{Domain: domain, SchemaSeen: map[string]map[string]interface{}{}}
 }
 
-func (v *ViewConvertor) TransformToView(results utils.Results, tableName string, isWorkflow bool, params utils.Params) utils.Results {
+func (v *ViewConvertor) TransformToView(schemas []*models.SchemaModel, results utils.Results, tableName string, isWorkflow bool, params utils.Params) utils.Results {
 	schema, err := scheme.GetSchema(tableName)
 	if err != nil {
 		return utils.Results{}
@@ -33,10 +34,22 @@ func (v *ViewConvertor) TransformToView(results utils.Results, tableName string,
 	if v.Domain.IsShallowed() {
 		return v.transformShallowedView(results, tableName, isWorkflow)
 	}
-	return v.transformFullView(results, &schema, isWorkflow, params)
+	return v.transformFullView(schemas, results, &schema, isWorkflow, params)
 }
 
-func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.SchemaModel, isWorkflow bool, params utils.Params) utils.Results {
+func (v *ViewConvertor) selectSchema(source string, schema *sm.SchemaModel, schemas []*models.SchemaModel) *sm.SchemaModel {
+	if schema.Name == source {
+		return schema
+	}
+	for _, sch := range schemas {
+		if sch.Name == source {
+			return schema
+		}
+	}
+	return nil
+}
+
+func (v *ViewConvertor) transformFullView(schemas []*models.SchemaModel, results utils.Results, schema *sm.SchemaModel, isWorkflow bool, params utils.Params) utils.Results {
 	schemes, id, order, _, addAction, _ := v.GetViewFields(schema.Name, false, results)
 	commentBody := map[string]interface{}{}
 	if len(results) == 1 {
@@ -61,7 +74,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	view.CommentBody = commentBody
 	view.Shortcuts = v.GetShortcuts(schema.ID, addAction)
 	view.Consents = v.getConsent(schema.ID, results)
-	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
+	v.ProcessResultsConcurrently(schemas, results, schema, isWorkflow, &view, params)
 	// if there is only one item in the view, we can set the view readonly to the item readonly
 	if len(view.Items) == 1 {
 		view.Readonly = view.Items[0].Readonly
@@ -118,17 +131,7 @@ func (v *ViewConvertor) transformFullView(results utils.Results, schema *sm.Sche
 	return utils.Results{view.ToRecord()}
 }
 
-func (v *ViewConvertor) TransformMultipleSchema(results utils.Results, schema *sm.SchemaModel, isWorkflow bool, params utils.Params) utils.Results {
-	view := sm.ViewModel{
-		Items: []sm.ViewItemModel{},
-	}
-	v.ProcessResultsConcurrently(results, schema, isWorkflow, &view, params)
-	// if there is only one item in the view, we can set the view readonly to the item readonly
-	sort.SliceStable(view.Items, func(i, j int) bool { return view.Items[i].Sort < view.Items[j].Sort })
-	return utils.Results{view.ToRecord()}
-}
-
-func (v *ViewConvertor) ProcessResultsConcurrently(results utils.Results, schema *sm.SchemaModel, isWorkflow bool, view *sm.ViewModel, params utils.Params) {
+func (v *ViewConvertor) ProcessResultsConcurrently(schemas []*models.SchemaModel, results utils.Results, schema *sm.SchemaModel, isWorkflow bool, view *sm.ViewModel, params utils.Params) {
 	const maxConcurrent = 5
 	runtime.GOMAXPROCS(maxConcurrent)
 	channel := make(chan sm.ViewItemModel, len(results))
@@ -140,7 +143,11 @@ func (v *ViewConvertor) ProcessResultsConcurrently(results utils.Results, schema
 	}()
 	createdIds := history.GetCreatedAccessData(schema.ID, v.Domain)
 	for index, record := range results {
-		go v.ConvertRecordToView(len(results), index, view, channel, record, schema, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
+		sch := schema
+		if len(schemas) > 0 {
+			sch = v.selectSchema(fmt.Sprintf("%v", record["source"]), schema, schemas)
+		}
+		go v.ConvertRecordToView(len(results), index, view, channel, record, sch, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
 	}
 	for range results {
 		rec := <-channel

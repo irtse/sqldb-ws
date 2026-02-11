@@ -7,6 +7,7 @@ import (
 	"sqldb-ws/domain/domain_service/view_convertor"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	"sqldb-ws/domain/schema/models"
 	sm "sqldb-ws/domain/schema/models"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	utils "sqldb-ws/domain/utils"
@@ -73,7 +74,7 @@ func (s *FilterService) TransformToGenericView(results utils.Results, tableName 
 		id := rec.GetString(utils.SpecialIDParam)
 		selected[id] = rec["is_selected"] == nil || utils.Compare(rec["is_selected"], true)
 	}
-	for _, rec := range view_convertor.NewViewConvertor(s.Domain).TransformToView(results, tableName, true, s.Domain.GetParams().Copy()) { // transform to generic view
+	for _, rec := range view_convertor.NewViewConvertor(s.Domain).TransformToView([]*models.SchemaModel{}, results, tableName, true, s.Domain.GetParams().Copy()) { // transform to generic view
 		if rec == nil {
 			continue
 		}

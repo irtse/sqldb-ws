@@ -5,6 +5,7 @@ import (
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	"sqldb-ws/domain/schema/models"
 	servutils "sqldb-ws/domain/specialized_service/utils"
 	utils "sqldb-ws/domain/utils"
 )
@@ -28,7 +29,7 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 			res = append(res, rec)
 		}
 	}
-	rr := view_convertor.NewViewConvertor(s.Domain).TransformToView(res, tableName, true, s.Domain.GetParams().Copy())
+	rr := view_convertor.NewViewConvertor(s.Domain).TransformToView([]*models.SchemaModel{}, res, tableName, true, s.Domain.GetParams().Copy())
 	if _, ok := s.Domain.GetParams().Get(utils.SpecialIDParam); ok && len(results) == 1 && len(rr) == 1 {
 		r := results[0]
 		rr[0]["schema"] = view_convertor.GetNewSchemaByWF(r, rr[0]["schema"].(map[string]interface{}), s.Domain)
