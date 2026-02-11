@@ -202,7 +202,7 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 			rec["group_by"] = f
 		}
 		datas := utils.Results{}
-		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); (!ok || shal != "enable") && !notFound {
+		if shal, ok := s.Domain.GetParams().Get(utils.RootShallow); !ok || shal != "enable" {
 			if len(schemas) > 0 {
 				schemas = append(schemas, schema)
 			}
