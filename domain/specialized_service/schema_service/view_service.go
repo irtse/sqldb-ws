@@ -121,6 +121,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 
 func (s *ViewService) filterFilterLine(schema *models.SchemaModel, line string, operator string, params utils.Params, delete bool) (bool, utils.Params) {
 	ok := false
+	if line == "" {
+		return true, params
+	}
 	if operator == "=" {
 		if schema.Label == line || schema.Name == line {
 			ok = true
