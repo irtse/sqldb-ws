@@ -287,12 +287,15 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 				}
 			}
 		}
+		uss := []string{}
 		us := []string{}
 		for _, union := range unionsAlls {
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
+			sqlview += sqlview + ", '" + union.Name + "' as source"
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
+			uss = append(uss, union.Name)
 			us = append(us, s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false))
 		}
 		fmt.Println("UNIONS ALL", us)
@@ -303,7 +306,7 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
 		s.Domain.GetDb().SetSQLUnionAll(us)
 
-		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false, []string{})
+		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false, uss)
 		if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
 			max = utils.ToInt64(res[0]["result"])
 		}
