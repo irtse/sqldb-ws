@@ -37,7 +37,7 @@ func (v *ViewConvertor) TransformToView(schemas []*models.SchemaModel, results u
 	return v.transformFullView(schemas, results, &schema, isWorkflow, params)
 }
 
-func (v *ViewConvertor) selectSchema(source string, schema *sm.SchemaModel, schemas []*models.SchemaModel) *sm.SchemaModel {
+func (v *ViewConvertor) SelectSchema(source string, schema *sm.SchemaModel, schemas []*models.SchemaModel) *sm.SchemaModel {
 	if schema.Name == source {
 		return schema
 	}
@@ -145,7 +145,7 @@ func (v *ViewConvertor) ProcessResultsConcurrently(schemas []*models.SchemaModel
 	for index, record := range results {
 		sch := schema
 		if len(schemas) > 0 {
-			sch = v.selectSchema(fmt.Sprintf("%v", record["source"]), schema, schemas)
+			sch = v.SelectSchema(fmt.Sprintf("%v", record["source"]), schema, schemas)
 		}
 		go v.ConvertRecordToView(len(results), index, view, channel, record, sch, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
 	}
@@ -462,7 +462,8 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 
 func (s *ViewConvertor) getSynthesis(record utils.Record, schema *sm.SchemaModel) string {
 	taskIDs := ""
-	if schema.Name == ds.DBTask.Name {
+	switch schema.Name {
+	case ds.DBTask.Name:
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				ds.UserDBField: s.Domain.GetUserID(),
@@ -484,7 +485,7 @@ func (s *ViewConvertor) getSynthesis(record utils.Record, schema *sm.SchemaModel
 			}
 
 		}
-	} else if schema.Name == ds.DBRequest.Name {
+	case ds.DBRequest.Name:
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			ds.RequestDBField: record[utils.SpecialIDParam],
 		}, false); err == nil && len(res) > 0 {
@@ -496,7 +497,7 @@ func (s *ViewConvertor) getSynthesis(record utils.Record, schema *sm.SchemaModel
 				taskIDs = strings.Join(is, ",")
 			}
 		}
-	} else {
+	default:
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 			utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				ds.DestTableDBField: record[utils.SpecialIDParam],

@@ -343,7 +343,8 @@ func (s *ViewService) processData(rec utils.Record, schemas []*models.SchemaMode
 			}
 			switch k {
 			case "items":
-				rec, newOrder = s.extractItems(utils.ToList(v), k, rec, record, schema, params, false)
+
+				rec, newOrder = s.extractItems(schemas, utils.ToList(v), k, rec, record, schema, params, false)
 			default:
 				if recValue, exists := rec[k]; !exists || recValue == "" {
 					rec[k] = v
@@ -368,14 +369,19 @@ func (s *ViewService) extractSchema(value map[string]interface{}, record utils.R
 	return newV
 }
 
-func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Record, record utils.Record,
+func (s *ViewService) extractItems(schemas []*sm.SchemaModel, value []interface{}, key string, rec utils.Record, record utils.Record,
 	schema *sm.SchemaModel, params utils.Params, main bool) (utils.Record, []string) {
 	newOrder := []string{}
 	newItem := []interface{}{}
 	for _, item := range value {
 		values := utils.ToMap(item)["values"]
-		utils.ToMap(item)["schema_id"] = schema.ID
-		utils.ToMap(values)["type"] = schema.Label
+		sch := schema
+		if len(schemas) > 0 {
+			sch = view_convertor.NewViewConvertor(s.Domain).SelectSchema(
+				utils.ToString(utils.ToMap(values)["source"]), schema, schemas)
+		}
+		utils.ToMap(item)["schema_id"] = sch.ID
+		utils.ToMap(values)["type"] = sch.Label
 		if len(s.Domain.DetectFileToSearchIn()) > 0 {
 			isOK := false
 			for search, field := range s.Domain.DetectFileToSearchIn() {
@@ -415,19 +421,16 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 				}
 			}
 		}
-		if !main {
-			utils.ToMap(values)["type"] = schema.Label
-		}
 		if utils.Compare(rec["is_list"], true) {
 			path := utils.RootRowsParam
 			if strings.Contains(path, ds.DBView.Name) {
 				path = utils.RootDestTableIDParam
 			}
-			utils.ToMap(item)["link_path"] = fmt.Sprintf("/%s/%s?%s=%v", utils.MAIN_PREFIX, schema.Name,
+			utils.ToMap(item)["link_path"] = fmt.Sprintf("/%s/%s?%s=%v", utils.MAIN_PREFIX, sch.Name,
 				utils.RootRowsParam, utils.ToMap(values)[utils.SpecialIDParam])
 		}
-		rec, record, values = s.getFilter(rec, record, utils.ToMap(values), schema)
-		newOrder, values = view_convertor.GetOrder(schema, record, utils.ToMap(values), newOrder, s.Domain)
+		rec, record, values = s.getFilter(rec, record, utils.ToMap(values), sch)
+		newOrder, values = view_convertor.GetOrder(sch, record, utils.ToMap(values), newOrder, s.Domain)
 		newItem = append(newItem, item)
 		// here its to format by filter depending on task running about this document of viewing, if enable.
 	}
