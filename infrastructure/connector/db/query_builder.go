@@ -69,7 +69,7 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 	if len(view) > 0 {
 		viewStr = strings.Join(view, ",")
 	}
-	if viewStr != "*" && len(db.GetSQLUnionAll()) > 0 {
+	if viewStr != "*" && len(strings.Split(viewStr, ",")) > 1 {
 		viewStr += ",'" + name + "' as source"
 	}
 
