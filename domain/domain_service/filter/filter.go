@@ -297,7 +297,7 @@ func (d *FilterService) viewbyFields(schema sm.SchemaModel, domainParams utils.P
 		cols = strings.Split(views, ",")
 	}
 	for _, ff := range d.FieldOrder {
-		if strings.Contains(strings.ToLower(ff.Type), "many") || slices.Contains(cols, ff.Name) {
+		if strings.Contains(strings.ToLower(ff.Type), "many") || (len(cols) > 0 && !slices.Contains(cols, ff.Name)) {
 			continue
 		}
 		if f, err := schema.GetField(strings.TrimSpace(ff.Name)); err == nil {
