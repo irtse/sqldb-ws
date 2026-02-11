@@ -13,17 +13,17 @@ import (
 
 func (s *ViewConvertor) GetFieldsFill(sch *sm.SchemaModel, values map[string]interface{}) map[string]interface{} {
 	if !s.Domain.GetEmpty() {
+		if sch.Label == "" {
+			values["type"] = sch.Name
+		} else {
+			values["type"] = sch.Label
+		}
 		return values
 	}
 	for k := range values {
 		if f, err := sch.GetField(k); err == nil {
 			values[k], _ = s.GetFieldInfo(&f, ds.DBFieldAutoFill.Name)
 		}
-	}
-	if sch.Label == "" {
-		values["type"] = sch.Name
-	} else {
-		values["type"] = sch.Label
 	}
 	return values
 }

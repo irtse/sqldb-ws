@@ -420,6 +420,7 @@ func (s *ViewService) extractItems(value []interface{}, key string, rec utils.Re
 				path = utils.RootDestTableIDParam
 			}
 			schemaID := utils.ToMap(item)["schema_id"]
+			fmt.Println(schemaID)
 			if sch, err := models.GetSchemaByID(utils.ToInt64(schemaID)); err == nil {
 				utils.ToMap(item)["link_path"] = fmt.Sprintf("/%s/%s?%s=%v", utils.MAIN_PREFIX, sch.Name,
 					utils.RootRowsParam, utils.ToMap(values)[utils.SpecialIDParam])
