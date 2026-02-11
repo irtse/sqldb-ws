@@ -82,11 +82,8 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			res = append(res, rec)
 		}
 	}
-	if len(res) <= 1 && len(schemas) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
+	if len(res) > 0 && !s.Domain.GetEmpty() && !s.Domain.IsShallowed() {
 		for _, schema := range schemas {
-			if len(res) == 0 {
-				continue
-			}
 			typ := models.ViewFieldModel{
 				Label:    "type",
 				Type:     "enum__" + strings.ReplaceAll(schema.Label, "_", " "),
@@ -112,6 +109,9 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 			res[0]["multi_view_path"] = append(res[0]["multi_view_path"].([]interface{}), utils.BuildPath(schema.Name, utils.ReservedParam))
 		}
+		o := []interface{}{"type"}
+		o = append(o, utils.ToList(res[0]["order"])...)
+		res[0]["order"] = o
 	}
 	sort.SliceStable(res, func(i, j int) bool {
 		return utils.ToInt64(res[i]["index"]) <= utils.ToInt64(res[j]["index"])
