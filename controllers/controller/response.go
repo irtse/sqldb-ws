@@ -260,7 +260,7 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 	additionnalCol := ""
 	order := []interface{}{"id"}
 	order = append(order, utils.ToList(r["order"])...)
-	fmt.Println(order)
+	fmt.Println(colsCmd)
 	if cmd != "" {
 		decodedLine, _ := url.QueryUnescape(cmd)
 		re := strings.Split(decodedLine, " as ")
