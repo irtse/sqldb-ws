@@ -43,7 +43,7 @@ func (v *ViewConvertor) SelectSchema(source string, schema *sm.SchemaModel, sche
 	}
 	for _, sch := range schemas {
 		if sch.Name == source {
-			return schema
+			return sch
 		}
 	}
 	return schema
