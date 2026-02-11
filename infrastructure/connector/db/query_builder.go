@@ -69,6 +69,9 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 	if len(view) > 0 {
 		viewStr = strings.Join(view, ",")
 	}
+	if viewStr != "*" {
+		viewStr += ",'" + name + "' as source"
+	}
 
 	query := fmt.Sprintf("SELECT %s FROM %s", viewStr, name)
 	kind := reflect.TypeOf(restrictions).Kind()
