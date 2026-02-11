@@ -266,8 +266,6 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 			order = append(order, utils.ToString(o))
 		}
 	}
-	fmt.Println(params[utils.RootColumnsParam])
-	fmt.Println(order)
 	if cmd != "" {
 		decodedLine, _ := url.QueryUnescape(cmd)
 		re := strings.Split(decodedLine, " as ")
@@ -286,7 +284,6 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 			} else {
 				colsFunc[re[0]] = re[1]
 			}
-
 		}
 	}
 	schema := utils.ToMap(r["schema"])

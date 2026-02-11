@@ -119,6 +119,24 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 	return
 }
 
+func (s *ViewService) filterFilterLine(schema *models.SchemaModel, line string, operator string, params utils.Params, delete bool) (bool, utils.Params) {
+	ok := false
+	if operator == "=" {
+		if schema.Label == line || schema.Name == line {
+			ok = true
+			if delete {
+				params.Delete(func(s string) bool { return s == utils.RootFilterLine })
+			}
+		}
+	} else if schema.Name != line && schema.Label != line {
+		ok = true
+		if delete {
+			params.Delete(func(s string) bool { return s == utils.RootFilterLine })
+		}
+	}
+	return ok, params
+}
+
 func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record utils.Record, multiple bool, schema *models.SchemaModel, domainParams utils.Params,
 	channel chan utils.Record, dest_id ...string) {
 	s.Domain.SetOwn(record.GetBool("own_view"))
@@ -127,33 +145,33 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 			schema = &s
 		}
 	}
+	rschemas := []*models.SchemaModel{}
+	if line, ok := domainParams.Get(utils.RootFilterLine); ok {
+		var ok bool
+		if val, operator, separator := connector.GetFieldInInjection(line, "type"); val != "" {
+			if ok, domainParams = s.filterFilterLine(schema, val, operator, domainParams, separator != "and"); !ok {
+				schema = nil
+			}
+			for _, sch := range schemas {
+				if ok, domainParams = s.filterFilterLine(sch, val, operator, domainParams, separator != "and"); ok {
+					rschemas = append(rschemas, sch)
+				}
+			}
+		}
+	}
+	if schema == nil {
+		if len(rschemas) > 0 {
+			schema = rschemas[len(rschemas)-1]
+			rschemas = rschemas[0:(len(rschemas) - 1)]
+		} else {
+			return
+		}
+	}
+	schemas = rschemas
 	dp := domainParams.Copy()
 	if schema == nil {
 		channel <- nil
 	} else {
-		notFound := false
-		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
-			if val, operator, separator := connector.GetFieldInInjection(line, "type"); val != "" {
-				if separator == "and" {
-					if operator == "=" {
-						if schema.Label != val && schema.Name != val {
-							notFound = true
-						}
-					} else if schema.Name == val || schema.Label == val {
-						notFound = true
-					}
-				} else {
-					if operator == "=" {
-						if schema.Label == val || schema.Name == val {
-							dp.Delete(func(s string) bool { return s == utils.RootFilterLine })
-						}
-					} else if schema.Name != val && schema.Label != val {
-						dp.Delete(func(s string) bool { return s == utils.RootFilterLine })
-					}
-				}
-			}
-		}
-
 		// retrive additionnal view to combine to the main... add a type can be filtered by a filter line
 		// add type onto order and schema plus verify if filter not implied.
 		// may regenerate to get limits... for file... for type and for dest_table_id if needed.
