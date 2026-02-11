@@ -184,9 +184,10 @@ func (t *AbstractController) pdf(d utils.DomainITF, colsFunc, mapping map[string
 	for _, r := range results {
 		for _, c := range cols {
 			v := utils.ToString(r[c])
-			if v == "true" {
+			switch v {
+			case "true":
 				v = "yes"
-			} else if v == "false" {
+			case "false":
 				v = "no"
 			}
 			pdf.CellFormat(40, 10, v, "1", 0, "L", false, 0, "")
@@ -229,9 +230,10 @@ func (t *AbstractController) xlsx(d utils.DomainITF, colsFunc, mapping map[strin
 		row := sheet.AddRow()
 		for _, c := range cols {
 			v := utils.ToString(r[c])
-			if v == "true" {
+			switch v {
+			case "true":
 				v = "yes"
-			} else if v == "false" {
+			case "false":
 				v = "no"
 			}
 			row.AddCell().Value = v
@@ -258,6 +260,7 @@ func (t *AbstractController) mapping(col string, colsCmd string, cmd string, map
 	additionnalCol := ""
 	order := []interface{}{"id"}
 	order = append(order, utils.ToList(r["order"])...)
+	fmt.Println(order)
 	if cmd != "" {
 		decodedLine, _ := url.QueryUnescape(cmd)
 		re := strings.Split(decodedLine, " as ")
