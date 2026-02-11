@@ -145,7 +145,6 @@ func (v *ViewConvertor) ProcessResultsConcurrently(schemas []*models.SchemaModel
 	for index, record := range results {
 		sch := schema
 		if len(schemas) > 0 {
-			fmt.Println(fmt.Sprintf("%v", record["source"]), record)
 			sch = v.SelectSchema(fmt.Sprintf("%v", record["source"]), schema, schemas)
 		}
 		go v.ConvertRecordToView(len(results), index, view, channel, record, sch, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
@@ -266,7 +265,6 @@ func (d *ViewConvertor) ConvertRecordToView(l int, index int, view *sm.ViewModel
 	if len(newOrder) > 0 {
 		view.Order = newOrder
 	}
-	fmt.Println("SCHEMA", schema.Name)
 	vals = d.GetFieldsFill(schema, vals)
 	channel <- sm.ViewItemModel{
 		SharedTo:      d.Shared(*schema, utils.GetString(record, utils.SpecialIDParam), false, record),

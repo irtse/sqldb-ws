@@ -104,9 +104,6 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 	}
 	query = db.applyUnionAll(query)
 	query = db.applyOrderAndLimit(query)
-	if strings.Contains(query, "UNION") {
-		fmt.Println(strings.ReplaceAll(query, "WHERE  ", ""))
-	}
 	return strings.ReplaceAll(query, "WHERE  ", "")
 }
 
