@@ -145,6 +145,7 @@ func (v *ViewConvertor) ProcessResultsConcurrently(schemas []*models.SchemaModel
 	for index, record := range results {
 		sch := schema
 		if len(schemas) > 0 {
+			fmt.Println(fmt.Sprintf("%v", record["source"]), record)
 			sch = v.SelectSchema(fmt.Sprintf("%v", record["source"]), schema, schemas)
 		}
 		go v.ConvertRecordToView(len(results), index, view, channel, record, sch, v.Domain.GetEmpty(), isWorkflow, params, createdIds)
