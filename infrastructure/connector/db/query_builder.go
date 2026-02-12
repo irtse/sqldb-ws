@@ -35,6 +35,7 @@ func (db *Database) BuildSimpleMathQueryWithRestriction(algo string, name string
 			query += " UNION ALL " + db.buildSimpleMathQueryWithRestriction(name, restrictions, isOr)
 		}
 	}
+	fmt.Println("SELECT " + algo + "(*) as result FROM (" + query + ") u")
 	return "SELECT " + algo + "(*) as result FROM (" + query + ") u"
 }
 
