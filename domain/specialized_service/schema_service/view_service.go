@@ -327,6 +327,7 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 
 		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false, uss)
 		if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
+			fmt.Println(res)
 			max = utils.ToInt64(res[0]["result"])
 		}
 		s.Domain.GetDb().ClearQueryFilter()
