@@ -343,13 +343,10 @@ func (d *FilterService) LifeCycleRestriction(tableName string, schemaID string, 
 		SQLrestriction = append(SQLrestriction, connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 			k: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name,
 				map[string]interface{}{
-					"write":  false,
-					"update": false,
-					ds.SchemaDBField: d.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(
-						ds.DBSchema.Name, map[string]interface{}{
-							"name": connector.Quote(tableName),
-						}, false, "id"),
-					ds.UserDBField: d.Domain.GetUserID(),
+					"write":          false,
+					"update":         false,
+					ds.SchemaDBField: schemaID,
+					ds.UserDBField:   d.Domain.GetUserID(),
 				}, false, ds.DestTableDBField),
 		}, false))
 	}
