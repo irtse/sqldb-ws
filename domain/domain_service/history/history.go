@@ -98,7 +98,7 @@ func CountMaxDataAccess(schemaName string, filter []string, domain utils.DomainI
 	}
 	restr, _, _, _ := domain.GetSpecialized(schemaName).GenerateQueryFilter(schemaName, filter...)
 	count := int64(0)
-	res, err := domain.GetDb().ClearQueryFilter().SimpleMathQuery("COUNT", schemaName, []interface{}{restr}, false, []string{})
+	res, err := domain.GetDb().ClearQueryFilter().SimpleMathQuery("COUNT", schemaName, []interface{}{restr}, false)
 	if len(res) == 0 || err != nil || res[0]["result"] == nil {
 		return 0, restr
 	} else {
@@ -127,7 +127,7 @@ func CountNewDataAccess(schema *sm.SchemaModel, filter []string, domain utils.Do
 	filter = []string{restr}
 	filter = append(filter, connector.FormatSQLRestrictionWhereByMap("", newFilter, false))
 	if res, err := domain.GetDb().ClearQueryFilter().SimpleMathQuery("COUNT", schema.Name,
-		utils.ToListAnonymized(filter), false, []string{}); err == nil && len(res) > 0 {
+		utils.ToListAnonymized(filter), false); err == nil && len(res) > 0 {
 		newCount = utils.ToInt64(res[0]["result"])
 	}
 	return newCount, count

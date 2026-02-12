@@ -24,25 +24,12 @@ func (db *Database) BuildDeleteQueryWithRestriction(name string, restrictions ma
 }
 
 func (db *Database) BuildSimpleMathQueryWithRestriction(algo string, name string,
-	restrictions interface{}, isOr bool, names []string, restr ...string) string {
+	restrictions interface{}, isOr bool, restr ...string) string {
 	if db == nil || db.Conn == nil {
 		db = Open(db)
 		defer db.Close()
 	}
 	query := db.buildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr)
-	if len(names) > 0 {
-		for i, n := range names {
-			if strings.Contains(name, "main") {
-				n = n + " as main" + fmt.Sprintf("%v", i) + " "
-			}
-			q := db.buildSimpleMathQueryWithRestriction(algo, n, restrictions, isOr)
-			if strings.Contains(name, "main") {
-				q = strings.ReplaceAll(q, "main.", "main"+fmt.Sprintf("%v", i)+".")
-			}
-			query += " UNION ALL " + q
-		}
-	}
-	fmt.Println(query)
 	return query
 }
 

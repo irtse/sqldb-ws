@@ -306,25 +306,26 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 				}
 			}
 		}
-		uss := []string{}
 		us := []string{}
 		for i, union := range unionsAlls {
 			if union.Name == tablename {
 				continue
 			}
-			fmt.Println(sqlFilter)
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
-			uss = append(uss, union.Name)
 			q := s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false)
 			if strings.Contains(q, "main") {
 				q = s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name+" as main", map[string]interface{}{}, false)
 			}
-			s := strings.ReplaceAll(strings.ReplaceAll(q, "main.", "main"+fmt.Sprintf("%v", i)+"."),
+			ss := strings.ReplaceAll(strings.ReplaceAll(q, "main.", "main"+fmt.Sprintf("%v", i)+"."),
 				"as main", "as main"+fmt.Sprintf("%v", i))
-			us = append(us, s)
+			us = append(us, ss)
+			res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", union.Name, []interface{}{}, false)
+			if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
+				max += utils.ToInt64(res[0]["result"])
+			}
 		}
 		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
@@ -332,9 +333,9 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 		s.Domain.GetDb().SetSQLRestriction(sqlrestr)
 		s.Domain.GetDb().SetSQLUnionAll(us)
 
-		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false, uss)
+		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false)
 		if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
-			max = utils.ToInt64(res[0]["result"])
+			max += utils.ToInt64(res[0]["result"])
 		}
 		s.Domain.GetDb().ClearQueryFilter()
 		s.Domain.GetDb().SetSQLView(sqlview)

@@ -243,7 +243,7 @@ type DB interface {
 	ClearQueryFilter() *Database
 	DeleteQueryWithRestriction(name string, restrictions map[string]interface{}, isOr bool) error
 	SelectQueryWithRestriction(name string, restrictions interface{}, isOr bool) ([]map[string]interface{}, error)
-	SimpleMathQuery(algo string, name string, restrictions interface{}, isOr bool, names []string) ([]map[string]interface{}, error)
+	SimpleMathQuery(algo string, name string, restrictions interface{}, isOr bool) ([]map[string]interface{}, error)
 	MathQuery(algo string, name string, naming ...string) ([]map[string]interface{}, error)
 	SchemaQuery(name string) ([]map[string]interface{}, error)
 	ListTableQuery() ([]map[string]interface{}, error)
@@ -251,7 +251,7 @@ type DB interface {
 	UpdateQuery(name string, record map[string]interface{}, restriction map[string]interface{}, isOr bool) error
 	DeleteQuery(name string, colName string) error
 	BuildDeleteQueryWithRestriction(name string, restrictions map[string]interface{}, isOr bool) string
-	BuildSimpleMathQueryWithRestriction(algo string, name string, restrictions interface{}, isOr bool, names []string, restr ...string) string
+	BuildSimpleMathQueryWithRestriction(algo string, name string, restrictions interface{}, isOr bool, restr ...string) string
 	BuildSelectQueryWithRestriction(name string, restrictions interface{}, isOr bool, view ...string) string
 	BuildMathQuery(algo string, name string, naming ...string) string
 	BuildDeleteQuery(tableName string, colName string) string

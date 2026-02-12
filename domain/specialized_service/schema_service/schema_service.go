@@ -105,7 +105,7 @@ func (s *SchemaService) SpecializedCreateRow(record map[string]interface{}, tabl
 			var index int64 = 2
 			if count, err := s.Domain.GetDb().ClearQueryFilter().SimpleMathQuery(
 				"COUNT", ds.DBView.Name, map[string]interface{}{ds.SchemaDBField: utils.ToString(schema.ID)},
-				false, []string{}); err == nil && len(count) > 0 && (utils.ToInt64(count[0]["result"])+1) > 1 {
+				false); err == nil && len(count) > 0 && (utils.ToInt64(count[0]["result"])+1) > 1 {
 				index = utils.ToInt64(count[0]["result"]) + 1
 			}
 			cat := "data"
