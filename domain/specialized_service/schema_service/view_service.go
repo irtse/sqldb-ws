@@ -323,7 +323,6 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			}
 			s := strings.ReplaceAll(strings.ReplaceAll(q, "main.", "main"+fmt.Sprintf("%v", i)+"."),
 				"as main", "as main"+fmt.Sprintf("%v", i))
-			fmt.Println(s)
 			us = append(us, s)
 		}
 		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
@@ -334,7 +333,6 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 
 		res, err := s.Domain.GetDb().SimpleMathQuery("COUNT", tablename, []interface{}{}, false, uss)
 		if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
-			fmt.Println(res)
 			max = utils.ToInt64(res[0]["result"])
 		}
 		s.Domain.GetDb().ClearQueryFilter()

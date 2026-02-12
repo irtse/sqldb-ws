@@ -42,6 +42,7 @@ func (db *Database) BuildSimpleMathQueryWithRestriction(algo string, name string
 			query += " UNION ALL " + q
 		}
 	}
+	fmt.Println(query)
 	return query
 }
 
