@@ -312,6 +312,7 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			if union.Name == tablename {
 				continue
 			}
+			fmt.Println(sqlFilter)
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
