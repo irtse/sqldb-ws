@@ -308,7 +308,7 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 		}
 		uss := []string{}
 		us := []string{}
-		for _, union := range unionsAlls {
+		for i, union := range unionsAlls {
 			if union.Name == tablename {
 				continue
 			}
@@ -317,7 +317,9 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
 			uss = append(uss, union.Name)
-			us = append(us, s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false))
+			us = append(us, strings.ReplaceAll(
+				strings.ReplaceAll(s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false), "main.", "main"+fmt.Sprintf("%v", i)+"."),
+				"as main", "as main"+fmt.Sprintf("%v", i)))
 		}
 		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
