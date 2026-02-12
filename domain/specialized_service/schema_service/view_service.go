@@ -317,9 +317,11 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
 			uss = append(uss, union.Name)
-			us = append(us, strings.ReplaceAll(
+			s := strings.ReplaceAll(
 				strings.ReplaceAll(s.Domain.GetDb().BuildSelectQueryWithRestriction(union.Name, map[string]interface{}{}, false), "main.", "main"+fmt.Sprintf("%v", i)+"."),
-				"as main", "as main"+fmt.Sprintf("%v", i)))
+				"as main", "as main"+fmt.Sprintf("%v", i))
+			fmt.Println(s)
+			us = append(us, s)
 		}
 		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
