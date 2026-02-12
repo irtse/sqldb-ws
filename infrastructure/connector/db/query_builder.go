@@ -29,20 +29,19 @@ func (db *Database) BuildSimpleMathQueryWithRestriction(algo string, name string
 		db = Open(db)
 		defer db.Close()
 	}
-	query := db.buildSimpleMathQueryWithRestriction(name, restrictions, isOr)
+	query := db.buildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr)
 	if len(names) > 0 {
 		for _, name := range names {
-			query += " UNION ALL " + db.buildSimpleMathQueryWithRestriction(name, restrictions, isOr)
+			query += " UNION ALL " + db.buildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr)
 		}
 	}
-	fmt.Println("SELECT " + algo + "(*) as result FROM (" + query + ") u")
-	return "SELECT " + algo + "(*) as result FROM (" + query + ") u"
+	return query
 }
 
-func (db *Database) buildSimpleMathQueryWithRestriction(name string,
+func (db *Database) buildSimpleMathQueryWithRestriction(algo string, name string,
 	restrictions interface{}, isOr bool) string {
-	col := "id" // default to all columns
-	query := "SELECT " + col + " FROM " + name
+	col := "*" // default to all columns
+	query := "SELECT " + algo + "(" + col + ") as result FROM " + name
 	kind := reflect.TypeOf(restrictions).Kind()
 	if kind == reflect.Map && len(restrictions.(map[string]interface{})) > 0 {
 		if t := FormatSQLRestrictionWhereByMap("", restrictions.(map[string]interface{}), isOr); t != "" {

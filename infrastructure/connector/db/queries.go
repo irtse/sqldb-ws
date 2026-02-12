@@ -49,7 +49,18 @@ func (db *Database) SimpleMathQuery(algo string, name string, restrictions inter
 		name = name + " as main "
 		q = db.BuildSimpleMathQueryWithRestriction(algo, name, restrictions, isOr, names)
 	}
-	return db.QueryAssociativeArray(q)
+	i := 0
+	resp, err := db.QueryAssociativeArray(q)
+	if err == nil {
+		for _, r := range resp {
+			if y, err := strconv.Atoi(fmt.Sprintf("%v", r["result"])); err == nil {
+				i += y
+			}
+		}
+	}
+	return []map[string]interface{}{
+		{"result": i},
+	}, err
 }
 
 func (db *Database) MathQuery(algo string, name string, naming ...string) ([]map[string]interface{}, error) {
