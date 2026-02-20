@@ -157,16 +157,16 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 					rschemas = append(rschemas, sch)
 				}
 			}
-		}
-		if schema == nil {
-			if len(rschemas) > 0 {
-				schema = rschemas[len(rschemas)-1]
-				rschemas = rschemas[0:(len(rschemas) - 1)]
-			} else {
-				return
+			if schema == nil {
+				if len(rschemas) > 0 {
+					schema = rschemas[len(rschemas)-1]
+					rschemas = rschemas[0:(len(rschemas) - 1)]
+				} else {
+					return
+				}
 			}
+			schemas = rschemas
 		}
-		schemas = rschemas
 	}
 
 	dp := domainParams.Copy()
