@@ -65,7 +65,7 @@ func (db *Database) BuildSelectQueryWithRestriction(name string, restrictions in
 		viewStr = strings.Join(view, ",")
 	}
 	if viewStr != "*" && len(strings.Split(viewStr, ",")) > 1 {
-		viewStr += ",'" + strings.ReplaceAll(name, " as main ", "") + "' as source"
+		viewStr += ",'" + strings.ReplaceAll(name, " as main", "") + "' as source"
 	}
 
 	query := fmt.Sprintf("SELECT %s FROM %s", viewStr, name)
