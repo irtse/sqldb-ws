@@ -81,14 +81,14 @@ func (f *FilterService) GetQueryFilter(tableName string, domainParams utils.Para
 		} else if id, _ := domainParams.Get(utils.SpecialIDParam); id != "" {
 			SQLrestriction = append(SQLrestriction, "id="+id)
 		}
-		if f.Domain.GetMethod() != utils.DELETE && !avoidUser && !schema.IsAssociated {
+		if f.Domain.GetMethod() != utils.DELETE && !avoidUser {
 			SQLrestriction = f.RestrictionByEntityUser(schema, SQLrestriction, false, hierarchy, hierarchOnly) // admin can see all on admin view
 		}
 		SQLrestriction = f.GetFilterEdit(SQLrestriction, schema)
 		SQLrestriction = f.GetFilterDelete(SQLrestriction, schema)
 	}
 
-	return strings.Join(SQLrestriction, " AND "), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
+	return strings.ReplaceAll(strings.Join(SQLrestriction, " AND "), " AND ()", ""), strings.Join(SQLOrder, ","), SQLLimit, strings.Join(SQLview, ",")
 }
 
 func (d *FilterService) RestrictionBySchema(tableName string, restr []string, domainParams utils.Params) []string {
@@ -169,46 +169,46 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 }
 
 func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []string, overrideOwn bool, hierarch bool, hierarchOnly bool) []string {
-	if s.Domain.GetMethod() == utils.UPDATE || s.Domain.GetMethod() == utils.DELETE || schema.Name == ds.DBView.Name {
+	if s.Domain.GetMethod() != utils.SELECT || schema.Name == ds.DBView.Name {
 		return restr
 	}
 	newRestr := map[string]interface{}{}
 	restrictions := map[string]interface{}{}
-	if s.Domain.IsOwn(false, true, s.Domain.GetMethod()) {
+	if s.Domain.IsOwn(false, true, s.Domain.GetMethod()) || overrideOwn {
 		if !s.Domain.IsShallowed() && ds.DBView.Name != schema.Name {
 			m := map[string]interface{}{}
 			if hierarch {
-				m[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d1",
+				m[utils.SpecialIDParam+"_1"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name,
 					map[string]interface{}{
-						"d1." + ds.SchemaDBField:    schema.ID,
-						"d1." + ds.DestTableDBField: "main.id",
-						"d1." + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+						ds.SchemaDBField:    schema.ID,
+						ds.DestTableDBField: "main.id",
+						ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
 							"parent_" + ds.UserDBField: s.Domain.GetUserID(),
 						}, false, ds.UserDBField),
-						"d.write": true,
+						"write": true,
 					}, false, ds.DestTableDBField)
-				m[utils.SpecialIDParam+"_2"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name+" as d2", map[string]interface{}{
-					"d2." + ds.SchemaDBField:      schema.ID,
-					"d2." + ds.DestTableDBField:   "main.id",
-					"d2.read_access":              true,
-					"d2.shared_" + ds.UserDBField: s.Domain.GetUserID(),
+				m[utils.SpecialIDParam+"_2"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+					ds.SchemaDBField:           schema.ID,
+					ds.DestTableDBField:        "main.id",
+					"read_access":              true,
+					"shared_" + ds.UserDBField: s.Domain.GetUserID(),
 				}, false, ds.DestTableDBField)
 			}
 			if !hierarchOnly {
-				m := map[string]interface{}{
-					utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name+" as d",
+				m = map[string]interface{}{
+					utils.SpecialIDParam: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBDataAccess.Name,
 						map[string]interface{}{
-							"d." + ds.SchemaDBField:    schema.ID,
-							"d." + ds.DestTableDBField: "main.id",
-							"d." + ds.UserDBField:      s.Domain.GetUserID(),
-							"d.write":                  true,
+							ds.SchemaDBField:    schema.ID,
+							ds.DestTableDBField: "main.id",
+							ds.UserDBField:      s.Domain.GetUserID(),
+							"write":             true,
 						}, false, ds.DestTableDBField),
 				}
-				m[utils.SpecialIDParam+"_3"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name+" as d2", map[string]interface{}{
-					"d2." + ds.SchemaDBField:    schema.ID,
-					"d2." + ds.DestTableDBField: "main.id",
-					"d2.read_access":            true,
-					"d2.shared_" + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+				m[utils.SpecialIDParam+"_3"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+					ds.SchemaDBField:    schema.ID,
+					ds.DestTableDBField: "main.id",
+					"read_access":       true,
+					"shared_" + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
 						"parent_" + ds.UserDBField: s.Domain.GetUserID(),
 					}, false, ds.UserDBField),
 				}, false, ds.DestTableDBField)

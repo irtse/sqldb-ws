@@ -185,7 +185,7 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 			_, ok := params.Values[k]
 			return !ok && k != "new" && !strings.Contains(k, "dest_table") && k != "id"
 		})
-		sqlFilter, view, dir := s.getFilterDetails(record, schema)
+		_, view, dir := s.getFilterDetails(record, schema)
 		params.UpdateParamsWithFilters(view, dir)
 		params.EnrichCondition(dp.Values, func(k string) bool {
 			return k != utils.RootRowsParam && k != utils.SpecialIDParam && k != utils.RootTableParam
@@ -207,7 +207,7 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 			if len(schemas) > 0 {
 				schemas = append(schemas, schema)
 			}
-			params, datas, rec["max"] = s.fetchData(schemas, schema.Name, params, sqlFilter)
+			params, datas, rec["max"] = s.fetchData(schemas, schema.Name, params, record)
 		}
 		newOrder := strings.Split(view, ",")
 		record, rec, newOrder = s.processData(rec, schemas, datas, schema, record, newOrder, params)
@@ -291,7 +291,7 @@ func (s *ViewService) getFilterDetails(record utils.Record, schema *models.Schem
 		filter, viewFilter, *schema, s.Domain.GetParams())
 	return sqlFilter, view, dir
 }
-func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename string, params utils.Params, sqlFilter string) (utils.Params, utils.Results, int64) {
+func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename string, params utils.Params, record utils.Record) (utils.Params, utils.Results, int64) {
 	datas := utils.Results{}
 	max := int64(0)
 	if !s.Domain.GetEmpty() {
@@ -311,7 +311,12 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			if union.Name == tablename {
 				continue
 			}
+			sqlFilter := ""
+			if sch, err := schserv.GetSchema(union.Name); err == nil {
+				sqlFilter, _, _ = s.getFilterDetails(record, &sch)
+			}
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
+			fmt.Println(sqlFilter)
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)
@@ -326,6 +331,10 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			if !(len(res) == 0 || err != nil || res[0]["result"] == nil) {
 				max += utils.ToInt64(res[0]["result"])
 			}
+		}
+		sqlFilter := ""
+		if sch, err := schserv.GetSchema(tablename); err == nil {
+			sqlFilter, _, _ = s.getFilterDetails(record, &sch)
 		}
 		sqlrestr, sqlorder, sqllimit, sqlview := f.GetQueryFilter(tablename, params, false, sqlFilter)
 		s.Domain.GetDb().ClearQueryFilter()
