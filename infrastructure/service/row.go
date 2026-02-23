@@ -124,7 +124,7 @@ func (t *TableRowService) Delete(restriction ...string) ([]map[string]interface{
 	if _, err = t.setupFilter(map[string]interface{}{}, false, true, restriction...); err != nil {
 		return nil, err
 	}
-	if t.Results, err = t.Get(restriction...); err == nil {
+	if t.Results, err = t.DB.SelectQueryWithRestriction(t.Table.Name, map[string]interface{}{}, false); err != nil {
 		if t.DB.GetSQLRestriction() == "" {
 			return t.DBError(nil, errors.New("no restriction can't delete all"))
 		} else if err = t.DB.DeleteQuery(t.Table.Name, ""); err != nil {

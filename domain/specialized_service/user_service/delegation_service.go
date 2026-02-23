@@ -2,6 +2,7 @@ package user_service
 
 import (
 	"errors"
+	"fmt"
 	ds "sqldb-ws/domain/schema/database_resources"
 	task "sqldb-ws/domain/specialized_service/task_service"
 	servutils "sqldb-ws/domain/specialized_service/utils"
@@ -168,6 +169,7 @@ func (s *DelegationService) Trigger(rr map[string]interface{}, db *connector.Dat
 }
 
 func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{}, tableName string) {
+	fmt.Println(results)
 	for i, res := range results {
 		share := map[string]interface{}{
 			ds.DelegationDBField: res[utils.SpecialIDParam],
