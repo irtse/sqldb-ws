@@ -316,7 +316,6 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 				sqlFilter, _, _ = s.getFilterDetails(record, &sch)
 			}
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
-			fmt.Println(sqlFilter)
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
 			s.Domain.GetDb().SetSQLRestriction(sqlrestr)

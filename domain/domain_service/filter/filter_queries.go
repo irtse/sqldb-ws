@@ -210,7 +210,6 @@ func (s *FilterService) GetFilterEdit(restr []string, schema sm.SchemaModel) []s
 }
 
 func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.SchemaModel) (bool, bool, string) {
-	fmt.Println("ProcessFilterRestriction")
 	if filterID == "" {
 		return false, false, ""
 	}
@@ -232,7 +231,6 @@ func (s *FilterService) ProcessFilterRestriction(filterID string, schema sm.Sche
 				}
 			}
 			if utils.GetBool(field, "is_task_concerned") {
-				fmt.Println("is_task_concerned")
 				filter = append(filter, "("+connector.FormatSQLRestrictionWhereByMap("", map[string]interface{}{
 					"!0": s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 						"is_close":          false,

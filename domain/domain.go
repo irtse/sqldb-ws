@@ -180,7 +180,6 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 		}
 		return d.Invoke(record, method, args...)
 	}
-	fmt.Println(params.Values)
 	return utils.Results{}, errors.New("no service available " + d.TableName + " " + method.String())
 }
 
