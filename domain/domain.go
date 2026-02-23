@@ -139,7 +139,11 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 	d.Params = params
 	d.Mode, _ = params.Get(utils.RootFilterMode)
 	d.onBooleanValue(utils.RootShallow, func(b bool) { d.Shallowed = b })
-	if tablename, ok := params.Get(utils.RootTableParam); ok { // retrieve tableName in query (not optionnal)
+	tablename, ok := params.Get(utils.RootTableParam)
+	if ok {
+		d.TableName = strings.ToLower(schserv.GetTablename(tablename))
+	}
+	if d.TableName != "" { // retrieve tableName in query (not optionnal)
 		d.TableName = strings.ToLower(schserv.GetTablename(tablename))
 		specializedService := domain.SpecializedService(d.TableName)
 		d.SpecializedService = specializedService.SetDomain(d)
