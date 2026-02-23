@@ -180,8 +180,8 @@ func (s *DelegationService) SpecializedDeleteRow(results []map[string]interface{
 				ds.UserDBField:                res[ds.UserDBField],
 			}, false),
 		}
-		currentTime := time.Now()
-		arr = append(arr, "('"+currentTime.Format("2006-01-02 15:04:05")+"' >= start_date AND ('"+currentTime.Format("2006-01-02 15:04:05")+"' < end_date OR end_date IS NULL))")
+		// currentTime := time.Now()
+		// arr = append(arr, "('"+currentTime.Format("2006-01-02 15:04:05")+"' >= start_date AND ('"+currentTime.Format("2006-01-02 15:04:05")+"' < end_date OR end_date IS NULL))")
 		if rr, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBDelegation.Name, arr, false); err == nil && len(rr) == 0 {
 			s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 				"is_close":     false,
