@@ -144,7 +144,6 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 		d.TableName = strings.ToLower(schserv.GetTablename(tablename))
 	}
 	if d.TableName != "" { // retrieve tableName in query (not optionnal)
-		d.TableName = strings.ToLower(schserv.GetTablename(tablename))
 		specializedService := domain.SpecializedService(d.TableName)
 		d.SpecializedService = specializedService.SetDomain(d)
 		if d.Db == nil || d.Db.Conn == nil {
@@ -166,7 +165,7 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 			d.Method = utils.SELECT
 		}
 		if !d.SuperAdmin && !d.PermsService.PermsCheck(d.TableName, "", "", d.Own, d.Method, d) && !d.AutoLoad && method != utils.DELETE {
-			return utils.Results{}, errors.New("not authorized to " + method.String() + " " + d.TableName + " data")
+			return utils.Results{}, errors.New("not authorized to " + method.String() + " <" + d.TableName + "> data")
 		}
 		// load the highest entity avaiable Table level.
 		d.Service = infrastructure.NewTableService(d.Db, d.SuperAdmin, d.User, strings.ToLower(d.TableName))
