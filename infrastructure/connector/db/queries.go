@@ -19,7 +19,7 @@ func (db *Database) DeleteQueryWithRestriction(name string, restrictions map[str
 		name = name + " as main "
 		q = db.BuildDeleteQueryWithRestriction(name, restrictions, isOr)
 	}
-	if strings.Contains(q, "dbshare") || strings.Contains(q, "dbdelegation") {
+	if strings.Contains(q, "dbshare") || strings.Contains(q, "dbdelegation") || strings.Contains(q, "dbtask") {
 		fmt.Println(q)
 	}
 	_, err := db.Conn.Exec(q)
