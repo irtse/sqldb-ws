@@ -130,6 +130,7 @@ func (t *TableRowService) Delete(restriction ...string) ([]map[string]interface{
 		} else if err = t.DB.DeleteQuery(t.Table.Name, ""); err != nil {
 			return t.DBError(nil, err)
 		}
+		fmt.Println("SpecializedDeleteRow", t.SpecializedService, t.Results, t.Table.Name)
 		t.SpecializedService.SpecializedDeleteRow(t.Results, t.Table.Name)
 	}
 	return t.Results, err

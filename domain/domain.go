@@ -180,7 +180,7 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 		}
 		return d.Invoke(record, method, args...)
 	}
-	return utils.Results{}, errors.New("no service available")
+	return utils.Results{}, errors.New("no service available " + d.TableName + " " + method.String())
 }
 
 func (d *SpecializedDomain) GetRowResults(
@@ -268,7 +268,7 @@ func (d *SpecializedDomain) Invoke(record utils.Record, method utils.Method, arg
 	var err error
 	res := []map[string]interface{}{}
 	if d.Service == nil {
-		return utils.ToResult(res), errors.New("no service available")
+		return utils.ToResult(res), errors.New("no service available " + d.TableName + " " + method.String())
 	}
 	switch method {
 	case utils.CREATE:
