@@ -30,8 +30,8 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 	delete(record, ds.SchemaDBField)
 	delete(record, ds.DestTableDBField)
 
-	if record["dbtask_id"] != nil {
-		record["all_tasks"] = false
+	if utils.GetBool(record, "all_tasks") {
+		record["dbtask_id"] = nil
 	}
 
 	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
