@@ -19,6 +19,9 @@ func (db *Database) DeleteQueryWithRestriction(name string, restrictions map[str
 		name = name + " as main "
 		q = db.BuildDeleteQueryWithRestriction(name, restrictions, isOr)
 	}
+	if strings.Contains(q, "dbshare") || strings.Contains(q, "dbdelegation") {
+		fmt.Println(q)
+	}
 	_, err := db.Conn.Exec(q)
 	if err != nil {
 		return nil
@@ -209,9 +212,6 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 	}
 	q = strings.ReplaceAll(q, " AND ((end_date >= start_date)) OR ((end_date IS  NULL)) AND ((start_date >= NOW()))", "")
 	_, err := db.Conn.Exec(q)
-	if strings.Contains(q, "dbdelegation") {
-		fmt.Println(q)
-	}
 	return err
 
 }
