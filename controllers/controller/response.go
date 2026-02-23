@@ -18,7 +18,7 @@ func (t *AbstractController) Respond(user string, params map[string]string, asLa
 		params[utils.RootRawView] = "disable"
 	}
 	response, err := domain.Call(utils.NewParams(params), t.Body(true), method, args...)
-	if method != utils.SELECT {
+	if method != utils.SELECT && method == utils.WEBSOCKET {
 		t.WebsocketTrigger(user, utils.NewParams(params), domain, args...)
 	}
 	if format, ok := params[utils.RootExport]; ok {

@@ -63,7 +63,7 @@ func (t *AbstractController) WebSocketController(w *context.Response, r *http.Re
 		t.Response(utils.Results{}, errors.New("can't found table name"), "", "")
 		return
 	}
-	if rowName, ok = params.Get(utils.RootTableParam); !ok {
+	if rowName, ok = params.Get(utils.RootRowsParam); !ok {
 		t.Response(utils.Results{}, errors.New("can't found row name"), "", "")
 		return
 	}
@@ -110,7 +110,7 @@ func (t *AbstractController) WebsocketTrigger(user string, params utils.Params, 
 	}
 	ok := false
 	var tableName, rowName string = "", ""
-	if tableName, ok = params.Get(utils.RootRowsParam); !ok {
+	if tableName, ok = params.Get(utils.RootTableParam); !ok {
 		t.Response(utils.Results{}, errors.New("can't found table name"), "", "")
 		return
 	}
