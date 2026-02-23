@@ -59,11 +59,11 @@ func (t *AbstractController) WebSocketController(w *context.Response, r *http.Re
 	defer conn.Close()
 	ok := false
 	var tableName, rowName string = "", ""
-	if tableName, ok = params.Get(utils.RootRowsParam); !ok {
+	if tableName, ok = params.Get(utils.RootTableParam); !ok {
 		t.Response(utils.Results{}, errors.New("can't found table name"), "", "")
 		return
 	}
-	if rowName, ok = params.Get(utils.RootRowsParam); !ok {
+	if rowName, ok = params.Get(utils.RootTableParam); !ok {
 		t.Response(utils.Results{}, errors.New("can't found row name"), "", "")
 		return
 	}
