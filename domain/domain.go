@@ -180,6 +180,7 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 		}
 		return d.Invoke(record, method, args...)
 	}
+	fmt.Println(params.Values)
 	return utils.Results{}, errors.New("no service available " + d.TableName + " " + method.String())
 }
 
@@ -254,7 +255,7 @@ func (d *SpecializedDomain) GetRowResults(
 					history.NewDataAccess(sch.GetID(), strings.Split(ids, ","), utils.Record{}, d)
 				}
 			}
-			if p != "enable" && err == nil && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
+			if p != "enable" && !slices.Contains(EXCEPTION_FUNC, d.Method.Calling()) {
 				res = specializedService.TransformToGenericView(res, d.TableName, d.Params.GetAsArgs(utils.RootDestIDParam)...)
 				d.Redirections = append(d.Redirections, d.GetRedirections(res)...)
 			}
@@ -268,7 +269,7 @@ func (d *SpecializedDomain) Invoke(record utils.Record, method utils.Method, arg
 	var err error
 	res := []map[string]interface{}{}
 	if d.Service == nil {
-		return utils.ToResult(res), errors.New("no service available " + d.TableName + " " + method.String())
+		return utils.ToResult(res), errors.New("no service not available NULL " + d.TableName + " " + method.String())
 	}
 	switch method {
 	case utils.CREATE:
