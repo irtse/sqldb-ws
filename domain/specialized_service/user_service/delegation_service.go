@@ -29,6 +29,10 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 	delete(record, ds.SchemaDBField)
 	delete(record, ds.DestTableDBField)
 
+	if record["dbtask_id"] != nil {
+		record["all_tasks"] = false
+	}
+
 	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
 	if utils.GetString(record, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
 		return map[string]interface{}{}, errors.New("can't add a delegation to yourself"), false
