@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	conn "sqldb-ws/infrastructure/connector/db"
+	"strings"
 )
 
 type TableRowService struct {
@@ -124,6 +125,7 @@ func (t *TableRowService) Delete(restriction ...string) ([]map[string]interface{
 	if _, err = t.setupFilter(map[string]interface{}{}, false, true, restriction...); err != nil {
 		return nil, err
 	}
+	t.DB.SetSQLRestriction(strings.ReplaceAll(t.DB.GetSQLRestriction(), " AND ((end_date >= start_date)) OR ((end_date IS  NULL)) AND ((start_date >= NOW()))", ""))
 	if t.Results, err = t.DB.SelectQueryWithRestriction(t.Table.Name, map[string]interface{}{}, false); err == nil {
 		if t.DB.GetSQLRestriction() == "" {
 			return t.DBError(nil, errors.New("no restriction can't delete all"))

@@ -210,7 +210,6 @@ func (db *Database) DeleteQuery(name string, colName string) error {
 		name = name + " as main "
 		q = db.BuildDeleteQuery(name, colName)
 	}
-	q = strings.ReplaceAll(q, " AND ((end_date >= start_date)) OR ((end_date IS  NULL)) AND ((start_date >= NOW()))", "")
 	_, err := db.Conn.Exec(q)
 	return err
 
