@@ -187,11 +187,13 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 						}, false, ds.UserDBField),
 						"write": true,
 					}, false, ds.DestTableDBField)
-				m[utils.SpecialIDParam+"_2"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-					ds.SchemaDBField:           schema.ID,
-					ds.DestTableDBField:        "main.id",
-					"read_access":              true,
-					"shared_" + ds.UserDBField: s.Domain.GetUserID(),
+				m[utils.SpecialIDParam+"_3"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+					ds.SchemaDBField:    schema.ID,
+					ds.DestTableDBField: "main.id",
+					"read_access":       true,
+					"shared_" + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+						"parent_" + ds.UserDBField: s.Domain.GetUserID(),
+					}, false, ds.UserDBField),
 				}, false, ds.DestTableDBField)
 			}
 			if !hierarchOnly {
@@ -204,13 +206,11 @@ func (s *FilterService) RestrictionByEntityUser(schema sm.SchemaModel, restr []s
 							"write":             true,
 						}, false, ds.DestTableDBField),
 				}
-				m[utils.SpecialIDParam+"_3"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
-					ds.SchemaDBField:    schema.ID,
-					ds.DestTableDBField: "main.id",
-					"read_access":       true,
-					"shared_" + ds.UserDBField: s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
-						"parent_" + ds.UserDBField: s.Domain.GetUserID(),
-					}, false, ds.UserDBField),
+				m[utils.SpecialIDParam+"_2"] = s.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBShare.Name, map[string]interface{}{
+					ds.SchemaDBField:           schema.ID,
+					ds.DestTableDBField:        "main.id",
+					"read_access":              true,
+					"shared_" + ds.UserDBField: s.Domain.GetUserID(),
 				}, false, ds.DestTableDBField)
 			}
 			restr = append(restr, "("+connector.FormatSQLRestrictionWhereByMap("", m, true)+")")
