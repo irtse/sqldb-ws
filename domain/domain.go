@@ -174,9 +174,6 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 		if rowName, ok := params.Get(utils.RootRowsParam); ok { // rows override columns
 			return d.GetRowResults(rowName, record, specializedService, args...)
 		}
-		if !d.SuperAdmin || method == utils.DELETE || method == utils.IMPORT {
-			return utils.Results{}, errors.New("not authorized to " + method.String() + " " + d.Service.GetName() + " data")
-		}
 		if col, ok := params.Get(utils.RootColumnsParam); ok && d.TableName != utils.ReservedParam {
 			d.Service = infrastructure.NewTableColumnService(d.Db, d.SuperAdmin, d.User, strings.ToLower(d.TableName), d.SpecializedService, strings.ToLower(col))
 		} else if d.TableName == utils.ReservedParam {
