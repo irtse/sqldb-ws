@@ -164,7 +164,7 @@ func (d *SpecializedDomain) call(params utils.Params, record utils.Record, metho
 		if d.Method.IsMath() {
 			d.Method = utils.SELECT
 		}
-		if !d.SuperAdmin && !d.PermsService.PermsCheck(d.TableName, "", "", d.Own, d.Method, d) && !d.AutoLoad {
+		if !d.SuperAdmin && !d.PermsService.PermsCheck(d.TableName, "", "", d.Own, d.Method, d) && !d.AutoLoad && method != utils.DELETE {
 			return utils.Results{}, errors.New("not authorized to " + method.String() + " <" + d.TableName + "> data")
 		}
 		// load the highest entity avaiable Table level.
