@@ -223,12 +223,12 @@ func MakeSqlItem(alterRestr string, typ string, foreignName string, key string, 
 					alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE name IS " + sql + ")"
 					return key, "IN", "(SELECT id FROM " + foreignName + " WHERE name IS " + sql + ")", alterRestr
 				} else {
-					alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE LOWER(name) = LOWER(" + sql + "))"
-					return key, "IN", "(SELECT id FROM " + foreignName + " WHERE LOWER(name) = LOWER(" + sql + "))", alterRestr
+					alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE LOWER(name::text) " + operator + " LOWER(" + sql + ") OR LOWER(id::text) " + operator + " LOWER(" + sql + "))"
+					return key, "IN", "(SELECT id FROM " + foreignName + " WHERE LOWER(name::text) " + operator + " LOWER(" + sql + ") OR LOWER(id::text) " + operator + " LOWER(" + sql + "))", alterRestr
 				}
 			} else {
-				alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE id " + operator + " " + sql + ")"
-				return key, "IN", "(SELECT id FROM " + foreignName + " WHERE id " + operator + " " + sql + ")", alterRestr
+				alterRestr += key + " IN (SELECT id FROM " + foreignName + " WHERE id " + operator + " " + sql + " OR LOWER(name::text) " + operator + " LOWER(" + sql + "::text))"
+				return key, "IN", "(SELECT id FROM " + foreignName + " WHERE id " + operator + " " + sql + " OR LOWER(name::text) " + operator + " LOWER(" + sql + "::text))", alterRestr
 			}
 		}
 	} else if strings.Contains(sql, "%") && !strings.Contains(typ, "many") {
