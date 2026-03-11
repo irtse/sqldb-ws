@@ -500,6 +500,7 @@ func ImportUserHierachy() {
 							d.GetDb().ClearQueryFilter().CreateQuery(models.CoCFR.Name, map[string]interface{}{
 								"name":           cocName,
 								ds.EntityDBField: res,
+								"label":          cocName,
 							}, func(s string) (string, bool) { return "", true })
 						}
 					}
