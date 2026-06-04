@@ -32,11 +32,19 @@ func (s *DelegationService) VerifyDataIntegrity(record map[string]interface{}, t
 	if utils.GetBool(record, "all_tasks") {
 		record["dbtask_id"] = nil
 	}
-
-	record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
-	if utils.GetString(record, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
-		return map[string]interface{}{}, errors.New("can't add a delegation to yourself"), false
+	if record["dbtask_id"] == nil || record["dbtask_id"] == "" {
+		record["all_tasks"] = true
 	}
+	if record[ds.UserDBField] == nil || record[ds.UserDBField] == "" {
+		record[ds.UserDBField] = s.Domain.GetUserID() // affected create_by
+		if utils.GetString(record, "delegated_"+ds.UserDBField) == s.Domain.GetUserID() {
+			return map[string]interface{}{}, errors.New("can't add a delegation to yourself"), false
+		}
+	}
+	if utils.GetString(record, "delegated_"+ds.UserDBField) == utils.GetString(record, ds.UserDBField) {
+		return map[string]interface{}{}, errors.New("can't add a delegation to themself"), false
+	}
+
 	if _, err, ok := servutils.CheckAutoLoad(tablename, record, s.Domain); ok {
 		return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 	} else {
