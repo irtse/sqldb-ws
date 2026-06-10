@@ -320,13 +320,16 @@ func FormatSQLRestrictionWhereByMap(SQLrestriction string, restrictions map[stri
 		if _, err := strconv.Atoi(latest); err == nil {
 			k2 = strings.ReplaceAll(k, "_"+latest, "")
 		}
-		if len(SQLrestriction) > 0 {
+		isArray := reflect.TypeOf(r).Kind() == reflect.Slice || reflect.TypeOf(r).Kind() == reflect.Array
+
+		if len(SQLrestriction) > 0 && !isArray {
 			if isOr {
 				SQLrestriction += " OR "
 			} else {
 				SQLrestriction += " AND "
 			}
 		}
+
 		if r == nil {
 			if strings.Contains(k2, "!") {
 				k2 = strings.ReplaceAll(k2, "!", "")
@@ -337,42 +340,56 @@ func FormatSQLRestrictionWhereByMap(SQLrestriction string, restrictions map[stri
 		} else {
 			not := strings.Contains(k2, "!")
 			k2 = strings.ReplaceAll(k2, "!", "")
-			divided := strings.Split(fmt.Sprintf("%v", r), " ")
-			if len(divided) > 1 && slices.Contains([]string{"SELECT", "INSERT", "UPDATE", "DELETE"}, strings.ToUpper(divided[0])) {
-				if not {
+
+			if isArray == false {
+				divided := strings.Split(fmt.Sprintf("%v", r), " ")
+				if len(divided) > 1 && slices.Contains([]string{"SELECT", "INSERT", "UPDATE", "DELETE"}, strings.ToUpper(divided[0])) {
+					if not {
+						SQLrestriction += k2 + " NOT IN (" + fmt.Sprintf("%v", r) + ")"
+					} else {
+						SQLrestriction += k2 + " IN (" + fmt.Sprintf("%v", r) + ")"
+					}
+
+				} else if len(divided) > 1 && slices.Contains([]string{"!SELECT", "!INSERT", "!UPDATE", "!DELETE"}, strings.ToUpper(divided[0])) {
+					r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!SELECT", "SELECT")
+					r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!INSERT", "INSERT")
+					r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!UPDATE", "UPDATE")
+					r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!DELETE", "DELETE")
 					SQLrestriction += k2 + " NOT IN (" + fmt.Sprintf("%v", r) + ")"
-				} else {
+				} else if reflect.TypeOf(r).Kind() == reflect.Slice {
+					if not {
+						SQLrestriction += k2 + " NOT IN (" + strings.Join(r.([]string), ",") + ")"
+					} else {
+						SQLrestriction += k2 + " IN (" + strings.Join(r.([]string), ",") + ")"
+					}
+				} else if strings.Contains(fmt.Sprintf("%v", r), "SELECT") {
 					SQLrestriction += k2 + " IN (" + fmt.Sprintf("%v", r) + ")"
-				}
-
-			} else if len(divided) > 1 && slices.Contains([]string{"!SELECT", "!INSERT", "!UPDATE", "!DELETE"}, strings.ToUpper(divided[0])) {
-				r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!SELECT", "SELECT")
-				r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!INSERT", "INSERT")
-				r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!UPDATE", "UPDATE")
-				r = strings.ReplaceAll(fmt.Sprintf("%v", r), "!DELETE", "DELETE")
-				SQLrestriction += k2 + " NOT IN (" + fmt.Sprintf("%v", r) + ")"
-			} else if reflect.TypeOf(r).Kind() == reflect.Slice {
-				if not {
-					SQLrestriction += k2 + " NOT IN (" + strings.Join(r.([]string), ",") + ")"
 				} else {
-					SQLrestriction += k2 + " IN (" + strings.Join(r.([]string), ",") + ")"
+					if strings.Contains(k2, "'") {
+						k2 = "LOWER(" + k2 + ")"
+					}
+					str := fmt.Sprintf("%v", r)
+					if strings.Contains(k2, "'") {
+						str = "LOWER(" + k2 + ")"
+					}
+					if not {
+						SQLrestriction += k2 + "!=" + str
+					} else {
+						SQLrestriction += k2 + "=" + str
+					}
+
 				}
-			} else if strings.Contains(fmt.Sprintf("%v", r), "SELECT") {
-				SQLrestriction += k2 + " IN (" + fmt.Sprintf("%v", r) + ")"
 			} else {
-				if strings.Contains(k2, "'") {
-					k2 = "LOWER(" + k2 + ")"
+				for _, v := range r.([]interface{}) {
+					if len(SQLrestriction) > 0 && !isArray {
+						if isOr {
+							SQLrestriction += " OR "
+						} else {
+							SQLrestriction += " AND "
+						}
+						SQLrestriction += fmt.Sprintf("%v", v)
+					}
 				}
-				str := fmt.Sprintf("%v", r)
-				if strings.Contains(k2, "'") {
-					str = "LOWER(" + k2 + ")"
-				}
-				if not {
-					SQLrestriction += k2 + "!=" + str
-				} else {
-					SQLrestriction += k2 + "=" + str
-				}
-
 			}
 		}
 	}

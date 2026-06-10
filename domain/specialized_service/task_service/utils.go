@@ -1,8 +1,10 @@
 package task_service
 
 import (
+	"sqldb-ws/domain/schema"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
+	"sqldb-ws/domain/schema/models"
 	sm "sqldb-ws/domain/schema/models"
 	"sqldb-ws/domain/utils"
 	connector "sqldb-ws/infrastructure/connector/db"
@@ -155,7 +157,6 @@ func createTaskAndNotify(task map[string]interface{}, request map[string]interfa
 }
 
 func notify(task utils.Record, i int64, domain utils.DomainITF) {
-
 	if schema, err := schserv.GetSchema(ds.DBTask.Name); err == nil {
 		name := utils.GetString(task, "name")
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schema.Name, map[string]interface{}{
@@ -235,55 +236,61 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			"!" + "delegated_" + ds.UserDBField: domain.GetUserID(),
 		}, false, utils.SpecialIDParam),
 	}, false))
+	additionnalDels := GetWorkflowToDelegate(domain, record)
 	if dels, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(
 		ds.DBDelegation.Name, utils.ToListAnonymized(sqlFilter), false); err == nil && len(dels) > 0 {
-		for _, delegated := range dels {
-			newRec := record.Copy()
-			newRec["binded_dbtask"] = id
-			k1 := "delegated_" + ds.UserDBField
-			k2 := ds.UserDBField
-			ks1 := "shared_" + ds.UserDBField
-			ks2 := ds.UserDBField
-			newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
-			delete(newRec, utils.SpecialIDParam)
-
-			createTaskAndNotify(newRec, request, initialRec, domain, true)
-			share := map[string]interface{}{
-				ks1:                  delegated[k1],
-				ks2:                  delegated[k2],
-				ds.SchemaDBField:     record[ds.SchemaDBField],
-				ds.DestTableDBField:  record[ds.DestTableDBField],
-				ds.DelegationDBField: delegated[utils.SpecialIDParam],
-				"delete_access":      delegated["delete_access"],
+		for _, d := range dels {
+			if additionnalDels[utils.ToString(d["delegated_"+ds.UserDBField])] == nil {
+				additionnalDels[utils.ToString(d["delegated_"+ds.UserDBField])] = d
 			}
+		}
+	}
+	for _, delegated := range additionnalDels {
+		newRec := record.Copy()
+		newRec["binded_dbtask"] = id
+		k1 := "delegated_" + ds.UserDBField
+		k2 := ds.UserDBField
+		ks1 := "shared_" + ds.UserDBField
+		ks2 := ds.UserDBField
+		newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
+		delete(newRec, utils.SpecialIDParam)
 
+		createTaskAndNotify(newRec, request, initialRec, domain, true)
+		share := map[string]interface{}{
+			ks1:                  delegated[k1],
+			ks2:                  delegated[k2],
+			ds.SchemaDBField:     record[ds.SchemaDBField],
+			ds.DestTableDBField:  record[ds.DestTableDBField],
+			ds.DelegationDBField: delegated[utils.SpecialIDParam],
+			"delete_access":      delegated["delete_access"],
+		}
+
+		arr := []interface{}{
+			connector.FormatSQLRestrictionWhereByMap("", share, false),
+		}
+		if utils.GetString(delegated, "end_date") == "" {
+			arr = append(arr, "(('"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
+		} else {
+			arr = append(arr, "(('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
+		}
+		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
+			share["start_date"] = delegated["start_date"]
+			share["end_date"] = delegated["end_date"]
+			domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+		}
+		if request[ds.DestTableDBField] != share[ds.DestTableDBField] && request[ds.SchemaDBField] != share[ds.SchemaDBField] {
+			delete(share, "start_date")
+			delete(share, "end_date")
+			share[ds.SchemaDBField] = request[ds.SchemaDBField]
+			share[ds.DestTableDBField] = request[ds.DestTableDBField]
 			arr := []interface{}{
 				connector.FormatSQLRestrictionWhereByMap("", share, false),
 			}
-			if utils.GetString(delegated, "end_date") == "" {
-				arr = append(arr, "(('"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
-			} else {
-				arr = append(arr, "(('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
-			}
+			arr = append(arr, "(()'"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date) OR end_date IS NULL)")
 			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 				share["start_date"] = delegated["start_date"]
 				share["end_date"] = delegated["end_date"]
 				domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
-			}
-			if request[ds.DestTableDBField] != share[ds.DestTableDBField] && request[ds.SchemaDBField] != share[ds.SchemaDBField] {
-				delete(share, "start_date")
-				delete(share, "end_date")
-				share[ds.SchemaDBField] = request[ds.SchemaDBField]
-				share[ds.DestTableDBField] = request[ds.DestTableDBField]
-				arr := []interface{}{
-					connector.FormatSQLRestrictionWhereByMap("", share, false),
-				}
-				arr = append(arr, "(()'"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date) OR end_date IS NULL)")
-				if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
-					share["start_date"] = delegated["start_date"]
-					share["end_date"] = delegated["end_date"]
-					domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
-				}
 			}
 		}
 	}
@@ -374,3 +381,140 @@ func CreateHierarchicalTask(domain utils.DomainITF, request utils.Record, record
 		notify(newTask, i, domain)
 	}
 }
+
+func GetWorkflowToDelegate(domain utils.DomainITF, task utils.Record) map[string]map[string]interface{} {
+	users := map[string]map[string]interface{}{}
+	wf, err := domain.GetDb().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+		utils.SpecialIDParam: domain.GetDb().BuildSelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
+			utils.SpecialIDParam: utils.ToString(task[ds.WorkflowSchemaDBField]),
+		}, false, ds.WorkflowDBField),
+	}, false)
+	if err != nil {
+		return users
+	}
+	if wn, err := schema.GetSchema(ds.DBWorkflow.Name); err == nil {
+		for _, w := range wf {
+			for k, v := range GetUserToDelegate(domain, wn.Name, utils.ToString(w[utils.SpecialIDParam]), utils.ToString(task[ds.UserDBField])) {
+				users[k] = v
+			}
+		}
+	}
+	return users
+}
+
+func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from string) map[string]map[string]interface{} {
+	users := map[string]map[string]interface{}{}
+	now := time.Now().UTC()
+	start := "('" + now.Format("2006-01-02 15:04:05") + "' >= start_date"
+	end := "('" + now.Format("2006-01-02 15:04:05") + "' < end_date OR end_date IS NULL))"
+
+	founded, err := domain.GetDb().SelectQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
+		ds.SchemaDBField:       schemaID,
+		ds.DestTableDBField:    id,
+		"hierarchy_delegation": false,
+	}, false)
+
+	if err == nil && len(founded) > 0 {
+		for _, f := range founded {
+			if users[utils.ToString(f[ds.UserDBField])] == nil {
+				users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
+					"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
+					ds.UserDBField:                from,
+					"start_date":                  time.Now().Add(-1 * time.Hour),
+					"delete_access":               utils.GetBool(f, "delete_access"),
+				}
+			}
+		}
+	}
+
+	hierarchDels, err := domain.GetDb().SelectQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
+		ds.SchemaDBField:       schemaID,
+		ds.DestTableDBField:    id,
+		"hierarchy_delegation": true,
+	}, false)
+	if err == nil && len(hierarchDels) > 0 { // only need one
+		foundedHierarch, err := domain.GetDb().SelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+			ds.UserDBField:  domain.GetUserID(), // TODO : moi même
+			models.STARTKEY: []interface{}{start},
+			models.ENDKEY:   []interface{}{end},
+		}, false)
+		if err == nil && len(foundedHierarch) > 0 {
+			for _, f := range foundedHierarch {
+				if users[utils.ToString(f[utils.SpecialIDParam])] == nil {
+					users[utils.ToString(f[utils.SpecialIDParam])] = map[string]interface{}{
+						"delegated_" + ds.UserDBField: utils.ToString(f["parent_"+ds.UserDBField]),
+						ds.UserDBField:                from,
+						"start_date":                  time.Now().Add(-1 * time.Hour),
+						"delete_access":               utils.GetBool(hierarchDels[0], "delete_access"),
+					}
+				}
+			}
+		}
+	}
+	roleDels, err := domain.GetDb().SelectQueryWithRestriction(ds.DBRoleDelegation.Name, map[string]interface{}{
+		ds.SchemaDBField:    schemaID,
+		ds.DestTableDBField: id,
+	}, false)
+	if err == nil && len(roleDels) > 0 {
+		for _, rd := range roleDels {
+			foundedRole, err := domain.GetDb().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+				utils.SpecialIDParam: domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
+					ds.RoleDBField:  utils.ToString(rd[ds.RoleDBField]),
+					models.STARTKEY: []interface{}{start},
+					models.ENDKEY:   []interface{}{end},
+					"is_hierarch":   utils.GetBool(rd, "hierarchy_delegation"),
+				}, true, ds.UserDBField),
+				utils.SpecialIDParam + "_1": domain.GetDb().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+					utils.SpecialIDParam: domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
+						ds.RoleDBField:  utils.ToString(rd[ds.RoleDBField]),
+						models.STARTKEY: []interface{}{start},
+						models.ENDKEY:   []interface{}{end},
+						"is_hierarch":   utils.GetBool(rd, "hierarchy_delegation"),
+					}, false, ds.EntityDBField),
+				}, true, ds.UserDBField),
+			}, false)
+			if err == nil && len(foundedRole) > 0 {
+				for _, f := range foundedRole {
+					if users[utils.ToString(f[utils.SpecialIDParam])] == nil {
+						users[utils.ToString(f[utils.SpecialIDParam])] = map[string]interface{}{
+							"delegated_" + ds.UserDBField: utils.ToString(f[utils.SpecialIDParam]),
+							ds.UserDBField:                from,
+							"start_date":                  time.Now().Add(-1 * time.Hour),
+							"delete_access":               utils.GetBool(rd, "delete_access"),
+						}
+					}
+				}
+			}
+		}
+	}
+	entDels, err := domain.GetDb().SelectQueryWithRestriction(ds.DBEntityDelegation.Name, map[string]interface{}{
+		ds.SchemaDBField:    schemaID,
+		ds.DestTableDBField: id,
+	}, false)
+	if err == nil && len(entDels) > 0 {
+		for _, rd := range entDels {
+			foundedEnt, err := domain.GetDb().SelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+				ds.EntityDBField: utils.ToString(rd[ds.EntityDBField]),
+				models.STARTKEY:  []interface{}{start},
+				models.ENDKEY:    []interface{}{end},
+				"is_hierarch":    utils.GetBool(rd, "hierarchy_delegation"),
+			}, false)
+			if err == nil && len(foundedEnt) > 0 {
+				for _, f := range foundedEnt {
+					if users[utils.ToString(f[ds.UserDBField])] == nil {
+						users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
+							"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
+							ds.UserDBField:                from,
+							"start_date":                  time.Now().Add(-1 * time.Hour),
+							"delete_access":               utils.GetBool(rd, "delete_access"),
+						}
+					}
+				}
+			}
+		}
+	}
+	return users
+}
+
+// TODO : - Create Delegation - Update Delegation - Delete Delegation
+// TODO : - les perms

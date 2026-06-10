@@ -340,6 +340,7 @@ var DBEntityUser = models.SchemaModel{
 		{Name: RootID(DBEntity.Name), Type: models.INTEGER.String(), ForeignTable: DBEntity.Name, Required: true, Readonly: true, Index: 1, Label: "entity"},
 		{Name: models.STARTKEY, Type: models.TIMESTAMP.String(), Required: false, Default: "CURRENT_TIMESTAMP", Index: 2},
 		{Name: models.ENDKEY, Type: models.TIMESTAMP.String(), Required: false, Index: 3},
+		{Name: "is_hierarch", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 4, Label: "is role hierarch"},
 	},
 }
 
@@ -354,6 +355,7 @@ var DBRoleAttribution = models.SchemaModel{
 		{Name: RootID(DBRole.Name), Type: models.INTEGER.String(), ForeignTable: DBRole.Name, Required: true, Readonly: true, Index: 2, Label: "role"},
 		{Name: models.STARTKEY, Type: models.TIMESTAMP.String(), Required: false, Default: "CURRENT_TIMESTAMP", Index: 3},
 		{Name: models.ENDKEY, Type: models.TIMESTAMP.String(), Required: false, Index: 4},
+		{Name: "is_hierarch", Type: models.BOOLEAN.String(), Required: false, Default: false, Index: 4, Label: "is role hierarch"},
 	},
 }
 
@@ -399,6 +401,45 @@ var DBWorkflowSchema = models.SchemaModel{
 		{Name: "override_state_completed", Type: models.VARCHAR.String(), Required: false, Index: 14},
 		{Name: "override_state_dismiss", Type: models.VARCHAR.String(), Required: false, Index: 15},
 		{Name: "override_state_refused", Type: models.VARCHAR.String(), Required: false, Index: 16},
+	},
+}
+
+var DBEntityDelegation = models.SchemaModel{
+	Name:     RootName("entity_delegation"),
+	Label:    "entity delegation",
+	Category: "entity",
+	Fields: []models.FieldModel{
+		{Name: RootID(DBEntity.Name), Type: models.INTEGER.String(), ForeignTable: DBEntity.Name, Required: true, Readonly: true, Label: "entity delegation", Index: 1},
+		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "dependent schema", Index: 2},
+		{Name: RootID("dest_table"), Type: models.INTEGER.String(), Required: true, Readonly: true, Label: "reference", Index: 2},
+		{Name: "delete_access", Type: models.BOOLEAN.String(), Required: false, Default: true, Label: "delete permission", Index: 4},
+		{Name: "hierarchy_delegation", Type: models.BOOLEAN.String(), Required: false, Default: false, Label: "hierarchy delegation", Index: 5},
+	},
+}
+
+var DBRoleDelegation = models.SchemaModel{
+	Name:     RootName("role_delegation"),
+	Label:    "role delegation",
+	Category: "role",
+	Fields: []models.FieldModel{
+		{Name: RootID(DBRole.Name), Type: models.INTEGER.String(), ForeignTable: DBRole.Name, Required: true, Readonly: true, Label: "role delegation", Index: 1},
+		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "dependent schema", Index: 2},
+		{Name: RootID("dest_table"), Type: models.INTEGER.String(), Required: true, Readonly: true, Label: "reference", Index: 2},
+		{Name: "delete_access", Type: models.BOOLEAN.String(), Required: false, Default: true, Label: "delete permission", Index: 4},
+		{Name: "hierarchy_delegation", Type: models.BOOLEAN.String(), Required: false, Default: false, Label: "hierarchy delegation", Index: 5},
+	},
+}
+
+var DBUserDelegation = models.SchemaModel{
+	Name:     RootName("user_delegation"),
+	Label:    "user delegation",
+	Category: "user",
+	Fields: []models.FieldModel{
+		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Readonly: true, Label: "user delegation", Index: 1},
+		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "dependent schema", Index: 2},
+		{Name: RootID("dest_table"), Type: models.INTEGER.String(), Required: true, Readonly: true, Label: "reference", Index: 2},
+		{Name: "delete_access", Type: models.BOOLEAN.String(), Required: false, Default: true, Label: "delete permission", Index: 4},
+		{Name: "hierarchy_delegation", Type: models.BOOLEAN.String(), Required: false, Default: false, Label: "hierarchy delegation", Index: 5},
 	},
 }
 
@@ -674,6 +715,7 @@ var DBDelegation = models.SchemaModel{
 		{Name: models.STARTKEY, Type: models.TIMESTAMP.String(), Required: false, Readonly: true, Default: "CURRENT_TIMESTAMP", Index: 2},
 		{Name: models.ENDKEY, Type: models.TIMESTAMP.String(), Readonly: true, Required: false, Index: 3},
 		{Name: RootID(DBTask.Name), Type: models.INTEGER.String(), ForeignTable: DBTask.Name, Readonly: true, Required: false, Index: 4, Label: "task delegated"},
+		{Name: "delete_access", Type: models.BOOLEAN.String(), Required: false, Default: true, Index: 9, Label: "delete access"},
 		{Name: "all_tasks", Type: models.BOOLEAN.String(), Readonly: true, Required: false, Index: 5, Label: "all tasks"},
 	},
 }
@@ -708,6 +750,7 @@ var PERMISSIONEXCEPTION = []string{
 	DBDelegation.Name, DBRequest.Name, DBWorkflow.Name, DBDashboardFavorite.Name,
 	DBEntity.Name, DBSchema.Name, DBEmailSendedUser.Name,
 	DBSchemaField.Name, DBComment.Name, DBDataAccess.Name,
+	DBRoleDelegation.Name, DBUserDelegation.Name, DBEntityDelegation.Name,
 } // override permission checkup
 
 var ROOTTABLES = []models.SchemaModel{DBSchemaField, DBUser, DBWorkflow, DBView, DBRequest, DBSchema, DBPermission, DBFilter, DBFilterField, DBEntity,
@@ -720,6 +763,7 @@ var ROOTTABLES = []models.SchemaModel{DBSchemaField, DBUser, DBWorkflow, DBView,
 	DBFieldAutoFill, DBFieldRule, DBFieldCondition,
 	DBViewSchema,
 	DBEmailSended, DBEmailTemplate, DBEmailResponse, DBEmailSendedUser, DBEmailList,
+	DBRoleDelegation, DBUserDelegation, DBEntityDelegation,
 }
 
 var NOAUTOLOADROOTTABLES = []models.SchemaModel{DBSchema, DBSchemaField, DBPermission, DBView, DBWorkflow}
@@ -754,6 +798,7 @@ var WorkflowDBField = RootID(DBWorkflow.Name)
 var WorkflowSchemaDBField = RootID(DBWorkflowSchema.Name)
 var UserDBField = RootID(DBUser.Name)
 var EntityDBField = RootID(DBEntity.Name)
+var RoleDBField = RootID(DBRole.Name)
 var DestTableDBField = RootID("dest_table")
 var FilterDBField = RootID(DBFilter.Name)
 var FilterFieldDBField = RootID(DBFilterField.Name)
