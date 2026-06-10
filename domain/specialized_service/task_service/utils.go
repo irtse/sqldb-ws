@@ -384,8 +384,8 @@ func CreateHierarchicalTask(domain utils.DomainITF, request utils.Record, record
 
 func GetWorkflowToDelegate(domain utils.DomainITF, task utils.Record) map[string]map[string]interface{} {
 	users := map[string]map[string]interface{}{}
-	wf, err := domain.GetDb().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
-		utils.SpecialIDParam: domain.GetDb().BuildSelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
+	wf, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+		utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
 			utils.SpecialIDParam: utils.ToString(task[ds.WorkflowSchemaDBField]),
 		}, false, ds.WorkflowDBField),
 	}, false)
@@ -427,13 +427,13 @@ func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from 
 		}
 	}
 
-	hierarchDels, err := domain.GetDb().SelectQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
+	hierarchDels, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
 		ds.SchemaDBField:       schemaID,
 		ds.DestTableDBField:    id,
 		"hierarchy_delegation": true,
 	}, false)
 	if err == nil && len(hierarchDels) > 0 { // only need one
-		foundedHierarch, err := domain.GetDb().SelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
+		foundedHierarch, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
 			ds.UserDBField:  domain.GetUserID(), // TODO : moi même
 			models.STARTKEY: []interface{}{start},
 			models.ENDKEY:   []interface{}{end},
@@ -451,21 +451,21 @@ func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from 
 			}
 		}
 	}
-	roleDels, err := domain.GetDb().SelectQueryWithRestriction(ds.DBRoleDelegation.Name, map[string]interface{}{
+	roleDels, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRoleDelegation.Name, map[string]interface{}{
 		ds.SchemaDBField:    schemaID,
 		ds.DestTableDBField: id,
 	}, false)
 	if err == nil && len(roleDels) > 0 {
 		for _, rd := range roleDels {
-			foundedRole, err := domain.GetDb().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-				utils.SpecialIDParam: domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
+			foundedRole, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+				utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
 					ds.RoleDBField:  utils.ToString(rd[ds.RoleDBField]),
 					models.STARTKEY: []interface{}{start},
 					models.ENDKEY:   []interface{}{end},
 					"is_hierarch":   utils.GetBool(rd, "hierarchy_delegation"),
 				}, true, ds.UserDBField),
-				utils.SpecialIDParam + "_1": domain.GetDb().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
-					utils.SpecialIDParam: domain.GetDb().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
+				utils.SpecialIDParam + "_1": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+					utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
 						ds.RoleDBField:  utils.ToString(rd[ds.RoleDBField]),
 						models.STARTKEY: []interface{}{start},
 						models.ENDKEY:   []interface{}{end},
@@ -487,13 +487,13 @@ func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from 
 			}
 		}
 	}
-	entDels, err := domain.GetDb().SelectQueryWithRestriction(ds.DBEntityDelegation.Name, map[string]interface{}{
+	entDels, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntityDelegation.Name, map[string]interface{}{
 		ds.SchemaDBField:    schemaID,
 		ds.DestTableDBField: id,
 	}, false)
 	if err == nil && len(entDels) > 0 {
 		for _, rd := range entDels {
-			foundedEnt, err := domain.GetDb().SelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+			foundedEnt, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
 				ds.EntityDBField: utils.ToString(rd[ds.EntityDBField]),
 				models.STARTKEY:  []interface{}{start},
 				models.ENDKEY:    []interface{}{end},
