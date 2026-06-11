@@ -123,6 +123,7 @@ func ImportPublication() {
 				}
 			} else if i == 41 {
 				if model["state"] == nil {
+					fmt.Println("Dqdz", strings.ToLower(data[i]))
 					if strings.Contains(strings.ToLower(data[i]), "init") {
 						if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
 							"name::text LIKE '%init%'",
