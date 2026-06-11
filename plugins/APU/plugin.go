@@ -123,41 +123,39 @@ func ImportPublication() {
 				}
 			} else if i == 41 {
 				fmt.Println("Dqdz", strings.ToLower(data[i]))
-				if model["state"] == nil {
 
-					if strings.Contains(strings.ToLower(data[i]), "init") {
+				if strings.Contains(strings.ToLower(data[i]), "init") {
+					if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
+						"name::text LIKE '%init%'",
+					}, false); err == nil && len(st) > 0 {
+						model["state"] = st[0][utils.SpecialIDParam]
+					}
+				} else if strings.Contains(strings.ToLower(data[i]), "annul") || strings.Contains(strings.ToLower(data[i]), "refu") {
+					if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
+						"name::text LIKE '%ban%'",
+					}, false); err == nil && len(st) > 0 {
+						model["state"] = st[0][utils.SpecialIDParam]
+					}
+				} else if strings.Contains(strings.ToLower(data[i]), "réalis") {
+					if model["is_awarded"] == true {
 						if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
-							"name::text LIKE '%init%'",
+							"name::text LIKE '%prim%'",
 						}, false); err == nil && len(st) > 0 {
 							model["state"] = st[0][utils.SpecialIDParam]
 						}
-					} else if strings.Contains(strings.ToLower(data[i]), "annul") || strings.Contains(strings.ToLower(data[i]), "refu") {
-						if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
-							"name::text LIKE '%ban%'",
-						}, false); err == nil && len(st) > 0 {
-							model["state"] = st[0][utils.SpecialIDParam]
-						}
-					} else if strings.Contains(strings.ToLower(data[i]), "réalis") {
-						if model["is_awarded"] == true {
-							if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
-								"name::text LIKE '%prim%'",
-							}, false); err == nil && len(st) > 0 {
-								model["state"] = st[0][utils.SpecialIDParam]
-							}
-						} else {
-							if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
-								"name::text LIKE '%pub%'",
-							}, false); err == nil && len(st) > 0 {
-								model["state"] = st[0][utils.SpecialIDParam]
-							}
-						}
-
 					} else {
 						if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
-							"name::text LIKE '%aut%'",
+							"name::text LIKE '%pub%'",
 						}, false); err == nil && len(st) > 0 {
 							model["state"] = st[0][utils.SpecialIDParam]
 						}
+					}
+
+				} else {
+					if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
+						"name::text LIKE '%aut%'",
+					}, false); err == nil && len(st) > 0 {
+						model["state"] = st[0][utils.SpecialIDParam]
 					}
 				}
 
