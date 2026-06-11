@@ -135,7 +135,12 @@ func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTy
 						ids = append(ids, id)
 					}
 				}
-				keyVal[1] = strings.Join(ids, ",")
+				if len(strings.Join(ids, ",")) > 0 {
+					keyVal[1] = strings.Join(ids, ",")
+				} else {
+					keyVal[1] = "-1"
+				}
+				fmt.Println("FormatSQLRestrictionWhereInjection", keyVal)
 			}
 
 			keyVal[0], keyVal[1], operator, typ, link, err = getTypeAndLink(keyVal[0], keyVal[1], operator, special)
