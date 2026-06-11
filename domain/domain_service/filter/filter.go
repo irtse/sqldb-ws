@@ -106,8 +106,8 @@ func (d *FilterService) RestrictionBySchema(tableName string, restr []string, do
 			}
 		}
 		if line, ok := domainParams.Get(utils.RootFilterLine); ok {
-			if connector.FormatSQLRestrictionWhereInjection(line, schema.GetTypeAndLinkForField, f) != "" && tableName != ds.DBView.Name {
-				alterRestr = append(alterRestr, connector.FormatSQLRestrictionWhereInjection(line, schema.GetTypeAndLinkForField, f))
+			if connector.FormatSQLRestrictionWhereInjection(line, schema.ID, schema.GetTypeAndLinkForField, f) != "" && tableName != ds.DBView.Name {
+				alterRestr = append(alterRestr, connector.FormatSQLRestrictionWhereInjection(line, schema.ID, schema.GetTypeAndLinkForField, f))
 			}
 		}
 		for key, val := range domainParams.Values {

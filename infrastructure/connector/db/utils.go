@@ -106,7 +106,7 @@ func GetFieldInInjection(injection string, searchField string) (string, string, 
 	return "", "", beforeSeparator
 }
 
-func FormatSQLRestrictionWhereInjection(injection string, getTypeAndLink func(string, string, string, func(string, string)) (string, string, string, string, string, error), special func(string, string)) string {
+func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTypeAndLink func(string, string, string, func(string, string)) (string, string, string, string, string, error), special func(string, string)) string {
 	alterRestr := ""
 	injection = SQLInjectionProtector(injection)
 	ands := strings.Split(injection, "+")
@@ -124,6 +124,20 @@ func FormatSQLRestrictionWhereInjection(injection string, getTypeAndLink func(st
 			}
 			var err error
 			var typ, link string
+
+			if keyVal[0] == "id_scheme" {
+				keyVal[0] = "id"
+				ids := []string{}
+				for _, val := range strings.Split(keyVal[0], ",") {
+					id := strings.Split(val, "~")[0]
+					scheme := strings.Split(val, "~")[1]
+					if scheme == schemaID {
+						ids = append(ids, id)
+					}
+				}
+				keyVal[1] = strings.Join(ids, ",")
+			}
+
 			keyVal[0], keyVal[1], operator, typ, link, err = getTypeAndLink(keyVal[0], keyVal[1], operator, special)
 			if err != nil && keyVal[0] != "id" {
 				continue
