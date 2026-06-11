@@ -71,35 +71,35 @@ func ImportPublication() {
 		dbName := models.OtherPublicationFR.Name
 		affDbName := models.OtherPublicationAffiliationAuthorsFR.Name
 		authorsDbName := models.OtherPublicationAuthorsFR.Name
-		dt := []int{5, 3, 30, 23, 25, 26, 39, 8, 15}
+		dt := []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 15}
 		if strings.Contains(strings.ToLower(data[4]), "these") {
-			dt = []int{5, 3, 30, 23, 25, 26, 34, 39, 35, 363}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 34, 39, 35, 363}
 			dbName = models.ThesisFR.Name
 			affDbName = models.ThesisAffiliationAuthorsFR.Name
 			authorsDbName = models.ThesisAffiliationAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "stage") {
-			dt = []int{5, 3, 30, 23, 25, 26, 39, 27, 28, 29}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 27, 28, 29}
 			dbName = models.InternshipFR.Name
 			affDbName = models.InternshipAffiliationAuthorsFR.Name
 			authorsDbName = models.InternshipAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "poster") {
-			dt = []int{5, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13}
 			dbName = models.PosterFR.Name
 			affDbName = models.PosterAffiliationAuthorsFR.Name
 			authorsDbName = models.PosterAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "demo") {
-			dt = []int{5, 3, 30, 23, 25, 26, 39, 37, 38}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 37, 38}
 			dbName = models.DemoFR.Name
 			affDbName = models.DemoAffiliationAuthorsFR.Name
 			authorsDbName = models.DemoAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "article_bdd") {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
-			dt = []int{5, 3, 8, 30, 23, 25, 26, 39, 37, 38}
+			dt = []int{5, 41, 42, 3, 8, 30, 23, 25, 26, 39, 37, 38}
 			dbName = models.OtherPublicationFR.Name
 			affDbName = models.OtherPublicationAffiliationAuthorsFR.Name
 			authorsDbName = models.OtherPublicationAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "article") {
-			dt = []int{5, 3, 30, 23, 25, 26, 39, 14, 15}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15}
 			dbName = models.ArticleFR.Name
 			affDbName = models.ArticleAffiliationAuthorsFR.Name
 			authorsDbName = models.ArticleAuthorsFR.Name
