@@ -173,7 +173,10 @@ func Compare(or string) ([]string, string) {
 	operator := "~"
 	keyVal := []string{}
 
-	if strings.Contains(or, "<>~") {
+	if strings.Contains(or, ":") {
+		keyVal = strings.Split(or, ":")
+		operator = "="
+	} else if strings.Contains(or, "<>~") {
 		keyVal = strings.Split(or, "<>~")
 		operator = " NOT LIKE "
 	} else if strings.Contains(or, "~~") {
@@ -191,9 +194,6 @@ func Compare(or string) ([]string, string) {
 	} else if strings.Contains(or, ">:") {
 		keyVal = strings.Split(or, ">:")
 		operator = ">="
-	} else if strings.Contains(or, ":") {
-		keyVal = strings.Split(or, ":")
-		operator = "="
 	} else if strings.Contains(or, "<") {
 		keyVal = strings.Split(or, "<")
 		operator = "<"
