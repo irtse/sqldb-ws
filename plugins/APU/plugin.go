@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/csv"
+	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/specialized_service/task_service"
 	connector "sqldb-ws/infrastructure/connector/db"
@@ -282,66 +283,62 @@ func ImportPublication() {
 				if err != nil {
 					createDate = time.Time{}
 				}
-				_, err = d.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name, map[string]interface{}{
-					"write":             true,
-					"access_date":       createDate,
-					ds.DestTableDBField: id,
-					ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
-						"name": dbName,
-					}, false, utils.SpecialIDParam),
-					ds.UserDBField: model["manager_"+ds.RootID(ds.DBUser.Name)],
-				}, func(s string) (string, bool) { return s, true })
-				for _, auth := range model["authors"].([]map[string]interface{}) {
-					authorss := auth["authors"]
-					if authorss == nil {
-						continue
-					}
-					delete(auth, "authors")
-					auth[ds.RootID(dbName)] = id
-					if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
-						authorss.(map[string]interface{})[ds.RootID(dbName)] = id
-						d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
-					}
-				}
-				_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
-					ds.RootID(models.PublicationStatusFR.Name): model["state"],
-					"update_date":       createDate,
-					ds.DestTableDBField: id,
-					ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
-						"name": dbName,
-					}, false, utils.SpecialIDParam),
-				}, func(s string) (string, bool) { return s, true })
-				fmt.Println("PUBLI", err)
-				if (model["state"] == 3 || model["state"] == 5) && model["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
-					if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
-						ds.SchemaDBField: d.Db.BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
-							"name": dbName,
-						}, false, utils.SpecialIDParam),
-					}, false); err == nil && len(wfs) > 0 {
-						m := map[string]interface{}{
-							"name":              "APU retrieval " + utils.ToString(model["name"]),
-							"state":             "pending",
-							"is_close":          false,
-							"current_index":     1,
-							ds.DestTableDBField: id,
-							ds.SchemaDBField: d.Db.BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
-								"name": dbName,
-							}, false, utils.SpecialIDParam),
-							ds.WorkflowDBField: res[0][utils.SpecialIDParam],
-							ds.UserDBField:     model["manager_"+ds.RootID(ds.DBUser.Name)],
+				if sch, err := schema.GetSchema(dbName); err == nil {
+					_, err = d.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name, map[string]interface{}{
+						"write":             true,
+						"access_date":       createDate,
+						ds.DestTableDBField: id,
+						ds.SchemaDBField:    sch.ID,
+						ds.UserDBField:      model["manager_"+ds.RootID(ds.DBUser.Name)],
+					}, func(s string) (string, bool) { return s, true })
+					fmt.Println("DATAACCESS", err)
+					for _, auth := range model["authors"].([]map[string]interface{}) {
+						authorss := auth["authors"]
+						if authorss == nil {
+							continue
 						}
+						delete(auth, "authors")
+						auth[ds.RootID(dbName)] = id
+						if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
+							authorss.(map[string]interface{})[ds.RootID(dbName)] = id
+							d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
+						}
+					}
+					_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
+						ds.RootID(models.PublicationStatusFR.Name): model["state"],
+						"update_date":       createDate,
+						ds.DestTableDBField: id,
+						ds.SchemaDBField:    sch.ID,
+					}, func(s string) (string, bool) { return s, true })
+					fmt.Println("PUBLI", err)
+					if (model["state"] == 3 || model["state"] == 5) && model["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
+						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+							ds.SchemaDBField: sch.ID,
+						}, false); err == nil && len(wfs) > 0 {
+							m := map[string]interface{}{
+								"name":              "APU retrieval " + utils.ToString(model["name"]),
+								"state":             "pending",
+								"is_close":          false,
+								"current_index":     1,
+								ds.DestTableDBField: id,
+								ds.SchemaDBField:    sch.ID,
+								ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
+								ds.UserDBField:      model["manager_"+ds.RootID(ds.DBUser.Name)],
+							}
 
-						if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err != nil {
-							if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
-								"index":            1,
-								ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
-							}, false); err == nil && len(wfss) > 0 {
-								m["id"] = i
-								task_service.PrepareAndCreateTask(wfss[0], m, m, d, false)
+							if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err != nil {
+								if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
+									"index":            1,
+									ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
+								}, false); err == nil && len(wfss) > 0 {
+									m["id"] = i
+									task_service.PrepareAndCreateTask(wfss[0], m, m, d, false)
+								}
 							}
 						}
 					}
 				}
+
 			} else {
 				fmt.Println("Err create", err)
 			}
