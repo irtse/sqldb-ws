@@ -54,6 +54,8 @@ func main() {
 	if os.Getenv("PLUGINS") != "" {
 		for _, plug := range strings.Split(os.Getenv("PLUGINS"), ",") {
 			if p, err := plugin.Open("./plugins/" + plug + "/plugin.so"); err == nil {
+				fmt.Println("./plugins/"+plug+"/plugin.so", err)
+				fmt.Println(p.Lookup("Run"))
 				if sym, err := p.Lookup("Run"); err == nil {
 					launchFunc := sym.(func())
 					go launchFunc()
