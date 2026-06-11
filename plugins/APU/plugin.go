@@ -307,36 +307,41 @@ func ImportPublication() {
 						}
 					}
 
-					fmt.Println(m2["state"])
-					_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
-						ds.RootID(models.PublicationStatusFR.Name): m2["state"],
-						"update_date":       createDate,
-						ds.DestTableDBField: id,
-						ds.SchemaDBField:    sch.ID,
-					}, func(s string) (string, bool) { return s, true })
-					fmt.Println("PUBLI", err)
-					if (m2["state"] == 3 || m2["state"] == 5) && m2["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
-						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
-							ds.SchemaDBField: sch.ID,
-						}, false); err == nil && len(wfs) > 0 {
-							m := map[string]interface{}{
-								"name":              "APU retrieval " + utils.ToString(m2["name"]),
-								"state":             "pending",
-								"is_close":          false,
-								"current_index":     1,
-								ds.DestTableDBField: id,
-								ds.SchemaDBField:    sch.ID,
-								ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
-								ds.UserDBField:      m2["manager_"+ds.RootID(ds.DBUser.Name)],
-							}
+					if r, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
+						"name": connector.Quote(utils.GetString(model, "name")),
+					}, false); err == nil && len(res) == 0 {
+						fmt.Println(r[0])
 
-							if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err != nil {
-								if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
-									"index":            1,
-									ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
-								}, false); err == nil && len(wfss) > 0 {
-									m["id"] = i
-									task_service.PrepareAndCreateTask(wfss[0], m, m, d, false)
+						_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
+							ds.RootID(models.PublicationStatusFR.Name): r[0]["state"],
+							"update_date":       createDate,
+							ds.DestTableDBField: id,
+							ds.SchemaDBField:    sch.ID,
+						}, func(s string) (string, bool) { return s, true })
+						fmt.Println("PUBLI", err)
+						if (r[0]["state"] == 3 || r[0]["state"] == 5) && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
+							if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+								ds.SchemaDBField: sch.ID,
+							}, false); err == nil && len(wfs) > 0 {
+								m := map[string]interface{}{
+									"name":              "APU retrieval " + utils.ToString(r[0]["name"]),
+									"state":             "pending",
+									"is_close":          false,
+									"current_index":     1,
+									ds.DestTableDBField: id,
+									ds.SchemaDBField:    sch.ID,
+									ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
+									ds.UserDBField:      r[0]["manager_"+ds.RootID(ds.DBUser.Name)],
+								}
+
+								if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err != nil {
+									if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
+										"index":            1,
+										ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
+									}, false); err == nil && len(wfss) > 0 {
+										m["id"] = i
+										task_service.PrepareAndCreateTask(wfss[0], m, m, d, false)
+									}
 								}
 							}
 						}
