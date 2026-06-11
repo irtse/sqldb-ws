@@ -234,11 +234,11 @@ func ImportPublication() {
 					for _, n := range strings.Split(authors, " ") {
 						restr = append(restr, "name::text LIKE '%"+strings.Trim(strings.ReplaceAll(n, "'", "''"), " ")+"%'")
 					}
-					if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, restr, false); err == nil && len(usr) > 0 {
+					if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, restr, false); err == nil && len(usr) > 0 && len(model["authors"].([]map[string]interface{})) > y {
 						model["authors"].([]map[string]interface{})[y]["authors"] = map[string]interface{}{
 							ds.UserDBField: usr[0][utils.SpecialIDParam],
 						}
-					} else {
+					} else if len(model["authors"].([]map[string]interface{})) > y {
 						model["authors"].([]map[string]interface{})[y]["authors"] = map[string]interface{}{
 							"name": strings.Trim(authors, " "),
 						}
