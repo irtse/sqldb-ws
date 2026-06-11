@@ -321,7 +321,7 @@ func FormatSQLRestrictionWhereByMap(SQLrestriction string, restrictions map[stri
 			k2 = strings.ReplaceAll(k, "_"+latest, "")
 		}
 		isArray := r != nil && (reflect.TypeOf(r).Kind() == reflect.Slice || reflect.TypeOf(r).Kind() == reflect.Array)
-
+		fmt.Println(isArray)
 		if len(SQLrestriction) > 0 && !isArray {
 			if isOr {
 				SQLrestriction += " OR "
@@ -381,7 +381,7 @@ func FormatSQLRestrictionWhereByMap(SQLrestriction string, restrictions map[stri
 				}
 			} else {
 				for _, v := range r.([]string) {
-					if len(SQLrestriction) > 0 && !isArray {
+					if len(SQLrestriction) > 0 && isArray {
 						if isOr {
 							SQLrestriction += " OR "
 						} else {
