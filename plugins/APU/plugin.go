@@ -259,7 +259,11 @@ func ImportPublication() {
 				}
 			} else if len(data) > i {
 				fmt.Println(model, mapped[i], i)
-				model[mapped[i]] = data[i]
+				if createDate, err := time.Parse("02/01/2006", data[i]); err != nil {
+					model[mapped[i]] = data[i]
+				} else {
+					model[mapped[i]] = createDate
+				}
 			}
 			// TODO check special field like project, authors, affiliation... etc.
 		}
