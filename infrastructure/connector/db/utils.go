@@ -168,6 +168,7 @@ func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTy
 	alterRestr = strings.ReplaceAll(alterRestr, "()", "")
 	alterRestr = strings.ReplaceAll(alterRestr, " OR AND", "OR")
 	alterRestr = strings.ReplaceAll(alterRestr, " AND OR", "OR")
+	fmt.Println("alterRestr2", alterRestr)
 	return alterRestr
 }
 
