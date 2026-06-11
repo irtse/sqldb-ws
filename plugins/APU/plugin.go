@@ -289,10 +289,10 @@ func ImportPublication() {
 						"access_date":       createDate,
 						ds.DestTableDBField: id,
 						ds.SchemaDBField:    sch.ID,
-						ds.UserDBField:      model["manager_"+ds.RootID(ds.DBUser.Name)],
+						ds.UserDBField:      m2["manager_"+ds.RootID(ds.DBUser.Name)],
 					}, func(s string) (string, bool) { return s, true })
 					fmt.Println("DATAACCESS", err)
-					for _, auth := range model["authors"].([]map[string]interface{}) {
+					for _, auth := range m2["authors"].([]map[string]interface{}) {
 						authorss := auth["authors"]
 						if authorss == nil {
 							continue
@@ -304,26 +304,27 @@ func ImportPublication() {
 							d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
 						}
 					}
+					fmt.Println(m2["state"])
 					_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
-						ds.RootID(models.PublicationStatusFR.Name): model["state"],
+						ds.RootID(models.PublicationStatusFR.Name): m2["state"],
 						"update_date":       createDate,
 						ds.DestTableDBField: id,
 						ds.SchemaDBField:    sch.ID,
 					}, func(s string) (string, bool) { return s, true })
 					fmt.Println("PUBLI", err)
-					if (model["state"] == 3 || model["state"] == 5) && model["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
+					if (m2["state"] == 3 || m2["state"] == 5) && m2["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 							ds.SchemaDBField: sch.ID,
 						}, false); err == nil && len(wfs) > 0 {
 							m := map[string]interface{}{
-								"name":              "APU retrieval " + utils.ToString(model["name"]),
+								"name":              "APU retrieval " + utils.ToString(m2["name"]),
 								"state":             "pending",
 								"is_close":          false,
 								"current_index":     1,
 								ds.DestTableDBField: id,
 								ds.SchemaDBField:    sch.ID,
 								ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
-								ds.UserDBField:      model["manager_"+ds.RootID(ds.DBUser.Name)],
+								ds.UserDBField:      m2["manager_"+ds.RootID(ds.DBUser.Name)],
 							}
 
 							if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err != nil {
