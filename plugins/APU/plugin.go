@@ -103,6 +103,7 @@ func ImportPublication() {
 			affDbName = models.OtherPublicationAffiliationAuthorsFR.Name
 			authorsDbName = models.OtherPublicationAuthorsFR.Name
 		}
+		fmt.Println(dt, dbName, affDbName, authorsDbName)
 		date := ""
 		// TODO FILE RETRIEVAL +
 		for _, i := range dt {
