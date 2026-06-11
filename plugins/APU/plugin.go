@@ -113,11 +113,11 @@ func ImportPublication() {
 			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
 				date = data[i]
 			}
-
+			fmt.Println("STATE", i, mapped[i])
 			if i == 42 {
 				if data[i] == "0" {
 					model[mapped[i]] = false
-					continue
+					break
 				} else {
 					model[mapped[i]] = true
 				}
