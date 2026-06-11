@@ -344,6 +344,8 @@ func importFile(filePath string) ([]string, [][]string) {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
+	reader.Comma = ';'
+
 	records, err := reader.ReadAll()
 	if err != nil {
 		fmt.Println("Failed to read CSV:", err)
