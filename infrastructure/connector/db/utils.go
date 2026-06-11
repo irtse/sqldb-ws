@@ -380,7 +380,7 @@ func FormatSQLRestrictionWhereByMap(SQLrestriction string, restrictions map[stri
 
 				}
 			} else {
-				for _, v := range r.([]interface{}) {
+				for _, v := range r.([]string) {
 					if len(SQLrestriction) > 0 && !isArray {
 						if isOr {
 							SQLrestriction += " OR "
