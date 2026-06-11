@@ -320,7 +320,7 @@ func FormatSQLRestrictionWhereByMap(SQLrestriction string, restrictions map[stri
 		if _, err := strconv.Atoi(latest); err == nil {
 			k2 = strings.ReplaceAll(k, "_"+latest, "")
 		}
-		isArray := reflect.TypeOf(r).Kind() == reflect.Slice || reflect.TypeOf(r).Kind() == reflect.Array
+		isArray := r != nil && (reflect.TypeOf(r).Kind() == reflect.Slice || reflect.TypeOf(r).Kind() == reflect.Array)
 
 		if len(SQLrestriction) > 0 && !isArray {
 			if isOr {
