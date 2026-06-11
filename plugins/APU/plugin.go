@@ -20,6 +20,7 @@ import (
 )
 
 func Run() {
+	fmt.Println("RUN APU")
 	ImportPublication()
 }
 
