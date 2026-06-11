@@ -9,6 +9,7 @@ import (
 	"sqldb-ws/domain/specialized_service/task_service"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
+	"time"
 
 	"fmt"
 	"os"
@@ -34,26 +35,26 @@ func ImportPublication() {
 	mapped := map[int]string{
 		5:  "name",
 		8:  "conference_name",
-		9:  "conference_start_date",
+		9:  "conference_start_date", // date for date
 		10: "conference_end_date",
 		11: "conference_city",
 		12: "conference_country",
 		13: "conference_link",
 		14: "media_name",
-		15: "publishing_date",
-		23: "effective_publishing_date",
+		15: "publishing_date",                         // date for date
+		23: "effective_publishing_date",               // date for date
 		25: "authors",                                 // special OK
 		26: "affiliation",                             // special OK
 		27: "IRT_manager" + ds.RootID(ds.DBUser.Name), // special OK
-		28: "i_start_date",
+		28: "i_start_date",                            // date for date
 		29: "i_end_date",
-		30: "is_awarded", // special OK
-		31: "defense_date",
+		30: "is_awarded",                            // special OK
+		31: "defense_date",                          // date for date
 		34: "director_" + ds.RootID(ds.DBUser.Name), // special
-		35: "t_start_date",
+		35: "t_start_date",                          // date for date
 		36: "t_end_date",
 		37: "meeting_name",
-		38: "meeting_date",
+		38: "meeting_date",                         // date for date
 		39: "manager_" + ds.RootID(ds.DBUser.Name), // special OK
 		41: "state",                                // special OK
 		42: "active",                               // special OK
@@ -102,8 +103,13 @@ func ImportPublication() {
 			affDbName = models.OtherPublicationAffiliationAuthorsFR.Name
 			authorsDbName = models.OtherPublicationAuthorsFR.Name
 		}
+		date := ""
 		// TODO FILE RETRIEVAL +
 		for _, i := range dt {
+			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
+				date = data[i]
+			}
+
 			if i == 42 {
 				if data[i] == "0" {
 					model[mapped[i]] = false
@@ -259,6 +265,20 @@ func ImportPublication() {
 		}, false); err == nil && len(res) == 0 {
 			delete(m2, "authors")
 			if id, err := d.GetDb().ClearQueryFilter().CreateQuery(dbName, m2, func(s string) (string, bool) { return s, true }); err == nil {
+				createDate, err := time.Parse("02/01/2006", date)
+				if err != nil {
+					createDate = time.Time{}
+				}
+				_, err = d.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name, map[string]interface{}{
+					"write":             true,
+					"access_date":       createDate,
+					ds.DestTableDBField: id,
+					ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
+						"name": dbName,
+					}, false, utils.SpecialIDParam),
+					ds.UserDBField: model["manager_"+ds.RootID(ds.DBUser.Name)],
+				}, func(s string) (string, bool) { return s, true })
+				fmt.Println("DATAACCESS CREATE", err)
 				for _, auth := range model["authors"].([]map[string]interface{}) {
 					authorss := auth["authors"]
 					delete(auth, "authors")
@@ -268,6 +288,16 @@ func ImportPublication() {
 						d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
 					}
 				}
+				_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
+					ds.RootID(models.PublicationStatusFR.Name): model["state"],
+					"update_date":       createDate,
+					ds.DestTableDBField: id,
+					ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
+						"name": dbName,
+					}, false, utils.SpecialIDParam),
+					ds.UserDBField: model["manager_"+ds.RootID(ds.DBUser.Name)],
+				}, func(s string) (string, bool) { return s, true })
+				fmt.Println("DATAACCESS CREATE", err)
 				if (model["state"] == 3 || model["state"] == 5) && model["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 					if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 						ds.SchemaDBField: d.Db.BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
