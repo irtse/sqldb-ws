@@ -292,18 +292,21 @@ func ImportPublication() {
 						ds.UserDBField:      m2["manager_"+ds.RootID(ds.DBUser.Name)],
 					}, func(s string) (string, bool) { return s, true })
 					fmt.Println("DATAACCESS", err)
-					for _, auth := range m2["authors"].([]map[string]interface{}) {
-						authorss := auth["authors"]
-						if authorss == nil {
-							continue
-						}
-						delete(auth, "authors")
-						auth[ds.RootID(dbName)] = id
-						if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
-							authorss.(map[string]interface{})[ds.RootID(dbName)] = id
-							d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
+					if m2["authors"] != nil {
+						for _, auth := range m2["authors"].([]map[string]interface{}) {
+							authorss := auth["authors"]
+							if authorss == nil {
+								continue
+							}
+							delete(auth, "authors")
+							auth[ds.RootID(dbName)] = id
+							if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
+								authorss.(map[string]interface{})[ds.RootID(dbName)] = id
+								d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
+							}
 						}
 					}
+
 					fmt.Println(m2["state"])
 					_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
 						ds.RootID(models.PublicationStatusFR.Name): m2["state"],
