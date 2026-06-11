@@ -3,8 +3,8 @@
 # INSERT NEW FIELD
 
 INSERT INTO "dbschema_column" ("id", "active", "is_draft", "name", "label", "type", "description", "placeholder", "default_value", "index", "readonly", "required", "read_level", "dbschema_id", "constraints", "link_id", "hidden", "translatable", "transform_function", "group_by", "in_resume", "subsection", "info") VALUES
-(6044342,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	't',	'f',	'normal',	44,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL),
-(16846,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	't',	'f',	'normal',	43,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL);
+(6044342,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	44,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL),
+(16846,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	43,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL);
 
 # INSERT FILTERS
 
@@ -94,4 +94,8 @@ INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "descriptio
 (100,	't',	'f',	'validation de l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	34,	43,	NULL,	NULL,	NULL,	NULL,	NULL,	101,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication');
 
 
+DELETE * FROM dbtriggers WHERE mode = 'manual' and dbschema_id IN (44,43)
 
+INSERT INTO "dbtriggers" ("id", "active", "is_draft", "name", "type", "mode", "dbschema_id", "on_write", "on_update", "description", "job_duration", "job_start_date", "on_update_step") VALUES
+(2,	't',	'f',	'envoyer un email : "autorisation de publication d''une conférence"',	'mail',	'manual',	44,	'f',	't',	'Nous te proposons d''envoyer cet email aux personne en charge de valider que les informations contenues dans cette publication ne sont pas confidentielles. Cet email n''est cependant pas obligatoire',	NULL,	NULL,	5),
+(3,	't',	'f',	'envoyer un email : "autorisation de publication d''une présentation sans relecture"',	'mail',	'manual',	43,	'f',	't',	'Nous te proposons d''envoyer cet email aux personne en charge de valider que les informations contenues dans cette publication ne sont pas confidentielles. Cet email n''est cependant pas obligatoire',	NULL,	NULL,	NULL);
