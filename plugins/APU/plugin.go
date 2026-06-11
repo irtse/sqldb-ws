@@ -62,6 +62,7 @@ func ImportPublication() {
 	}
 	// TODO finalized_publication failed
 	_, datas := importFile(filepath)
+	fmt.Println("DATAS", datas)
 	for _, data := range datas {
 		model := map[string]interface{}{}
 
