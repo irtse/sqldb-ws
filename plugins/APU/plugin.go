@@ -257,11 +257,13 @@ func ImportPublication() {
 					}
 
 				}
-			} else {
+			} else if len(data) > i {
+				fmt.Println(model, mapped[i], i)
 				model[mapped[i]] = data[i]
 			}
 			// TODO check special field like project, authors, affiliation... etc.
 		}
+		fmt.Println("MODEL", model)
 		m2 := map[string]interface{}{}
 		for k, v := range model {
 			m2[k] = v
