@@ -252,7 +252,10 @@ func ImportPublication() {
 					if len(model["authors"].([]map[string]interface{})) < y {
 						model["authors"] = append(model["authors"].([]map[string]interface{}), map[string]interface{}{})
 					}
-					model["authors"].([]map[string]interface{})[y]["affiliation"] = aff
+					if len(model["authors"].([]map[string]interface{})) > y {
+						model["authors"].([]map[string]interface{})[y]["affiliation"] = aff
+					}
+
 				}
 			} else {
 				model[mapped[i]] = data[i]
