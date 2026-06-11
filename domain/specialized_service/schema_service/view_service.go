@@ -190,6 +190,7 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 		params.EnrichCondition(dp.Values, func(k string) bool {
 			return k != utils.RootRowsParam && k != utils.SpecialIDParam && k != utils.RootTableParam
 		})
+		fmt.Println("PARAMS COMPOSED OF", params)
 		dp.Delete(func(k string) bool {
 			return k == utils.RootRowsParam || k == utils.SpecialIDParam || k == utils.RootTableParam || k == utils.SpecialSubIDParam
 		})
@@ -315,6 +316,7 @@ func (s *ViewService) fetchData(unionsAlls []*models.SchemaModel, tablename stri
 			if sch, err := schserv.GetSchema(union.Name); err == nil {
 				sqlFilter, _, _ = s.getFilterDetails(record, &sch)
 			}
+			fmt.Println("BEFORE FILTER PARAMS", params)
 			sqlrestr, _, _, sqlview := f.GetQueryFilter(union.Name, params, false, sqlFilter)
 			s.Domain.GetDb().ClearQueryFilter()
 			s.Domain.GetDb().SetSQLView(sqlview)
