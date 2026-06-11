@@ -140,7 +140,7 @@ func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTy
 					if len(strings.Trim(alterRestr, " ")) > 0 {
 						alterRestr += " AND "
 					}
-					alterRestr += "(" + strings.Join(ids, " OR ") + ")"
+					alterRestr += "id IN (" + strings.Join(ids, ", ") + ")"
 				}
 				continue
 			}
