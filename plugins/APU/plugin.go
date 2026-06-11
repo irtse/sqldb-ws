@@ -288,6 +288,9 @@ func ImportPublication() {
 				}, func(s string) (string, bool) { return s, true })
 				for _, auth := range model["authors"].([]map[string]interface{}) {
 					authorss := auth["authors"]
+					if authorss == nil {
+						continue
+					}
 					delete(auth, "authors")
 					auth[ds.RootID(dbName)] = id
 					if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
