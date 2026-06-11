@@ -278,7 +278,6 @@ func ImportPublication() {
 					}, false, utils.SpecialIDParam),
 					ds.UserDBField: model["manager_"+ds.RootID(ds.DBUser.Name)],
 				}, func(s string) (string, bool) { return s, true })
-				fmt.Println("DATAACCESS CREATE", err)
 				for _, auth := range model["authors"].([]map[string]interface{}) {
 					authorss := auth["authors"]
 					delete(auth, "authors")
@@ -297,7 +296,6 @@ func ImportPublication() {
 					}, false, utils.SpecialIDParam),
 					ds.UserDBField: model["manager_"+ds.RootID(ds.DBUser.Name)],
 				}, func(s string) (string, bool) { return s, true })
-				fmt.Println("DATAACCESS CREATE", err)
 				if (model["state"] == 3 || model["state"] == 5) && model["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 					if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 						ds.SchemaDBField: d.Db.BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{

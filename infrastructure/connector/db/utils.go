@@ -119,7 +119,6 @@ func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTy
 		orRestr := ""
 		for _, or := range ors {
 			keyVal, operator := Compare(or)
-			fmt.Println("kv", keyVal)
 			if len(keyVal) != 2 {
 				continue
 			}
@@ -344,7 +343,6 @@ func FormatSQLRestrictionWhereByMap(SQLrestriction string, restrictions map[stri
 			k2 = strings.ReplaceAll(k, "_"+latest, "")
 		}
 		isArray := r != nil && (reflect.TypeOf(r).Kind() == reflect.Slice || reflect.TypeOf(r).Kind() == reflect.Array)
-		fmt.Println(isArray)
 		if len(SQLrestriction) > 0 && !isArray {
 			if isOr {
 				SQLrestriction += " OR "

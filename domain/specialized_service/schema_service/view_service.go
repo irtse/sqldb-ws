@@ -190,7 +190,6 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 		params.EnrichCondition(dp.Values, func(k string) bool {
 			return k != utils.RootRowsParam && k != utils.SpecialIDParam && k != utils.RootTableParam
 		})
-		fmt.Println("PARAMS COMPOSED OF", params)
 		dp.Delete(func(k string) bool {
 			return k == utils.RootRowsParam || k == utils.SpecialIDParam || k == utils.RootTableParam || k == utils.SpecialSubIDParam
 		})
