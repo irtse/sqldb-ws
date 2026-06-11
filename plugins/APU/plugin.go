@@ -71,34 +71,34 @@ func ImportPublication() {
 		affDbName := models.OtherPublicationAffiliationAuthorsFR.Name
 		authorsDbName := models.OtherPublicationAuthorsFR.Name
 		dt := []int{5, 3, 30, 23, 25, 26, 39, 8, 15}
-		if strings.ToLower(data[4]) != "these" {
+		if strings.ToLower(data[4]) == "these" {
 			dt = []int{5, 3, 30, 23, 25, 26, 34, 39, 35, 363}
 			dbName = models.ThesisFR.Name
 			affDbName = models.ThesisAffiliationAuthorsFR.Name
 			authorsDbName = models.ThesisAffiliationAuthorsFR.Name
-		} else if strings.ToLower(data[4]) != "stage" {
+		} else if strings.ToLower(data[4]) == "stage" {
 			dt = []int{5, 3, 30, 23, 25, 26, 39, 27, 28, 29}
 			dbName = models.InternshipFR.Name
 			affDbName = models.InternshipAffiliationAuthorsFR.Name
 			authorsDbName = models.InternshipAuthorsFR.Name
-		} else if strings.ToLower(data[4]) != "poster" {
+		} else if strings.ToLower(data[4]) == "poster" {
 			dt = []int{5, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13}
 			dbName = models.PosterFR.Name
 			affDbName = models.PosterAffiliationAuthorsFR.Name
 			authorsDbName = models.PosterAuthorsFR.Name
-		} else if strings.ToLower(data[4]) != "demo" {
+		} else if strings.ToLower(data[4]) == "demo" {
 			dt = []int{5, 3, 30, 23, 25, 26, 39, 37, 38}
 			dbName = models.DemoFR.Name
 			affDbName = models.DemoAffiliationAuthorsFR.Name
 			authorsDbName = models.DemoAuthorsFR.Name
-		} else if strings.ToLower(data[4]) != "article" {
+		} else if strings.ToLower(data[4]) == "article" {
 			dt = []int{5, 3, 30, 23, 25, 26, 39, 14, 15}
 			dbName = models.ArticleFR.Name
 			affDbName = models.ArticleAffiliationAuthorsFR.Name
 			authorsDbName = models.ArticleAuthorsFR.Name
-		} else if strings.ToLower(data[4]) != "communication" {
+		} else if strings.ToLower(data[4]) == "communication" {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
-		} else if strings.ToLower(data[4]) != "article_bdd" {
+		} else if strings.ToLower(data[4]) == "article_bdd" {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
 			dt = []int{5, 3, 8, 30, 23, 25, 26, 39, 37, 38}
 			dbName = models.OtherPublicationFR.Name
@@ -263,7 +263,7 @@ func ImportPublication() {
 			}
 			// TODO check special field like project, authors, affiliation... etc.
 		}
-		fmt.Println("MODEL", model)
+		fmt.Println("MODEL", dbName, model)
 		m2 := map[string]interface{}{}
 		for k, v := range model {
 			m2[k] = v
@@ -273,6 +273,7 @@ func ImportPublication() {
 		}, false); err == nil && len(res) == 0 {
 			delete(m2, "authors")
 			if id, err := d.GetDb().ClearQueryFilter().CreateQuery(dbName, m2, func(s string) (string, bool) { return s, true }); err == nil {
+				fmt.Println("MODEL", dbName, model)
 				createDate, err := time.Parse("02/01/2006", date)
 				if err != nil {
 					createDate = time.Time{}
@@ -337,6 +338,8 @@ func ImportPublication() {
 						}
 					}
 				}
+			} else {
+				fmt.Println("Err create", err)
 			}
 		}
 	}
