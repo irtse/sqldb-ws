@@ -130,8 +130,8 @@ func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTy
 				keyVal[0] = "id"
 				ids := []string{}
 				for _, val := range strings.Split(keyVal[0], ",") {
-					id := strings.Split(val, "~")[0]
-					scheme := strings.Split(val, "~")[1]
+					id := strings.Split(val, "--")[0]
+					scheme := strings.Split(val, "--")[1]
 					if scheme == schemaID {
 						ids = append(ids, id)
 					}
