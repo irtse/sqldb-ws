@@ -310,7 +310,6 @@ func ImportPublication() {
 					ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
 						"name": dbName,
 					}, false, utils.SpecialIDParam),
-					ds.UserDBField: model["manager_"+ds.RootID(ds.DBUser.Name)],
 				}, func(s string) (string, bool) { return s, true })
 				fmt.Println("PUBLI", err)
 				if (model["state"] == 3 || model["state"] == 5) && model["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
