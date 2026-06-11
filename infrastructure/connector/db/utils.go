@@ -141,6 +141,8 @@ func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTy
 						alterRestr += " AND "
 					}
 					alterRestr += "id IN (" + strings.Join(ids, ", ") + ")"
+				} else {
+					alterRestr += "id = -1"
 				}
 				fmt.Println("alterRestr", keyVal, ids, alterRestr)
 				continue
