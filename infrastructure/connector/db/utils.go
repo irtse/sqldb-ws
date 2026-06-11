@@ -119,6 +119,7 @@ func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTy
 		orRestr := ""
 		for _, or := range ors {
 			keyVal, operator := Compare(or)
+			fmt.Println("kv", keyVal)
 			if len(keyVal) != 2 {
 				continue
 			}
