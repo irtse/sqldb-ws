@@ -394,7 +394,7 @@ func GetWorkflowToDelegate(domain utils.DomainITF, task utils.Record) map[string
 	}
 	if wn, err := schema.GetSchema(ds.DBWorkflow.Name); err == nil {
 		for _, w := range wf {
-			for k, v := range GetUserToDelegate(domain, wn.Name, utils.ToString(w[utils.SpecialIDParam]), utils.ToString(task[ds.UserDBField])) {
+			for k, v := range GetUserToDelegate(domain, wn.ID, utils.ToString(w[utils.SpecialIDParam]), utils.ToString(task[ds.UserDBField])) {
 				users[k] = v
 			}
 		}
