@@ -339,6 +339,7 @@ func ImportPublication() {
 										ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
 									}, false); err == nil && len(wfss) > 0 {
 										m["id"] = i
+										wfss[0][ds.UserDBField] = r[0]["manager_"+ds.RootID(ds.DBUser.Name)]
 										task_service.PrepareAndCreateTask(wfss[0], m, m, d, false)
 									} else {
 										fmt.Println("zzzzz", err)
