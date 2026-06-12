@@ -308,7 +308,7 @@ func ImportPublication() {
 
 					if r, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
 						"name": connector.Quote(utils.GetString(model, "name")),
-					}, false); err == nil && len(res) > 0 {
+					}, false); err == nil && len(r) > 0 {
 						fmt.Println(r[0])
 
 						_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
@@ -350,6 +350,8 @@ func ImportPublication() {
 								fmt.Println("WF ERR", err)
 							}
 						}
+					} else {
+						fmt.Println("qsdsq", r, err)
 					}
 				}
 
