@@ -341,7 +341,14 @@ func ImportPublication() {
 										m["id"] = i
 										newTask := task_service.ConstructNotificationTask(wfss[0], m, d)
 										newTask[ds.UserDBField] = r[0]["manager_"+ds.RootID(ds.DBUser.Name)]
-										task_service.CreateTaskAndNotify(newTask, m, m, d, false)
+										i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) {
+											return "", true
+										})
+										if err != nil {
+											fmt.Println("zouin", err)
+											return
+										}
+										task_service.Notify(newTask, i, d)
 									} else {
 										fmt.Println("zzzzz", err)
 									}

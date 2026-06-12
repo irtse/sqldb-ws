@@ -155,13 +155,13 @@ func CreateTaskAndNotify(task map[string]interface{}, request map[string]interfa
 			return -1
 		}
 		CreateDelegated(task, request, i, initialRec, domain)
-		notify(task, i, domain)
+		Notify(task, i, domain)
 		return i
 	}
 	return -1
 }
 
-func notify(task utils.Record, i int64, domain utils.DomainITF) {
+func Notify(task utils.Record, i int64, domain utils.DomainITF) {
 	if schema, err := schserv.GetSchema(ds.DBTask.Name); err == nil {
 		name := utils.GetString(task, "name")
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(schema.Name, map[string]interface{}{
@@ -386,7 +386,7 @@ func CreateHierarchicalTask(domain utils.DomainITF, request utils.Record, record
 		return "", true
 	}); err == nil {
 		CreateDelegated(newTask, request, i, record, domain)
-		notify(newTask, i, domain)
+		Notify(newTask, i, domain)
 	}
 }
 
