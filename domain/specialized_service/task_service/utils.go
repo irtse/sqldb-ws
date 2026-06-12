@@ -38,6 +38,9 @@ func ConstructNotificationTask(scheme utils.Record, request utils.Record, domain
 		"override_state_dismiss":   scheme["override_state_dismiss"],
 		"override_state_refused":   scheme["override_state_refused"],
 	}
+	if task[ds.UserDBField] == "" {
+		task[ds.UserDBField] = request[ds.UserDBField]
+	}
 	if utils.GetBool(scheme, "assign_to_creator") {
 		task[ds.UserDBField] = domain.GetUserID()
 	}
