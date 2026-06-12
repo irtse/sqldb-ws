@@ -278,7 +278,6 @@ func ImportPublication() {
 		}, false); err == nil && len(res) == 0 {
 			delete(m2, "authors")
 			if id, err := d.GetDb().ClearQueryFilter().CreateQuery(dbName, m2, func(s string) (string, bool) { return s, true }); err == nil {
-				fmt.Println("MODEL", dbName, model)
 				createDate, err := time.Parse("02/01/2006", date)
 				if err != nil {
 					createDate = time.Time{}
@@ -309,7 +308,7 @@ func ImportPublication() {
 
 					if r, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
 						"name": connector.Quote(utils.GetString(model, "name")),
-					}, false); err == nil && len(res) == 0 {
+					}, false); err == nil && len(res) > 0 {
 						fmt.Println(r[0])
 
 						_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
