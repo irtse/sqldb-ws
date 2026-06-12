@@ -125,11 +125,11 @@ func PrepareAndCreateTask(scheme utils.Record, request map[string]interface{}, r
 	}
 	shouldCreate := utils.GetString(record, "nexts") == utils.ReservedParam || utils.GetString(record, "nexts") == "" || isMeta
 	if shouldCreate {
-		createTaskAndNotify(newTask, request, record, domain, fromTask)
+		CreateTaskAndNotify(newTask, request, record, domain, fromTask)
 	}
 }
 
-func createTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) int64 {
+func CreateTaskAndNotify(task map[string]interface{}, request map[string]interface{}, initialRec map[string]interface{}, domain utils.DomainITF, isTask bool) int64 {
 	if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
 		ds.DestTableDBField: task[ds.DestTableDBField],
 		ds.SchemaDBField:    task[ds.SchemaDBField],
@@ -223,7 +223,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			newRec["binded_dbtask"] = nil
 			newRec[ds.UserDBField] = res[0][ds.UserDBField]
 			delete(newRec, utils.SpecialIDParam)
-			if i := createTaskAndNotify(newRec, request, initialRec, domain, true); i >= 0 {
+			if i := CreateTaskAndNotify(newRec, request, initialRec, domain, true); i >= 0 {
 				domain.GetDb().ClearQueryFilter().UpdateQuery(ds.DBTask.Name, map[string]interface{}{
 					"binded_dbtask": i,
 				}, map[string]interface{}{
@@ -261,7 +261,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		newRec[ds.UserDBField] = delegated["delegated_"+ds.UserDBField]
 		delete(newRec, utils.SpecialIDParam)
 
-		createTaskAndNotify(newRec, request, initialRec, domain, true)
+		CreateTaskAndNotify(newRec, request, initialRec, domain, true)
 		share := map[string]interface{}{
 			ks1:                  delegated[k1],
 			ks2:                  delegated[k2],
