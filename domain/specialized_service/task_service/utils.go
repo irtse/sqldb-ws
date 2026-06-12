@@ -1,6 +1,7 @@
 package task_service
 
 import (
+	"fmt"
 	"sqldb-ws/domain/schema"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -150,6 +151,7 @@ func CreateTaskAndNotify(task map[string]interface{}, request map[string]interfa
 			return "", true
 		})
 		if err != nil {
+			fmt.Println("zouin", err)
 			return -1
 		}
 		CreateDelegated(task, request, i, initialRec, domain)
