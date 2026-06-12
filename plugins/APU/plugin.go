@@ -333,7 +333,7 @@ func ImportPublication() {
 									ds.UserDBField:      r[0]["manager_"+ds.RootID(ds.DBUser.Name)],
 								}
 
-								if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err != nil {
+								if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err == nil {
 									if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
 										"index":            1,
 										ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
