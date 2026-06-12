@@ -329,7 +329,7 @@ func ImportPublication() {
 									"current_index":     1,
 									ds.DestTableDBField: id,
 									ds.SchemaDBField:    sch.ID,
-									ds.WorkflowDBField:  res[0][utils.SpecialIDParam],
+									ds.WorkflowDBField:  wfs[0][utils.SpecialIDParam],
 									ds.UserDBField:      r[0]["manager_"+ds.RootID(ds.DBUser.Name)],
 								}
 
