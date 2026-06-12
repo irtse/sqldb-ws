@@ -341,7 +341,11 @@ func ImportPublication() {
 									}, false); err == nil && len(wfss) > 0 {
 										m["id"] = i
 										task_service.PrepareAndCreateTask(wfss[0], m, m, d, false)
+									} else {
+										fmt.Println("zzzzz", err)
 									}
+								} else {
+									fmt.Println("lkqsdqsdk", err)
 								}
 							}
 						}
