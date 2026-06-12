@@ -153,7 +153,7 @@ func ImportPublication() {
 
 				} else {
 					if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
-						"name::text LIKE '%aut%'",
+						"name::text LIKE '%cour%'",
 					}, false); err == nil && len(st) > 0 {
 						model["state"] = st[0][utils.SpecialIDParam]
 					}
