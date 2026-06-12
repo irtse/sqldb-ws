@@ -317,7 +317,7 @@ func ImportPublication() {
 							ds.DestTableDBField: id,
 							ds.SchemaDBField:    sch.ID,
 						}, func(s string) (string, bool) { return s, true })
-						fmt.Println("PUBLI", err)
+						fmt.Println("PUBLI", err, (r[0]["state"] == 1 || r[0]["state"] == 6), r[0]["manager_"+ds.RootID(ds.DBUser.Name)])
 						if (r[0]["state"] == 1 || r[0]["state"] == 6) && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 							if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 								ds.SchemaDBField: sch.ID,
@@ -346,6 +346,8 @@ func ImportPublication() {
 								} else {
 									fmt.Println("lkqsdqsdk", err)
 								}
+							} else {
+								fmt.Println("WF ERR", err)
 							}
 						}
 					}
