@@ -207,6 +207,9 @@ func createMetaRequest(task map[string]interface{}, id interface{}, domain utils
 }
 
 func CreateDelegated(record utils.Record, request utils.Record, id int64, initialRec map[string]interface{}, domain utils.DomainITF) {
+	if domain.GetUserID() == "" {
+		return
+	}
 	currentTime := time.Now()
 	bd := utils.GetString(initialRec, "binded_dbtask")
 	if bd != "" {
