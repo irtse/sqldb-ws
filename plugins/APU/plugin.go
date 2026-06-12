@@ -319,7 +319,7 @@ func ImportPublication() {
 							ds.SchemaDBField:    sch.ID,
 						}, func(s string) (string, bool) { return s, true })
 						fmt.Println("PUBLI", err)
-						if (r[0]["state"] == 3 || r[0]["state"] == 5) && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
+						if (r[0]["state"] == 1 || r[0]["state"] == 6) && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 							if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 								ds.SchemaDBField: sch.ID,
 							}, false); err == nil && len(wfs) > 0 {
