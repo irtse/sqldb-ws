@@ -67,7 +67,7 @@ func (d *ViewConvertor) handleTaskWorkflow(record utils.Record) (sm.WorkflowMode
 		utils.SpecialIDParam: record.GetInt(ds.WorkflowSchemaDBField),
 	})
 	if len(schemaRecord) > 0 {
-		workflow.IsDismissable = utils.GetBool(schemaRecord[0], "optionnal") && utils.GetString(schemaRecord[0], "override_state_dismiss") == "NA"
+		workflow.IsDismissable = utils.GetBool(schemaRecord[0], "optionnal") && utils.GetString(schemaRecord[0], "override_state_dismiss") != "NA"
 		workflow.Current = utils.GetString(schemaRecord[0], "index")
 		workflow.CurrentHub = utils.Compare(schemaRecord[0]["hub"], true)
 		return workflow, utils.ToString(schemaRecord[0][ds.RootID(ds.DBWorkflow.Name)]), requestID, nexts
