@@ -116,12 +116,12 @@ func ImportPublication() {
 			}
 			if i == 47 && data[45] != "" {
 				if strings.Contains(data[45], "abstract") {
-					model["abstract_publication"] = "/apu_files/" + data[i]
+					model["abstract_publication"] = "apu_files/" + data[i]
 				} else {
 					if strings.Contains(data[45], "fin") {
-						model[mapped[i]] = "/apu_files/" + data[i]
+						model[mapped[i]] = "apu_files/" + data[i]
 					} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
-						model[mapped[i]] = "/apu_files/" + data[i]
+						model[mapped[i]] = "apu_files/" + data[i]
 					}
 				}
 			} else if i == 42 {
