@@ -271,7 +271,7 @@ func ImportPublication() {
 				a = append(a, map[string]interface{}{
 					"authors": aa,
 				})
-				model["authors"] = aa
+				model["authors"] = a
 			} else if i == 26 {
 				if model["authors"] == nil {
 					model["authors"] = []map[string]interface{}{}
