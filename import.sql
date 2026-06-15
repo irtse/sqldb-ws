@@ -11,11 +11,76 @@ INSERT INTO "dbschema_column" ("id", "active", "is_draft", "name", "label", "typ
 # INSERT FILTERS
 
 INSERT INTO "dbfilter" ("id", "active", "is_draft", "name", "is_view", "is_selected", "dbschema_id", "dbuser_id", "dbentity_id", "elder", "dashboard_restricted", "hidden") VALUES
+(103,	't',	'f',	'post filter abs poster with abstract',	't',	'f',	42,	NULL,	NULL,	'all',	'f',	'f');
+
+
+INSERT INTO "dbfilter" ("id", "active", "is_draft", "name", "is_view", "is_selected", "dbschema_id", "dbuser_id", "dbentity_id", "elder", "dashboard_restricted", "hidden") VALUES
 (100,	't',	'f',	'post filter abs presentations with congress proceedings',	't',	'f',	44,	NULL,	NULL,	'all',	'f',	'f'),
 (101,	't',	'f',	'post filter abs presentations without acts',	't',	'f',	43,	NULL,	NULL,	'all',	'f',	'f');
 
 
 # INSERT FILTER FIELDS FOR CONFERENCE
+
+INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
+(133,	't',	'f',	692,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(134,	't',	'f',	311,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(135,	't',	'f',	304,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(136,	't',	'f',	692,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(137,	't',	'f',	305,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(138,	't',	'f',	308,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(139,	't',	'f',	312,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(140,	't',	'f',	314,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(141,	't',	'f',	307,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(142,	't',	'f',	306,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(143,	't',	'f',	316,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(144,	't',	'f',	303,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(145,	't',	'f',	317,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(146,	't',	'f',	427,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(147,	't',	'f',	544,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(148,	't',	'f',	318,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL),
+(149,	't',	'f',	864,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	103,	'f',	'f',	NULL,	NULL,	NULL);
+
+INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
+(98,	't',	'f',	2501,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(99,	't',	'f',	692,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(100,	't',	'f',	311,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(101,	't',	'f',	304,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(102,	't',	'f',	692,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(103,	't',	'f',	7521,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(104,	't',	'f',	305,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(105,	't',	'f',	308,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(106,	't',	'f',	312,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(107,	't',	'f',	314,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(108,	't',	'f',	307,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(109,	't',	'f',	306,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(110,	't',	'f',	316,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(111,	't',	'f',	303,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(112,	't',	'f',	317,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(113,	't',	'f',	427,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(114,	't',	'f',	544,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(115,	't',	'f',	318,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL),
+(150,	't',	'f',	864,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	424,	'f',	'f',	NULL,	NULL,	NULL);
+
+INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
+(116,	't',	'f',	2501,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(117,	't',	'f',	311,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(118,	't',	'f',	7521,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(119,	't',	'f',	305,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(120,	't',	'f',	308,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(121,	't',	'f',	312,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(122,	't',	'f',	314,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(123,	't',	'f',	307,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(124,	't',	'f',	306,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(125,	't',	'f',	316,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(126,	't',	'f',	303,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(127,	't',	'f',	317,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(128,	't',	'f',	427,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(129,	't',	'f',	544,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(130,	't',	'f',	318,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(131,	't',	'f',	41215,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	't',	NULL,	NULL,	NULL),
+(132,	't',	'f',	304,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL),
+(151,	't',	'f',	864,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	49632,	'f',	'f',	NULL,	NULL,	NULL);
+
 
 INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
 (2,	't',	'f',	581,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	100,	'f',	'f',	NULL,	NULL,	NULL),
@@ -75,6 +140,10 @@ INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", 
 (97,	't',	'f',	16846,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	555,	'f',	'f',	NULL,	NULL,	NULL);
 
 
+INSERT INTO "dbworkflow" ("id", "active", "is_draft", "name", "description", "is_meta", "dbschema_id", "view_dbfilter_id") VALUES
+(36,	't',	'f',	'Créer un poster avec abstract',	'new posters with abstract workflow',	'f',	42,	92);
+
+
 
 # DELETE workflow before
 
@@ -87,6 +156,11 @@ INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "descriptio
 (10,	't',	'f',	'publication primée ? ',	NULL,	3,	'normal',	'normal',	't',	'f',	35,	44,	NULL,	NULL,	NULL,	NULL,	NULL,	986,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication'),
 (11,	't',	'f',	'publication en cours de validation par la conférence',	NULL,	2,	'normal',	'normal',	't',	'f',	35,	44,	NULL,	NULL,	NULL,	NULL,	NULL,	637,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication');
 
+
+INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "description", "index", "urgency", "priority", "optionnal", "hub", "dbworkflow_id", "dbschema_id", "dbuser_id", "dbentity_id", "wrapped_dbworkflow_id", "before_hierarchical_validation", "custom_progressing_status", "view_dbfilter_id", "readonly_not_assignee", "assign_to_creator", "override_state_completed", "override_state_dismiss", "override_state_refused") VALUES
+(18,	't',	'f',	'publication en cours de validation et d''acceptation de la conférence',	NULL,	2,	'normal',	'normal',	'f',	'f',	36,	42,	NULL,	NULL,	NULL,	NULL,	NULL,	424,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication'),
+(19,	't',	'f',	'publication primée ? ',	NULL,	3,	'normal',	'normal',	't',	'f',	36,	42,	NULL,	NULL,	NULL,	NULL,	NULL,	49632,	't',	't',	'valider la publication',	'NA',	'abandonner la publication'),
+(20,	't',	'f',	'validation de l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	36,	42,	NULL,	NULL,	NULL,	NULL,	NULL,	103,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication');
 
 # IMPORT PRESENTATION
 
