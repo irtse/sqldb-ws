@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CSV="input.csv"
-OUTPUT="missing_project.csv"
+OUTPUT="output_ids.csv"
 
 awk -F';' -v ids="$*" '
 BEGIN {

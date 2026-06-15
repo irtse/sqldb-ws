@@ -118,6 +118,7 @@ var DBUser = models.SchemaModel{
 		{Name: "token", Type: models.TEXT.String(), Required: false, Default: "", Level: models.LEVELRESPONSIBLE, Index: 3},
 		{Name: "super_admin", Type: models.BOOLEAN.String(), Required: false, Default: false, Level: models.LEVELRESPONSIBLE, Index: 4},
 		{Name: "code", Type: models.VARCHAR.String(), Required: false, Readonly: true, Level: models.LEVELRESPONSIBLE, Index: 5},
+		{Name: "passive_user", Type: models.BOOLEAN.String(), Required: false, Readonly: true, Default: false, Level: models.LEVELRESPONSIBLE, Index: 6},
 	},
 }
 

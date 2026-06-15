@@ -62,6 +62,7 @@ func ImportPublication() {
 		41: "state",                                // special OK
 		42: "active",                               // special OK
 		47: "finalized_publication",
+		48: "abstract_publication",
 		3:  "project_accronym", // special OK // TODO ajouté dans un csv.
 	}
 	_, datas := importFile(filepath)
@@ -115,17 +116,17 @@ func ImportPublication() {
 			}
 			if i == 47 && data[45] != "" {
 				file := strings.Split(data[i], "/")
-				if strings.Contains(data[45], "abstract") {
-					if dbName == models.ConferenceFR.Name || dbName == models.PresentationAuthorsFR.Name || dbName == models.PosterFR.Name {
-						model["abstract_publication"] = file[len(file)-1]
-					}
-				} else {
-					if strings.Contains(data[45], "fin") {
-						model[mapped[i]] = file[len(file)-1]
-					} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
-						model[mapped[i]] = file[len(file)-1]
-					}
+
+				if strings.Contains(data[45], "fin") {
+					model[mapped[i]] = file[len(file)-1]
+				} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
+					model[mapped[i]] = file[len(file)-1]
 				}
+
+			} else if i == 48 {
+				file := strings.Split(data[i], "/")
+				model[mapped[i]] = file[len(file)-1]
+
 			} else if i == 42 {
 				if data[i] == "0" {
 					model[mapped[i]] = false
@@ -205,9 +206,10 @@ func ImportPublication() {
 					if err == nil && len(coc) > 0 {
 						model["competence_center"] = coc[0][utils.SpecialIDParam]
 					}
-				} else {
-					// TODO
-
+				} else if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+					"name": "'root'",
+				}, false); err == nil && len(usr) > 0 { {
+					model[mapped[i]] = usr[0][utils.SpecialIDParam]
 				}
 			} else if i == 27 || i == 34 {
 				restr := []interface{}{}
@@ -295,7 +297,6 @@ func ImportPublication() {
 					model[mapped[i]] = createDate
 				}
 			}
-			// TODO check special field like project, authors, affiliation... etc.
 		}
 
 		if no_model {

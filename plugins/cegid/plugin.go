@@ -309,18 +309,20 @@ func ImportUserHierachy() {
 			}
 			if !slices.Contains(inside, utils.GetString(record, "name")) {
 				inside = append(inside, utils.GetString(record, "name"))
-				if utils.GetBool(record, "active") {
-					if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-						"name": connector.Quote(utils.GetString(record, "name")),
-					}, false); err == nil && len(res) > 0 {
-						record[utils.SpecialIDParam] = res[0][utils.SpecialIDParam]
-						d.GetDb().ClearQueryFilter().UpdateQuery(ds.DBUser.Name, record, map[string]interface{}{
-							utils.SpecialIDParam: res[0][utils.SpecialIDParam],
-						}, false)
-					} else {
-						d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUser.Name, record, func(s string) (string, bool) { return "", true })
-					}
+				if !utils.GetBool(record, "active") {
+					record["passive_user"] = true
 				}
+				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
+					"name": connector.Quote(utils.GetString(record, "name")),
+				}, false); err == nil && len(res) > 0 {
+					record[utils.SpecialIDParam] = res[0][utils.SpecialIDParam]
+					d.GetDb().ClearQueryFilter().UpdateQuery(ds.DBUser.Name, record, map[string]interface{}{
+						utils.SpecialIDParam: res[0][utils.SpecialIDParam],
+					}, false)
+				} else {
+					d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUser.Name, record, func(s string) (string, bool) { return "", true })
+				}
+
 			}
 		}
 	}
