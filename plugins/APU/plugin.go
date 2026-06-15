@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/csv"
+	"os/exec"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/specialized_service/task_service"
@@ -60,7 +61,7 @@ func ImportPublication() {
 		39: "manager_" + ds.RootID(ds.DBUser.Name), // special OK
 		41: "state",                                // special OK
 		42: "active",                               // special OK
-		3:  "project_accronym",                     // special OK
+		3:  "project_accronym",                     // special OK // TODO ajouté dans un csv.
 	}
 	// TODO finalized_publication failed
 	_, datas := importFile(filepath)
@@ -107,7 +108,9 @@ func ImportPublication() {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
 		}
 		fmt.Println(dt, dbName, affDbName, authorsDbName)
+		missing_project := []string{}
 		date := ""
+		no_model := false
 		// TODO FILE RETRIEVAL +
 		for _, i := range dt {
 			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
@@ -117,6 +120,7 @@ func ImportPublication() {
 			if i == 42 {
 				if data[i] == "0" {
 					model[mapped[i]] = false
+					no_model = true
 					break
 				} else {
 					model[mapped[i]] = true
@@ -194,8 +198,11 @@ func ImportPublication() {
 					if err == nil && len(coc) > 0 {
 						model["competence_center"] = coc[0][utils.SpecialIDParam]
 					}
+				} else {
+					// TODO
+
 				}
-			} else if i == 27 {
+			} else if i == 27 || i == 34 {
 				restr := []interface{}{}
 				data[i] = strings.ReplaceAll(data[i], ";", ",")
 				for _, auth := range strings.Split(data[i], ",") {
@@ -205,7 +212,17 @@ func ImportPublication() {
 				}
 				if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, restr, false); err == nil && len(usr) > 0 {
 					model[mapped[i]] = usr[0][utils.SpecialIDParam]
-					break
+				} else if len(strings.Split(data[i], ",")) > 0 {
+					iu, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUser.Name, map[string]interface{}{
+						"name": strings.Split(data[i], ",")[0],
+					}, func(s string) (string, bool) { return "", true })
+					if err == nil {
+						model[mapped[i]] = iu
+					} else {
+						model[mapped[i]] = 1 // root
+					}
+				} else {
+					model[mapped[i]] = 1 // root
 				}
 			} else if i == 3 {
 				if prj, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.Project.Name, map[string]interface{}{
@@ -221,6 +238,10 @@ func ImportPublication() {
 					}, false); err == nil && len(res) > 0 {
 						model["axis"] = res[0][utils.SpecialIDParam]
 					}
+				} else {
+					missing_project = append(missing_project, data[i])
+					no_model = true
+					break
 				}
 			} else if i == 25 {
 				if model["authors"] == nil {
@@ -267,6 +288,15 @@ func ImportPublication() {
 				}
 			}
 			// TODO check special field like project, authors, affiliation... etc.
+		}
+		if no_model {
+			continue // do not create anything
+		}
+		cmd := exec.Command("./id_script", missing_project...) // generate csv with missing project
+
+		_, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println("Erreur :", err)
 		}
 		fmt.Println("MODEL", dbName, model)
 		m2 := map[string]interface{}{}
