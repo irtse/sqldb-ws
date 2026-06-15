@@ -300,7 +300,7 @@ func ImportPublication() {
 			continue // do not create anything
 		}
 		fmt.Println(model["effective_publishing_date"], "//", date)
-		if model["effective_publishing_date"] == nil || model["effective"] == "" {
+		if model["effective_publishing_date"] == nil || model["effective_publishing_date"] == "" {
 			createDate, _ := time.Parse("02/01/2006", date)
 			model["effective_publishing_date"] = createDate
 			fmt.Println("ADD DATE", date)
