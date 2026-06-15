@@ -115,15 +115,16 @@ func ImportPublication() {
 				date = data[i]
 			}
 			if i == 47 && data[45] != "" {
+				file := strings.Split(data[i], "/")
 				if strings.Contains(data[45], "abstract") {
-					if dbName == models.ConferenceFR.Name || dbName == models.PresentationAuthorsFR.Name {
-						model["abstract_publication"] = "apu_files/" + data[i]
+					if dbName == models.ConferenceFR.Name || dbName == models.PresentationAuthorsFR.Name || dbName == models.PosterFR.Name {
+						model["abstract_publication"] = file[len(file)-1]
 					}
 				} else {
 					if strings.Contains(data[45], "fin") {
-						model[mapped[i]] = "apu_files/" + data[i]
+						model[mapped[i]] = "apu_files/" + file[len(file)-1]
 					} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
-						model[mapped[i]] = "apu_files/" + data[i]
+						model[mapped[i]] = "apu_files/" + file[len(file)-1]
 					}
 				}
 			} else if i == 42 {
@@ -301,16 +302,7 @@ func ImportPublication() {
 		if no_model {
 			continue // do not create anything
 		}
-		fmt.Println(model["effective_publishing_date"], "//", date)
-		if model["effective_publishing_date"] == nil || model["effective_publishing_date"] == "" {
-			createDate, err := time.Parse("02/01/2006", date)
-			fmt.Println(createDate, "createDate", err)
-			if err != nil {
-				createDate, err = time.Parse("2006/01/02", date)
-			}
-			model["effective_publishing_date"] = createDate
-			fmt.Println("ADD DATE", date)
-		}
+
 		cmd := exec.Command("./id_script.sh", missing_project...) // generate csv with missing project
 
 		_, err := cmd.CombinedOutput()
@@ -326,16 +318,25 @@ func ImportPublication() {
 			"name": connector.Quote(utils.GetString(model, "name")),
 		}, false); err == nil && len(res) == 0 {
 			delete(m2, "authors")
+			createDate, err := time.Parse("02/01/2006", date)
+			if err != nil {
+				createDate, err = time.Parse("2006/01/02", date)
+			}
+			if err != nil {
+				createDate = time.Time{}
+			}
+			fmt.Println(model["effective_publishing_date"], "//", date)
+			if m2["effective_publishing_date"] == nil || m2["effective_publishing_date"] == "" {
+
+				m2["effective_publishing_date"] = createDate
+				fmt.Println("ADD DATE", date)
+			}
+			if m2["state"] == 6 {
+				m2["is_draft"] = true
+			}
 			m2, _, _ = d.GetSpecialized(dbName).VerifyDataIntegrity(m2, dbName)
 			if id, err := d.GetDb().ClearQueryFilter().CreateQuery(dbName, m2, func(s string) (string, bool) { return s, true }); err == nil {
 				d.GetSpecialized(dbName).SpecializedCreateRow(m2, dbName)
-				createDate, err := time.Parse("02/01/2006", date)
-				if err != nil {
-					createDate, err = time.Parse("2006/01/02", date)
-				}
-				if err != nil {
-					createDate = time.Time{}
-				}
 				if sch, err := schema.GetSchema(dbName); err == nil {
 					_, err = d.GetDb().ClearQueryFilter().CreateQuery(ds.DBDataAccess.Name, map[string]interface{}{
 						"write":             true,
@@ -376,32 +377,31 @@ func ImportPublication() {
 						"name": connector.Quote(utils.GetString(model, "name")),
 					}, false); err == nil && len(r) > 0 {
 
-						_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
-							ds.RootID(models.PublicationStatusFR.Name): r[0]["state"],
-							"update_date":       createDate,
-							ds.DestTableDBField: id,
-							ds.SchemaDBField:    sch.ID,
-						}, func(s string) (string, bool) { return s, true })
-						if (utils.ToString(r[0]["state"]) == "1" || utils.ToString(r[0]["state"]) == "6") && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
-							if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
-								ds.SchemaDBField: sch.ID,
-							}, false); err == nil && len(wfs) > 0 {
-								m := map[string]interface{}{
-									"name":              "APU retrieval " + utils.ToString(r[0]["name"]),
-									"state":             "pending",
-									"is_close":          false,
-									"current_index":     1,
-									ds.DestTableDBField: id,
-									ds.SchemaDBField:    sch.ID,
-									ds.WorkflowDBField:  wfs[0][utils.SpecialIDParam],
-									ds.UserDBField:      r[0]["manager_"+ds.RootID(ds.DBUser.Name)],
-								}
-
-								if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err == nil {
-									if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
-										"index":            1,
-										ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
-									}, false); err == nil && len(wfss) > 0 {
+						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+							ds.SchemaDBField: sch.ID,
+						}, false); err == nil && len(wfs) > 0 {
+							m := map[string]interface{}{
+								"name":              "APU retrieval " + utils.ToString(r[0]["name"]),
+								"state":             "pending",
+								"is_close":          utils.ToString(r[0]["state"]) != "1",
+								"current_index":     1,
+								ds.DestTableDBField: id,
+								ds.SchemaDBField:    sch.ID,
+								ds.WorkflowDBField:  wfs[0][utils.SpecialIDParam],
+								ds.UserDBField:      r[0]["manager_"+ds.RootID(ds.DBUser.Name)],
+							}
+							if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err == nil {
+								if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
+									"index":            1,
+									ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
+								}, false); err == nil && len(wfss) > 0 {
+									_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
+										ds.RootID(models.PublicationStatusFR.Name): r[0]["state"],
+										"update_date":       createDate,
+										ds.DestTableDBField: id,
+										ds.SchemaDBField:    sch.ID,
+									}, func(s string) (string, bool) { return s, true })
+									if (utils.ToString(r[0]["state"]) != "1") && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 										m["id"] = i
 										newTask := task_service.ConstructNotificationTask(wfss[0], m, d)
 										newTask[ds.UserDBField] = r[0]["manager_"+ds.RootID(ds.DBUser.Name)]
@@ -411,17 +411,10 @@ func ImportPublication() {
 											return "", true
 										})
 										if err != nil {
-											fmt.Println("zouin", err)
 											return
 										}
-									} else {
-										fmt.Println("zzzzz", err)
 									}
-								} else {
-									fmt.Println("lkqsdqsdk", err)
 								}
-							} else {
-								fmt.Println("WF ERR", err)
 							}
 						}
 					} else {
