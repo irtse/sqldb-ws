@@ -330,6 +330,10 @@ func ImportPublication() {
 
 					if model["authors"] != nil {
 						for _, auth := range model["authors"].([]map[string]interface{}) {
+							fmt.Println("AUTH", auth)
+							if auth["authors"] == nil {
+								continue
+							}
 							m := map[string]interface{}{}
 							for k, v := range auth["authors"].(map[string]interface{}) {
 								m[k] = v
