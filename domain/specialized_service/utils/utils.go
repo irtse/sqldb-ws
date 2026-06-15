@@ -300,9 +300,10 @@ func (s *AbstractSpecializedService) VerifyDataIntegrity(record map[string]inter
 
 		for k, v := range record {
 			if f, err := sch.GetField(k); err == nil && f.Transform != "" {
-				if f.Transform == "lowercase" {
+				switch f.Transform {
+				case "lowercase":
 					record[k] = strings.ToLower(utils.ToString(v))
-				} else if f.Transform == "uppercase" {
+				case "uppercase":
 					record[k] = strings.ToUpper(utils.ToString(v))
 				}
 			}

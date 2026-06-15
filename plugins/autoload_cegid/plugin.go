@@ -183,14 +183,14 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 			for _, r := range res {
 				if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
-					ok = "yes"
+					ok = true
 					isNotFound = false
 					break
 				}
 			}
 		}
 		if isNotFound {
-			ok = "no"
+			ok = false
 		}
 		record["major_conference"] = ok
 	}

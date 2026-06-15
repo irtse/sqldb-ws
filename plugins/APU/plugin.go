@@ -300,7 +300,7 @@ func ImportPublication() {
 			continue // do not create anything
 		}
 
-		if model["effective_publishing_date"] == nil || model["effective"] == "effective_publishing_date" {
+		if model["effective_publishing_date"] == nil || model["effective"] == "" {
 			model["effective_publishing_date"] = date
 		}
 		cmd := exec.Command("./id_script.sh", missing_project...) // generate csv with missing project
@@ -318,7 +318,9 @@ func ImportPublication() {
 			"name": connector.Quote(utils.GetString(model, "name")),
 		}, false); err == nil && len(res) == 0 {
 			delete(m2, "authors")
+
 			if id, err := d.GetDb().ClearQueryFilter().CreateQuery(dbName, m2, func(s string) (string, bool) { return s, true }); err == nil {
+				d.GetSpecialized(dbName).SpecializedCreateRow(m2, dbName)
 				createDate, err := time.Parse("02/01/2006", date)
 				if err != nil {
 					createDate = time.Time{}
