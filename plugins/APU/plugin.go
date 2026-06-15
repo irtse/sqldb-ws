@@ -64,7 +64,6 @@ func ImportPublication() {
 		47: "finalized_publication",
 		3:  "project_accronym", // special OK // TODO ajouté dans un csv.
 	}
-	// TODO finalized_publication failed
 	_, datas := importFile(filepath)
 	for _, data := range datas {
 		model := map[string]interface{}{}
@@ -250,28 +249,29 @@ func ImportPublication() {
 					break
 				}
 			} else if i == 25 {
-				if model["authors"] == nil {
-					model["authors"] = []map[string]interface{}{}
-				}
+				a := []map[string]interface{}{}
 				data[i] = strings.ReplaceAll(data[i], ";", ",")
+				aa := []map[string]interface{}{}
 				for y, authors := range strings.Split(data[i], ",") {
-					if len(model["authors"].([]map[string]interface{})) < y {
-						model["authors"] = append(model["authors"].([]map[string]interface{}), map[string]interface{}{})
-					}
 					restr := []interface{}{}
+					fmt.Println("FOUND AUTHOR", authors)
 					for _, n := range strings.Split(authors, " ") {
 						restr = append(restr, "name::text LIKE '%"+strings.Trim(strings.ReplaceAll(n, "'", "''"), " ")+"%'")
 					}
 					if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, restr, false); err == nil && len(usr) > 0 && len(model["authors"].([]map[string]interface{})) > y {
-						model["authors"].([]map[string]interface{})[y]["authors"] = map[string]interface{}{
+						aa = append(aa, map[string]interface{}{
 							ds.UserDBField: usr[0][utils.SpecialIDParam],
-						}
-					} else if len(model["authors"].([]map[string]interface{})) > y {
-						model["authors"].([]map[string]interface{})[y]["authors"] = map[string]interface{}{
+						})
+					} else {
+						aa = append(aa, map[string]interface{}{
 							"name": strings.Trim(authors, " "),
-						}
+						})
 					}
 				}
+				a = append(a, map[string]interface{}{
+					"name": aa,
+				})
+				model["authors"] = aa
 			} else if i == 26 {
 				if model["authors"] == nil {
 					model["authors"] = []map[string]interface{}{}
