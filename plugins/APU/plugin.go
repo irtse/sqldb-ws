@@ -85,7 +85,7 @@ func ImportPublication() {
 			affDbName = models.InternshipAffiliationAuthorsFR.Name
 			authorsDbName = models.InternshipAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "poster") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13, 47}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13, 47, 48}
 			dbName = models.PosterFR.Name
 			affDbName = models.PosterAffiliationAuthorsFR.Name
 			authorsDbName = models.PosterAuthorsFR.Name
@@ -100,7 +100,7 @@ func ImportPublication() {
 			affDbName = models.OtherPublicationAffiliationAuthorsFR.Name
 			authorsDbName = models.OtherPublicationAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "article") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15, 47}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15, 47, 48}
 			dbName = models.ArticleFR.Name
 			affDbName = models.ArticleAffiliationAuthorsFR.Name
 			authorsDbName = models.ArticleAuthorsFR.Name
