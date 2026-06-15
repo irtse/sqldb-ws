@@ -4,7 +4,9 @@
 
 INSERT INTO "dbschema_column" ("id", "active", "is_draft", "name", "label", "type", "description", "placeholder", "default_value", "index", "readonly", "required", "read_level", "dbschema_id", "constraints", "link_id", "hidden", "translatable", "transform_function", "group_by", "in_resume", "subsection", "info") VALUES
 (6044342,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	44,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL),
-(16846,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	43,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL);
+(16846,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	43,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL),
+(864,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	42,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL);
+
 
 # INSERT FILTERS
 

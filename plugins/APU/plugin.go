@@ -409,7 +409,7 @@ func ImportPublication() {
 											ds.DestTableDBField: id,
 											ds.SchemaDBField:    sch.ID,
 										}, func(s string) (string, bool) { return s, true })
-										if (utils.ToString(r[0]["state"]) != "1") && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
+										if (utils.ToString(r[0]["state"]) == "1") && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 											m["id"] = i
 											newTask := task_service.ConstructNotificationTask(wfss[0], m, d)
 											newTask[ds.UserDBField] = r[0]["manager_"+ds.RootID(ds.DBUser.Name)]
