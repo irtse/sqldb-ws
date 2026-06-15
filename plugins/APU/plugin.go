@@ -116,7 +116,9 @@ func ImportPublication() {
 			}
 			if i == 47 && data[45] != "" {
 				if strings.Contains(data[45], "abstract") {
-					model["abstract_publication"] = "apu_files/" + data[i]
+					if dbName == models.ConferenceFR.Name || dbName == models.PresentationAuthorsFR.Name {
+						model["abstract_publication"] = "apu_files/" + data[i]
+					}
 				} else {
 					if strings.Contains(data[45], "fin") {
 						model[mapped[i]] = "apu_files/" + data[i]
