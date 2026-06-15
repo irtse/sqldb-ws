@@ -301,7 +301,10 @@ func ImportPublication() {
 		}
 		fmt.Println(model["effective_publishing_date"], "//", date)
 		if model["effective_publishing_date"] == nil || model["effective_publishing_date"] == "" {
-			createDate, _ := time.Parse("02/01/2006", date)
+			createDate, err := time.Parse("02/01/2006", date)
+			if err != nil {
+				createDate, err = time.Parse("2006/01/02", date)
+			}
 			model["effective_publishing_date"] = createDate
 			fmt.Println("ADD DATE", date)
 		}
@@ -324,6 +327,9 @@ func ImportPublication() {
 			if id, err := d.GetDb().ClearQueryFilter().CreateQuery(dbName, m2, func(s string) (string, bool) { return s, true }); err == nil {
 				d.GetSpecialized(dbName).SpecializedCreateRow(m2, dbName)
 				createDate, err := time.Parse("02/01/2006", date)
+				if err != nil {
+					createDate, err = time.Parse("2006/01/02", date)
+				}
 				if err != nil {
 					createDate = time.Time{}
 				}
