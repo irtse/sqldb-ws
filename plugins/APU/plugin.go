@@ -318,7 +318,7 @@ func ImportPublication() {
 			"name": connector.Quote(utils.GetString(model, "name")),
 		}, false); err == nil && len(res) == 0 {
 			delete(m2, "authors")
-
+			m2, _, _ = d.GetSpecialized(dbName).VerifyDataIntegrity(m2, dbName)
 			if id, err := d.GetDb().ClearQueryFilter().CreateQuery(dbName, m2, func(s string) (string, bool) { return s, true }); err == nil {
 				d.GetSpecialized(dbName).SpecializedCreateRow(m2, dbName)
 				createDate, err := time.Parse("02/01/2006", date)
