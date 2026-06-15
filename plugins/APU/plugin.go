@@ -111,6 +111,9 @@ func ImportPublication() {
 		no_model := false
 		// TODO FILE RETRIEVAL +
 		for _, i := range dt {
+			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
+				date = data[i]
+			}
 			if i == 47 && data[45] != "" {
 				if strings.Contains(data[45], "abstract") {
 					model["abstract_publication"] = "/apu_files/" + data[i]
@@ -121,10 +124,7 @@ func ImportPublication() {
 						model[mapped[i]] = "/apu_files/" + data[i]
 					}
 				}
-			} else if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
-				date = data[i]
-			}
-			if i == 42 {
+			} else if i == 42 {
 				if data[i] == "0" {
 					model[mapped[i]] = false
 					no_model = true
