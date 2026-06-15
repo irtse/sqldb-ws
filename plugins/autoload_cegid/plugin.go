@@ -193,6 +193,9 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 			ok = false
 		}
 		record["major_conference"] = ok
+		if ok == true {
+			record["reread"] = true
+		}
 	}
 	return s.AbstractSpecializedService.VerifyDataIntegrity(record, tablename)
 }
