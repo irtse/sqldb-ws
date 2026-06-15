@@ -383,7 +383,7 @@ func ImportPublication() {
 							state := "pending"
 							if utils.ToString(r[0]["state"]) == "4" {
 								state = "refused"
-							} else if utils.ToString(r[0]["state"]) == "5" && utils.ToString(r[0]["state"]) == "3" {
+							} else if utils.ToString(r[0]["state"]) == "5" || utils.ToString(r[0]["state"]) == "3" {
 								state = "completed"
 							}
 							m := map[string]interface{}{
