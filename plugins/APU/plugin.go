@@ -344,9 +344,9 @@ func ImportPublication() {
 							fmt.Println(affDbName, auth, m)
 							if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
 								for _, mm := range m {
-									mm[ds.RootID(dbName)] = id
-									d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, mm, func(s string) (string, bool) { return s, true })
-
+									mm[ds.RootID(affDbName)] = id
+									_, err := d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, mm, func(s string) (string, bool) { return s, true })
+									fmt.Println("AUTHORS", mm, err)
 								}
 							} else {
 								fmt.Println("AFF", err)
