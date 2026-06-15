@@ -295,8 +295,13 @@ func ImportPublication() {
 			}
 			// TODO check special field like project, authors, affiliation... etc.
 		}
+
 		if no_model {
 			continue // do not create anything
+		}
+
+		if model["effective_publishing_date"] == nil || model["effective"] == "effective_publishing_date" {
+			model["effective_publishing_date"] = date
 		}
 		cmd := exec.Command("./id_script.sh", missing_project...) // generate csv with missing project
 
