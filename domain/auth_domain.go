@@ -24,7 +24,7 @@ func IsLogged(superAdmin bool, user string, token string) (utils.Results, error)
 		"name":  connector.Quote(strings.ToLower(user)),
 		"email": connector.Quote(strings.ToLower(user)),
 	}, true)
-	if err != nil || len(response) == 0 || (response[0]["passive_user"] == nil || response[0]["passive_user"] == false) {
+	if err != nil || len(response) == 0 || !(response[0]["passive_user"] == nil || response[0]["passive_user"] == false) {
 		return nil, err
 	}
 	resp := response[0]
