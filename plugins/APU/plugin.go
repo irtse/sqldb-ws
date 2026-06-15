@@ -380,9 +380,15 @@ func ImportPublication() {
 						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 							ds.SchemaDBField: sch.ID,
 						}, false); err == nil && len(wfs) > 0 {
+							state := "pending"
+							if utils.ToString(r[0]["state"]) == "4" {
+								state = "refused"
+							} else if utils.ToString(r[0]["state"]) == "5" && utils.ToString(r[0]["state"]) == "3" {
+								state = "completed"
+							}
 							m := map[string]interface{}{
 								"name":              "APU retrieval " + utils.ToString(r[0]["name"]),
-								"state":             "pending",
+								"state":             state,
 								"is_close":          utils.ToString(r[0]["state"]) != "1",
 								"current_index":     1,
 								ds.DestTableDBField: id,
