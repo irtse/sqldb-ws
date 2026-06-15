@@ -73,7 +73,7 @@ func ImportPublication() {
 		authorsDbName := models.OtherPublicationAuthorsFR.Name
 		dt := []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 15, 47}
 		if strings.Contains(strings.ToLower(data[4]), "these") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 34, 39, 35, 363, 47}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 34, 39, 35, 36, 47}
 			dbName = models.ThesisFR.Name
 			affDbName = models.ThesisAffiliationAuthorsFR.Name
 			authorsDbName = models.ThesisAffiliationAuthorsFR.Name
@@ -111,7 +111,7 @@ func ImportPublication() {
 		no_model := false
 		// TODO FILE RETRIEVAL +
 		for _, i := range dt {
-			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38 || i == 29) && date == "" { // format d/m/y
+			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38 || i == 29 || i == 36) && date == "" { // format d/m/y
 				date = data[i]
 			}
 			if i == 47 && data[45] != "" {
@@ -390,7 +390,7 @@ func ImportPublication() {
 								ds.WorkflowDBField:  wfs[0][utils.SpecialIDParam],
 								ds.UserDBField:      r[0]["manager_"+ds.RootID(ds.DBUser.Name)],
 							}
-							if m2["is_draft"] == true {
+							if m2["is_draft"] != true {
 
 								if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err == nil {
 									if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
