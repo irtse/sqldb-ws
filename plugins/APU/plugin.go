@@ -256,7 +256,7 @@ func ImportPublication() {
 					restr := []interface{}{}
 					fmt.Println("FOUND AUTHOR", authors)
 					for _, n := range strings.Split(authors, " ") {
-						restr = append(restr, "name::text LIKE '%"+strings.Trim(strings.ReplaceAll(n, "'", "''"), " ")+"%'")
+						restr = append(restr, "name::text LIKE '%"+strings.Trim(strings.ReplaceAll(strings.ToLower(n), "'", "''"), " ")+"%'")
 					}
 					if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, restr, false); err == nil && len(usr) > 0 && len(model["authors"].([]map[string]interface{})) > y {
 						aa = append(aa, map[string]interface{}{
@@ -298,7 +298,7 @@ func ImportPublication() {
 		if no_model {
 			continue // do not create anything
 		}
-		cmd := exec.Command("./id_script", missing_project...) // generate csv with missing project
+		cmd := exec.Command("./id_script.sh", missing_project...) // generate csv with missing project
 
 		_, err := cmd.CombinedOutput()
 		if err != nil {
@@ -330,17 +330,17 @@ func ImportPublication() {
 
 					if model["authors"] != nil {
 						for _, auth := range model["authors"].([]map[string]interface{}) {
-							authorss := auth["authors"]
-							fmt.Println(affDbName, authorss)
-							if authorss == nil {
-								continue
+							m := map[string]interface{}{}
+							for k, v := range auth["authors"].(map[string]interface{}) {
+								m[k] = v
 							}
 							delete(auth, "authors")
 							auth[ds.RootID(dbName)] = id
-							fmt.Println(affDbName, authorss)
+
+							fmt.Println(affDbName, auth, m)
 							if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
-								authorss.(map[string]interface{})[ds.RootID(dbName)] = id
-								d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
+								m[ds.RootID(dbName)] = id
+								d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, m, func(s string) (string, bool) { return s, true })
 							} else {
 								fmt.Println("AFF", err)
 							}
