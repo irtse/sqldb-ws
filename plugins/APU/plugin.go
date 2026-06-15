@@ -327,19 +327,22 @@ func ImportPublication() {
 						ds.UserDBField:      m2["manager_"+ds.RootID(ds.DBUser.Name)],
 					}, func(s string) (string, bool) { return s, true })
 					fmt.Println("DATAACCESS", err)
-					fmt.Println(model["authors"])
+
 					if model["authors"] != nil {
 						for _, auth := range model["authors"].([]map[string]interface{}) {
 							authorss := auth["authors"]
+							fmt.Println(affDbName, authorss)
 							if authorss == nil {
 								continue
 							}
 							delete(auth, "authors")
 							auth[ds.RootID(dbName)] = id
-
+							fmt.Println(affDbName, authorss)
 							if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
 								authorss.(map[string]interface{})[ds.RootID(dbName)] = id
 								d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, authorss.(map[string]interface{}), func(s string) (string, bool) { return s, true })
+							} else {
+								fmt.Println("AFF", err)
 							}
 						}
 					}
