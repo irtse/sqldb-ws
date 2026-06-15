@@ -68,6 +68,7 @@ func ImportPublication() {
 	_, datas := importFile(filepath)
 	for _, data := range datas {
 		model := map[string]interface{}{}
+		no_model := false
 
 		dbName := models.OtherPublicationFR.Name
 		affDbName := models.OtherPublicationAffiliationAuthorsFR.Name
@@ -105,11 +106,11 @@ func ImportPublication() {
 			authorsDbName = models.ArticleAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "communication") {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
+			no_model = true
+			break
 		}
 		missing_project := []string{}
 		date := ""
-		no_model := false
-		// TODO FILE RETRIEVAL +
 		for _, i := range dt {
 			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38 || i == 29 || i == 36) && date == "" { // format d/m/y
 				date = data[i]
@@ -208,7 +209,7 @@ func ImportPublication() {
 					}
 				} else if usr, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"name": "'root'",
-				}, false); err == nil && len(usr) > 0 { {
+				}, false); err == nil && len(usr) > 0 {
 					model[mapped[i]] = usr[0][utils.SpecialIDParam]
 				}
 			} else if i == 27 || i == 34 {
