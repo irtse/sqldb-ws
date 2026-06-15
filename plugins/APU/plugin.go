@@ -301,7 +301,9 @@ func ImportPublication() {
 		}
 		fmt.Println(model["effective_publishing_date"], "//", date)
 		if model["effective_publishing_date"] == nil || model["effective"] == "" {
-			model["effective_publishing_date"] = date
+			createDate, _ := time.Parse("02/01/2006", date)
+			model["effective_publishing_date"] = createDate
+			fmt.Println("ADD DATE", date)
 		}
 		cmd := exec.Command("./id_script.sh", missing_project...) // generate csv with missing project
 
