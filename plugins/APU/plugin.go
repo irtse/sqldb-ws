@@ -61,7 +61,8 @@ func ImportPublication() {
 		39: "manager_" + ds.RootID(ds.DBUser.Name), // special OK
 		41: "state",                                // special OK
 		42: "active",                               // special OK
-		3:  "project_accronym",                     // special OK // TODO ajouté dans un csv.
+		47: "finalized_publication",
+		3:  "project_accronym", // special OK // TODO ajouté dans un csv.
 	}
 	// TODO finalized_publication failed
 	_, datas := importFile(filepath)
@@ -71,35 +72,35 @@ func ImportPublication() {
 		dbName := models.OtherPublicationFR.Name
 		affDbName := models.OtherPublicationAffiliationAuthorsFR.Name
 		authorsDbName := models.OtherPublicationAuthorsFR.Name
-		dt := []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 15}
+		dt := []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 15, 47}
 		if strings.Contains(strings.ToLower(data[4]), "these") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 34, 39, 35, 363}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 34, 39, 35, 363, 47}
 			dbName = models.ThesisFR.Name
 			affDbName = models.ThesisAffiliationAuthorsFR.Name
 			authorsDbName = models.ThesisAffiliationAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "stage") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 27, 28, 29}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 27, 28, 29, 47}
 			dbName = models.InternshipFR.Name
 			affDbName = models.InternshipAffiliationAuthorsFR.Name
 			authorsDbName = models.InternshipAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "poster") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13, 47}
 			dbName = models.PosterFR.Name
 			affDbName = models.PosterAffiliationAuthorsFR.Name
 			authorsDbName = models.PosterAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "demo") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 37, 38}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 37, 38, 47}
 			dbName = models.DemoFR.Name
 			affDbName = models.DemoAffiliationAuthorsFR.Name
 			authorsDbName = models.DemoAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "article_bdd") {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
-			dt = []int{5, 41, 42, 3, 8, 30, 23, 25, 26, 39, 37, 38}
+			dt = []int{5, 41, 42, 3, 8, 30, 23, 25, 26, 39, 37, 38, 47}
 			dbName = models.OtherPublicationFR.Name
 			affDbName = models.OtherPublicationAffiliationAuthorsFR.Name
 			authorsDbName = models.OtherPublicationAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "article") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15}
+			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15, 47}
 			dbName = models.ArticleFR.Name
 			affDbName = models.ArticleAffiliationAuthorsFR.Name
 			authorsDbName = models.ArticleAuthorsFR.Name
@@ -111,7 +112,17 @@ func ImportPublication() {
 		no_model := false
 		// TODO FILE RETRIEVAL +
 		for _, i := range dt {
-			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
+			if i == 47 && data[45] != "" {
+				if strings.Contains(data[45], "abstract") {
+					model["abstract_publication"] = "/apu_files/" + data[i]
+				} else {
+					if strings.Contains(data[45], "fin") {
+						model[mapped[i]] = "/apu_files/" + data[i]
+					} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
+						model[mapped[i]] = "/apu_files/" + data[i]
+					}
+				}
+			} else if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
 				date = data[i]
 			}
 			if i == 42 {
