@@ -299,7 +299,7 @@ func ImportPublication() {
 		if no_model {
 			continue // do not create anything
 		}
-
+		fmt.Println(model["effective_publishing_date"], "//", date)
 		if model["effective_publishing_date"] == nil || model["effective"] == "" {
 			model["effective_publishing_date"] = date
 		}
