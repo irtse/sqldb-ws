@@ -390,28 +390,31 @@ func ImportPublication() {
 								ds.WorkflowDBField:  wfs[0][utils.SpecialIDParam],
 								ds.UserDBField:      r[0]["manager_"+ds.RootID(ds.DBUser.Name)],
 							}
-							if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err == nil {
-								if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
-									"index":            1,
-									ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
-								}, false); err == nil && len(wfss) > 0 {
-									_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
-										ds.RootID(models.PublicationStatusFR.Name): r[0]["state"],
-										"update_date":       createDate,
-										ds.DestTableDBField: id,
-										ds.SchemaDBField:    sch.ID,
-									}, func(s string) (string, bool) { return s, true })
-									if (utils.ToString(r[0]["state"]) != "1") && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
-										m["id"] = i
-										newTask := task_service.ConstructNotificationTask(wfss[0], m, d)
-										newTask[ds.UserDBField] = r[0]["manager_"+ds.RootID(ds.DBUser.Name)]
-										newTask[ds.SchemaDBField] = sch.ID
-										newTask[ds.DestTableDBField] = id
-										_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) {
-											return "", true
-										})
-										if err != nil {
-											return
+							if m2["is_draft"] == true {
+
+								if i, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBRequest.Name, m, func(s string) (string, bool) { return "", true }); err == nil {
+									if wfss, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name, map[string]interface{}{
+										"index":            1,
+										ds.WorkflowDBField: wfs[0][utils.SpecialIDParam],
+									}, false); err == nil && len(wfss) > 0 {
+										_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
+											ds.RootID(models.PublicationStatusFR.Name): r[0]["state"],
+											"update_date":       createDate,
+											ds.DestTableDBField: id,
+											ds.SchemaDBField:    sch.ID,
+										}, func(s string) (string, bool) { return s, true })
+										if (utils.ToString(r[0]["state"]) != "1") && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
+											m["id"] = i
+											newTask := task_service.ConstructNotificationTask(wfss[0], m, d)
+											newTask[ds.UserDBField] = r[0]["manager_"+ds.RootID(ds.DBUser.Name)]
+											newTask[ds.SchemaDBField] = sch.ID
+											newTask[ds.DestTableDBField] = id
+											_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) {
+												return "", true
+											})
+											if err != nil {
+												return
+											}
 										}
 									}
 								}
