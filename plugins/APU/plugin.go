@@ -334,17 +334,20 @@ func ImportPublication() {
 							if auth["authors"] == nil {
 								continue
 							}
-							m := map[string]interface{}{}
-							for k, v := range auth["authors"].(map[string]interface{}) {
-								m[k] = v
+							m := []map[string]interface{}{}
+							for _, v := range auth["authors"].([]map[string]interface{}) {
+								m = append(m, v)
 							}
 							delete(auth, "authors")
 							auth[ds.RootID(dbName)] = id
 
 							fmt.Println(affDbName, auth, m)
 							if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
-								m[ds.RootID(dbName)] = id
-								d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, m, func(s string) (string, bool) { return s, true })
+								for _, mm := range m {
+									mm[ds.RootID(dbName)] = id
+									d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, mm, func(s string) (string, bool) { return s, true })
+
+								}
 							} else {
 								fmt.Println("AFF", err)
 							}
