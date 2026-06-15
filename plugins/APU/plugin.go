@@ -269,7 +269,7 @@ func ImportPublication() {
 					}
 				}
 				a = append(a, map[string]interface{}{
-					"name": aa,
+					"authors": aa,
 				})
 				model["authors"] = aa
 			} else if i == 26 {
