@@ -65,7 +65,6 @@ func ImportPublication() {
 	}
 	// TODO finalized_publication failed
 	_, datas := importFile(filepath)
-	fmt.Println("DATAS", datas)
 	for _, data := range datas {
 		model := map[string]interface{}{}
 
@@ -107,7 +106,6 @@ func ImportPublication() {
 		} else if strings.Contains(strings.ToLower(data[4]), "communication") {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
 		}
-		fmt.Println(dt, dbName, affDbName, authorsDbName)
 		missing_project := []string{}
 		date := ""
 		no_model := false
@@ -116,7 +114,6 @@ func ImportPublication() {
 			if (i == 21 || i == 9 || i == 15 || i == 23 || i == 28 || i == 31 || i == 35 || i == 38) && date == "" { // format d/m/y
 				date = data[i]
 			}
-			fmt.Println("STATE", i, mapped[i])
 			if i == 42 {
 				if data[i] == "0" {
 					model[mapped[i]] = false
@@ -126,8 +123,6 @@ func ImportPublication() {
 					model[mapped[i]] = true
 				}
 			} else if i == 41 {
-				fmt.Println("Dqdz", strings.ToLower(data[i]))
-
 				if strings.Contains(strings.ToLower(data[i]), "init") {
 					if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
 						"name::text LIKE '%init%'",
@@ -339,7 +334,6 @@ func ImportPublication() {
 					if r, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
 						"name": connector.Quote(utils.GetString(model, "name")),
 					}, false); err == nil && len(r) > 0 {
-						fmt.Println(r[0])
 
 						_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
 							ds.RootID(models.PublicationStatusFR.Name): r[0]["state"],
@@ -347,7 +341,6 @@ func ImportPublication() {
 							ds.DestTableDBField: id,
 							ds.SchemaDBField:    sch.ID,
 						}, func(s string) (string, bool) { return s, true })
-						fmt.Println("PUBLI", err, r[0]["state"], (utils.ToString(r[0]["state"]) == "1" || utils.ToString(r[0]["state"]) == "6"), r[0]["manager_"+ds.RootID(ds.DBUser.Name)])
 						if (utils.ToString(r[0]["state"]) == "1" || utils.ToString(r[0]["state"]) == "6") && r[0]["manager_"+ds.RootID(ds.DBUser.Name)] != nil {
 							if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
 								ds.SchemaDBField: sch.ID,
@@ -373,7 +366,6 @@ func ImportPublication() {
 										newTask[ds.UserDBField] = r[0]["manager_"+ds.RootID(ds.DBUser.Name)]
 										newTask[ds.SchemaDBField] = sch.ID
 										newTask[ds.DestTableDBField] = id
-										fmt.Println("NEW TASK", newTask)
 										_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBTask.Name, newTask, func(s string) (string, bool) {
 											return "", true
 										})
