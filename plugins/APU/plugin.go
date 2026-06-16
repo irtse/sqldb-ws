@@ -105,7 +105,7 @@ func ImportPublication() {
 			affDbName = models.OtherPublicationAffiliationAuthorsFR.Name
 			authorsDbName = models.OtherPublicationAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "article") {
-			dt = []int{5, 16, 17, 19, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15, 47, 48}
+			dt = []int{5, 16, 17, 19, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15, 47}
 			dbName = models.ArticleFR.Name
 			affDbName = models.ArticleAffiliationAuthorsFR.Name
 			authorsDbName = models.ArticleAuthorsFR.Name
@@ -129,7 +129,7 @@ func ImportPublication() {
 				} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
 					model[mapped[i]] = strings.ReplaceAll(file[len(file)-1], "'", "''")
 				}
-			} else if i == 48 && (dbName == models.ConferenceFR.Name || dbName == models.PresentationFR.Name || dbName == models.PosterFR.Name) {
+			} else if i == 48 {
 				file := strings.Split(data[i], "/")
 				model[mapped[i]] = file[len(file)-1]
 
