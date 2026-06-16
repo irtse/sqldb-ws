@@ -286,6 +286,8 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			share["end_date"] = delegated["end_date"]
 			s, err := domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 			fmt.Println("sharing pb", share, s, err)
+		} else {
+			fmt.Println("SHERE pb", err)
 		}
 		if request[ds.DestTableDBField] != share[ds.DestTableDBField] && request[ds.SchemaDBField] != share[ds.SchemaDBField] {
 			delete(share, "start_date")
