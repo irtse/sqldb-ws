@@ -322,9 +322,8 @@ func ImportPublication() {
 		for k, v := range model {
 			m2[k] = v
 		}
-		if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
-			"name": connector.Quote(utils.GetString(model, "name")),
-		}, false); err == nil && len(res) == 0 {
+		m2 = foundDiff(m2, dbName, d)
+		if m2 != nil {
 			delete(m2, "authors")
 			createDate, err := time.Parse("02/01/2006", date)
 			if err != nil {
@@ -447,6 +446,27 @@ func ImportPublication() {
 			}
 		}
 	}
+}
+
+func foundDiff(model map[string]interface{}, dbName string, d utils.DomainITF) map[string]interface{} {
+	if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
+		"name": connector.Quote(utils.GetString(model, "name")),
+	}, false); err == nil {
+		if len(res) > 0 {
+			for k, v := range res[0] {
+				if model[k] != v {
+					model["name"] = utils.ToString(model["name"]) + " "
+					if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
+						"name": connector.Quote(utils.GetString(model, "name")),
+					}, false); err == nil && len(res) > 0 {
+						return foundDiff(model, dbName, d)
+					}
+				}
+			}
+			return nil
+		}
+	}
+	return model
 }
 
 func importFile(filePath string) ([]string, [][]string) {
