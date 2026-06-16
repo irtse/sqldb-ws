@@ -286,8 +286,8 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		}
 		fmt.Println("SHARE", share)
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
-			share["start_date"] = delegated["start_date"]
-			share["end_date"] = delegated["end_date"]
+			share["start_date"] = utils.GetString(delegated, "start_date")[0:10]
+			share["end_date"] = utils.GetString(delegated, "start_date")[0:10]
 			s, err := domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 			fmt.Println("sharing pb", share, s, err)
 		} else {
@@ -303,8 +303,8 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 			}
 			arr = append(arr, "(()'"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date) OR end_date IS NULL)")
 			if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
-				share["start_date"] = delegated["start_date"]
-				share["end_date"] = delegated["end_date"]
+				share["start_date"] = utils.GetString(delegated, "start_date")[0:10]
+				share["end_date"] = utils.GetString(delegated, "start_date")[0:10]
 				domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 			}
 		}
