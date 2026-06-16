@@ -415,7 +415,7 @@ func GetWorkflowToDelegate(domain utils.DomainITF, task utils.Record) map[string
 
 func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from string) map[string]map[string]interface{} {
 	users := map[string]map[string]interface{}{}
-	now := time.Now().UTC()
+	now := time.Now()
 	start := "('" + now.Format("2006-01-02 15:04:05") + "' >= start_date"
 	end := "('" + now.Format("2006-01-02 15:04:05") + "' < end_date OR end_date IS NULL))"
 
