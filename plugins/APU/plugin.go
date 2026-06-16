@@ -322,7 +322,7 @@ func ImportPublication() {
 		for k, v := range model {
 			m2[k] = v
 		}
-		m2 = foundDiff(m2, dbName, d)
+		m2 = foundDiff(model, dbName, d)
 		fmt.Println("IS M2", m2)
 		if m2 != nil {
 			delete(m2, "authors")
