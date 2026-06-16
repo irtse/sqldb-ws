@@ -415,7 +415,7 @@ func GetWorkflowToDelegate(domain utils.DomainITF, task utils.Record) map[string
 
 func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from string) map[string]map[string]interface{} {
 	users := map[string]map[string]interface{}{}
-	now := time.Now()
+	now := time.Now().UTC()
 	start := "('" + now.Format("2006-01-02 15:04:05") + "' >= start_date"
 	end := "('" + now.Format("2006-01-02 15:04:05") + "' < end_date OR end_date IS NULL))"
 
@@ -431,7 +431,7 @@ func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from 
 				users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
 					"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
 					ds.UserDBField:                from,
-					"start_date":                  time.Now().Add(-1 * time.Hour),
+					"start_date":                  time.Now().UTC().Add(-1 * time.Hour).Format("2006-01-02 15:04:05"),
 					"delete_access":               utils.GetBool(f, "delete_access"),
 				}
 			}
@@ -455,7 +455,7 @@ func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from 
 					users[utils.ToString(f[utils.SpecialIDParam])] = map[string]interface{}{
 						"delegated_" + ds.UserDBField: utils.ToString(f["parent_"+ds.UserDBField]),
 						ds.UserDBField:                from,
-						"start_date":                  time.Now().Add(-1 * time.Hour),
+						"start_date":                  time.Now().Add(-1 * time.Hour).Format("2006-01-02 15:04:05"),
 						"delete_access":               utils.GetBool(hierarchDels[0], "delete_access"),
 					}
 				}
@@ -490,7 +490,7 @@ func GetUserToDelegate(domain utils.DomainITF, schemaID string, id string, from 
 						users[utils.ToString(f[utils.SpecialIDParam])] = map[string]interface{}{
 							"delegated_" + ds.UserDBField: utils.ToString(f[utils.SpecialIDParam]),
 							ds.UserDBField:                from,
-							"start_date":                  time.Now().Add(-1 * time.Hour),
+							"start_date":                  time.Now().Add(-1 * time.Hour).Format("2006-01-02 15:04:05"),
 							"delete_access":               utils.GetBool(rd, "delete_access"),
 						}
 					}
