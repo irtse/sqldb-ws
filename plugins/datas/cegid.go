@@ -119,7 +119,6 @@ var ArticleFR = models.SchemaModel{
 		{Name: "publishing_date", Label: "date objective de publication", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 		{Name: "volume", Label: "volume du journal", Type: models.BIGVARCHAR.String(), Required: false, Readonly: false, Index: 13},
 		{Name: "pages", Label: "pages du journal", Type: models.BIGVARCHAR.String(), Required: false, Readonly: false, Index: 14},
-		{Name: "doi", Label: "doi", Type: models.BIGVARCHAR.String(), Required: false, Readonly: false, Index: 15},
 	}...),
 }
 

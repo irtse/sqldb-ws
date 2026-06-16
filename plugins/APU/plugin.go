@@ -79,6 +79,7 @@ func ImportPublication() {
 		affDbName := models.OtherPublicationAffiliationAuthorsFR.Name
 		authorsDbName := models.OtherPublicationAuthorsFR.Name
 		dt := []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 15, 47}
+		verifyDT := []int{5, 8, 11, 12, 13, 14, 37, 47, 48}
 		if strings.Contains(strings.ToLower(data[4]), "these") {
 			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 34, 39, 35, 36, 47}
 			dbName = models.ThesisFR.Name
@@ -322,7 +323,7 @@ func ImportPublication() {
 		for k, v := range model {
 			m2[k] = v
 		}
-		m2["name"], err = foundDiff(model, dbName, d)
+		m2["name"], err = foundDiff(model, dbName, mapped, verifyDT, d)
 		fmt.Println("IS M2", m2, err)
 		if err == nil {
 			delete(m2, "authors")
@@ -449,18 +450,19 @@ func ImportPublication() {
 	}
 }
 
-func foundDiff(model map[string]interface{}, dbName string, d utils.DomainITF) (string, error) {
+func foundDiff(model map[string]interface{}, dbName string, mapped map[int]string, dt []int, d utils.DomainITF) (string, error) {
 	if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
 		"name": connector.Quote(utils.GetString(model, "name")),
 	}, false); err == nil && len(res) > 0 {
-		for k, v := range res[0] {
-			fmt.Println(k, model[k], v)
-			if model[k] != v {
+		for _, v := range dt {
+			if model[mapped[v]] != res[0][mapped[v]] {
+				fmt.Println("DIFF DETECTED", mapped[v], model[mapped[v]], res[0][mapped[v]])
+
 				model["name"] = utils.ToString(model["name"]) + "."
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
 					"name": connector.Quote(utils.GetString(model, "name")),
 				}, false); err == nil && len(res) > 0 {
-					return foundDiff(model, dbName, d)
+					return foundDiff(model, dbName, mapped, dt, d)
 				} else {
 					return utils.ToString(model["name"]), nil
 				}
