@@ -1,6 +1,7 @@
 package task_service
 
 import (
+	"fmt"
 	"sqldb-ws/domain/schema"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -282,7 +283,8 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 			share["start_date"] = delegated["start_date"]
 			share["end_date"] = delegated["end_date"]
-			domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+			s, err := domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
+			fmt.Println("sharing pb", share, s, err)
 		}
 		if request[ds.DestTableDBField] != share[ds.DestTableDBField] && request[ds.SchemaDBField] != share[ds.SchemaDBField] {
 			delete(share, "start_date")
