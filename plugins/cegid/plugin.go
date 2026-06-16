@@ -122,7 +122,7 @@ func ImportProjectAxis() {
 		axisName := ""
 		respPrj := int64(-1)
 		record := map[string]interface{}{}
-		for i, _ := range headers {
+		for i := range headers {
 			if realLabel, ok := mapped[i]; ok && realLabel != "" && data[i] != "" {
 				if strings.ToLower(data[i]) == "non" {
 					record[realLabel] = false
@@ -179,80 +179,80 @@ func ImportProjectAxis() {
 					parentID = &i
 				}
 			}
+			prjid := int64(-1)
 			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.Project.Name, map[string]interface{}{
 				"code": connector.Quote(utils.GetString(record, "code")),
 			}, false); err == nil && len(res) > 0 {
-
+				prjid = utils.ToInt64(res[0][utils.SpecialIDParam])
 				record[utils.SpecialIDParam] = res[0][utils.SpecialIDParam]
 				d.GetDb().ClearQueryFilter().UpdateQuery(models.Project.Name, record, map[string]interface{}{
-					utils.SpecialIDParam: res[0][utils.SpecialIDParam],
+					utils.SpecialIDParam: prjid,
 				}, false)
 
-				m := map[string]interface{}{
-					ds.UserDBField: respPrj,
-				}
-				m2 := map[string]interface{}{
-					ds.UserDBField: respPrj,
-				}
-				if respPrj >= 0 { // add a CDP to a project
-					if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntity.Name, map[string]interface{}{
-						"name": connector.Quote(utils.ToString(res[0]["name"])),
-					}, false); err == nil && len(res) > 0 {
-						m2["is_hierarch"] = true
+			}
+			if prjid != -1 {
+				if parentID != nil {
+					res, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntity.Name, map[string]interface{}{
+						"name":      record["name"],
+						"parent_id": parentID,
+					}, func(s string) (string, bool) { return "", true })
+					if err == nil {
+						record[ds.EntityDBField] = res
+						prjid, _ = d.GetDb().ClearQueryFilter().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
 					}
-					d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
-						"value": res[0][utils.SpecialIDParam],
-						"field": "project_accronym",
-					}, false)
-					wfscheme, _ := schema.GetSchema(ds.DBWorkflow.Name)
+				} else {
+					res, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntity.Name, map[string]interface{}{
+						"name": record["name"],
+					}, func(s string) (string, bool) { return "", true })
+					if err == nil {
+						record[ds.EntityDBField] = res
 
-					for _, t := range []string{models.ArticleFR.Name, models.ThesisFR.Name, models.HDRFR.Name, models.OtherPublicationFR.Name,
-						models.PosterFR.Name, models.PresentationFR.Name, models.DemoFR.Name, models.ConferenceFR.Name, models.InternshipFR.Name} {
-						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
-							ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
-								"name": "'" + t + "'",
-							}, false, utils.SpecialIDParam),
-						}, false); err == nil && len(wfs) > 0 {
-							for _, wf := range wfs {
-								_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUserDelegation.Name, map[string]interface{}{
-									"value":                res[0][utils.SpecialIDParam],
-									"field":                "project_accronym",
-									ds.UserDBField:         respPrj,
-									ds.SchemaDBField:       wfscheme,
-									ds.DestTableDBField:    wf[utils.SpecialIDParam],
-									"delete_access":        true,
-									"hierarchy_delegation": true,
-								}, func(s string) (string, bool) { return "", true })
-								fmt.Println("ENT DEL", err)
-							}
-						}
+						prjid, _ = d.GetDb().ClearQueryFilter().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
 
 					}
-					d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBEntityUser.Name, m, false)
-					d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntityUser.Name, m2, func(s string) (string, bool) { return "", true })
 				}
+			}
+			if prjid == -1 {
 				continue
 			}
-			if parentID != nil {
-				res, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntity.Name, map[string]interface{}{
-					"name":      record["name"],
-					"parent_id": parentID,
-				}, func(s string) (string, bool) { return "", true })
-				if err == nil {
-					record[ds.EntityDBField] = res
-					d.GetDb().ClearQueryFilter().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
+			m := map[string]interface{}{
+				ds.UserDBField: respPrj,
+			}
+			m2 := map[string]interface{}{
+				ds.UserDBField: respPrj,
+			}
+			if respPrj >= 0 { // add a CDP to a project
+				m2["is_hierarch"] = true
+				d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
+					"value": prjid,
+					"field": "project_accronym",
+				}, false)
+				wfscheme, _ := schema.GetSchema(ds.DBWorkflow.Name)
+
+				for _, t := range []string{models.ArticleFR.Name, models.ThesisFR.Name, models.HDRFR.Name, models.OtherPublicationFR.Name,
+					models.PosterFR.Name, models.PresentationFR.Name, models.DemoFR.Name, models.ConferenceFR.Name, models.InternshipFR.Name} {
+					if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+						ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
+							"name": "'" + t + "'",
+						}, false, utils.SpecialIDParam),
+					}, false); err == nil && len(wfs) > 0 {
+						for _, wf := range wfs {
+							_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUserDelegation.Name, map[string]interface{}{
+								"value":                prjid,
+								"field":                "project_accronym",
+								ds.UserDBField:         respPrj,
+								ds.SchemaDBField:       wfscheme,
+								ds.DestTableDBField:    wf[utils.SpecialIDParam],
+								"delete_access":        true,
+								"hierarchy_delegation": true,
+							}, func(s string) (string, bool) { return "", true })
+							fmt.Println("ENT DEL", err)
+						}
+					}
 
 				}
-			} else {
-				res, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntity.Name, map[string]interface{}{
-					"name": record["name"],
-				}, func(s string) (string, bool) { return "", true })
-				if err == nil {
-					record[ds.EntityDBField] = res
-
-					d.GetDb().ClearQueryFilter().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
-
-				}
+				d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBEntityUser.Name, m, false)
+				d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntityUser.Name, m2, func(s string) (string, bool) { return "", true })
 			}
 		}
 	}

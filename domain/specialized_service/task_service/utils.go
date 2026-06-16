@@ -431,7 +431,7 @@ func GetUserToDelegate(domain utils.DomainITF, record map[string]interface{}, sc
 
 	if err == nil && len(founded) > 0 {
 		for _, f := range founded {
-			fmt.Println("FOUNDED ", utils.ToString(record[utils.ToString(f["field"])]), utils.ToString(f["value"]))
+			fmt.Println("FOUNDED ", record, f["field"], utils.ToString(record[utils.ToString(f["field"])]), utils.ToString(f["value"]))
 			if f["field"] == nil || f["value"] == nil || utils.ToString(record[utils.ToString(f["field"])]) == utils.ToString(f["value"]) {
 				if users[utils.ToString(f[ds.UserDBField])] == nil {
 					users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
