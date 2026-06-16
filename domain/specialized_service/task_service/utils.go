@@ -253,6 +253,9 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		}
 	}
 	for _, delegated := range additionnalDels {
+		if delegated["delegated_"+ds.UserDBField] == record[ds.UserDBField] {
+			continue
+		}
 		newRec := record.Copy()
 		newRec["binded_dbtask"] = id
 		k1 := "delegated_" + ds.UserDBField
@@ -275,6 +278,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		arr := []interface{}{
 			connector.FormatSQLRestrictionWhereByMap("", share, false),
 		}
+		fmt.Println("DELEGATE", utils.GetString(delegated, "start_date"), utils.GetString(delegated, "end_date"))
 		if utils.GetString(delegated, "end_date") == "" {
 			arr = append(arr, "(('"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
 		} else {
