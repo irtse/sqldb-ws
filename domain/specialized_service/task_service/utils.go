@@ -431,6 +431,7 @@ func GetUserToDelegate(domain utils.DomainITF, record map[string]interface{}, sc
 
 	if err == nil && len(founded) > 0 {
 		for _, f := range founded {
+			fmt.Println("FOUNDED ", utils.ToString(record[utils.ToString(f["field"])]), utils.ToString(f["value"]))
 			if f["field"] == nil || f["value"] == nil || utils.ToString(record[utils.ToString(f["field"])]) == utils.ToString(f["value"]) {
 				if users[utils.ToString(f[ds.UserDBField])] == nil {
 					users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
@@ -439,15 +440,13 @@ func GetUserToDelegate(domain utils.DomainITF, record map[string]interface{}, sc
 						"start_date":                  time.Now().Add(-1 * time.Hour),
 						"delete_access":               utils.GetBool(f, "delete_access"),
 					}
-				}
-
-			}
-			if users[utils.ToString(f[ds.UserDBField])] == nil {
-				users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
-					"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
-					ds.UserDBField:                from,
-					"start_date":                  time.Now().UTC().Add(-1 * time.Hour),
-					"delete_access":               utils.GetBool(f, "delete_access"),
+				} else {
+					users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
+						"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
+						ds.UserDBField:                f[ds.UserDBField],
+						"start_date":                  time.Now().Add(-1 * time.Hour),
+						"delete_access":               utils.GetBool(f, "delete_access"),
+					}
 				}
 			}
 		}
@@ -465,6 +464,13 @@ func GetUserToDelegate(domain utils.DomainITF, record map[string]interface{}, sc
 					users[utils.ToString(hd[ds.UserDBField])] = map[string]interface{}{
 						"delegated_" + ds.UserDBField: utils.ToString(hd[ds.UserDBField]),
 						ds.UserDBField:                from,
+						"start_date":                  time.Now().Add(-1 * time.Hour),
+						"delete_access":               utils.GetBool(hd, "delete_access"),
+					}
+				} else {
+					users[utils.ToString(hd[ds.UserDBField])] = map[string]interface{}{
+						"delegated_" + ds.UserDBField: utils.ToString(hd[ds.UserDBField]),
+						ds.UserDBField:                hd[ds.UserDBField],
 						"start_date":                  time.Now().Add(-1 * time.Hour),
 						"delete_access":               utils.GetBool(hd, "delete_access"),
 					}
