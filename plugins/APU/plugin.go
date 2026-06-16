@@ -108,7 +108,7 @@ func ImportPublication() {
 		} else if strings.Contains(strings.ToLower(data[4]), "communication") {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
 			no_model = true
-			break
+			continue
 		}
 		missing_project := []string{}
 		date := ""
