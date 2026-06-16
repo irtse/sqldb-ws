@@ -120,9 +120,9 @@ func ImportPublication() {
 				file := strings.Split(data[i], "/")
 
 				if strings.Contains(data[45], "fin") {
-					model[mapped[i]] = file[len(file)-1]
+					model[mapped[i]] = strings.ReplaceAll(file[len(file)-1], "'", "''")
 				} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
-					model[mapped[i]] = file[len(file)-1]
+					model[mapped[i]] = strings.ReplaceAll(file[len(file)-1], "'", "''")
 				}
 
 			} else if i == 48 {
@@ -250,6 +250,7 @@ func ImportPublication() {
 						model["axis"] = res[0][utils.SpecialIDParam]
 					}
 				} else {
+					fmt.Println("FOUND MISSING PRJ", data[i])
 					missing_project = append(missing_project, data[i])
 					no_model = true
 					break
@@ -270,7 +271,7 @@ func ImportPublication() {
 						})
 					} else {
 						aa = append(aa, map[string]interface{}{
-							"name": strings.Trim(authors, " "),
+							"name": strings.Trim(strings.ReplaceAll(authors, "'", "''"), " "),
 						})
 					}
 				}
@@ -287,7 +288,7 @@ func ImportPublication() {
 						model["authors"] = append(model["authors"].([]map[string]interface{}), map[string]interface{}{})
 					}
 					if len(model["authors"].([]map[string]interface{})) > y {
-						model["authors"].([]map[string]interface{})[y]["affiliation"] = aff
+						model["authors"].([]map[string]interface{})[y]["affiliation"] = strings.ReplaceAll(aff, "'", "''")
 					}
 
 				}
