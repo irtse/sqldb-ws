@@ -462,6 +462,8 @@ func foundDiff(model map[string]interface{}, dbName string, d utils.DomainITF) (
 					"name": connector.Quote(utils.GetString(model, "name")),
 				}, false); err == nil && len(res) > 0 {
 					return foundDiff(model, dbName, d)
+				} else {
+					return utils.ToString(model["name"]), nil
 				}
 			}
 		}
