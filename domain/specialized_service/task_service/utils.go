@@ -280,9 +280,9 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		}
 		fmt.Println("DELEGATE", utils.GetString(delegated, "start_date"), utils.GetString(delegated, "end_date"))
 		if utils.GetString(delegated, "end_date") == "" {
-			arr = append(arr, "(('"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
+			arr = append(arr, "(('"+utils.GetString(delegated, "start_date")[0:10]+"' <= end_date)  OR end_date IS NULL)")
 		} else {
-			arr = append(arr, "(('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
+			arr = append(arr, "(('"+utils.GetString(delegated, "end_date")[0:10]+"' > end_date AND '"+utils.GetString(delegated, "start_date")[0:10]+"' <= end_date)  OR end_date IS NULL)")
 		}
 		fmt.Println("SHARE", share)
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
