@@ -455,6 +455,7 @@ func foundDiff(model map[string]interface{}, dbName string, d utils.DomainITF) (
 		"name": connector.Quote(utils.GetString(model, "name")),
 	}, false); err == nil && len(res) > 0 {
 		for k, v := range res[0] {
+			fmt.Println(k, model[k], v)
 			if model[k] != v {
 				model["name"] = utils.ToString(model["name"]) + "."
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
