@@ -455,6 +455,13 @@ func foundDiff(model map[string]interface{}, dbName string, mapped map[int]strin
 		"name": connector.Quote(utils.GetString(model, "name")),
 	}, false); err == nil && len(res) > 0 {
 		for _, v := range dt {
+			if model[mapped[v]] == "NULL" {
+				model[mapped[v]] = nil
+			}
+			if (model[mapped[v]] == "" && res[0][mapped[v]] == nil) || (model[mapped[v]] == nil && res[0][mapped[v]] == "") {
+				model[mapped[v]] = nil
+				res[0][mapped[v]] = nil
+			}
 			if model[mapped[v]] != res[0][mapped[v]] {
 				fmt.Println("DIFF DETECTED", mapped[v], model[mapped[v]], res[0][mapped[v]])
 
