@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"os/exec"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -322,9 +323,9 @@ func ImportPublication() {
 		for k, v := range model {
 			m2[k] = v
 		}
-		m2 = foundDiff(model, dbName, d)
-		fmt.Println("IS M2", m2)
-		if m2 != nil {
+		m2["name"], err = foundDiff(model, dbName, d)
+		fmt.Println("IS M2", m2, err)
+		if err == nil {
 			delete(m2, "authors")
 			createDate, err := time.Parse("02/01/2006", date)
 			if err != nil {
@@ -449,7 +450,7 @@ func ImportPublication() {
 	}
 }
 
-func foundDiff(model map[string]interface{}, dbName string, d utils.DomainITF) map[string]interface{} {
+func foundDiff(model map[string]interface{}, dbName string, d utils.DomainITF) (string, error) {
 	if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
 		"name": connector.Quote(utils.GetString(model, "name")),
 	}, false); err == nil && len(res) > 0 {
@@ -463,9 +464,9 @@ func foundDiff(model map[string]interface{}, dbName string, d utils.DomainITF) m
 				}
 			}
 		}
-		return nil
+		return "", errors.New("already exists")
 	}
-	return model
+	return utils.ToString(model["name"]), nil
 }
 
 func importFile(filePath string) ([]string, [][]string) {
