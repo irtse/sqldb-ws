@@ -66,7 +66,8 @@ func ImportPublication() {
 		3:  "project_accronym", // special OK // TODO ajouté dans un csv.
 	}
 	_, datas := importFile(filepath)
-	for _, data := range datas {
+	for index, data := range datas {
+		fmt.Println(index, data)
 		model := map[string]interface{}{}
 		no_model := false
 
