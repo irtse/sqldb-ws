@@ -129,8 +129,7 @@ func ImportPublication() {
 				} else if model[mapped[i]] == nil || model[mapped[i]] == "" {
 					model[mapped[i]] = strings.ReplaceAll(file[len(file)-1], "'", "''")
 				}
-
-			} else if i == 48 {
+			} else if i == 48 && (dbName == models.ConferenceFR.Name || dbName == models.PresentationFR.Name || dbName == models.PosterFR.Name) {
 				file := strings.Split(data[i], "/")
 				model[mapped[i]] = file[len(file)-1]
 
