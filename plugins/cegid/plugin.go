@@ -6,6 +6,7 @@ package main
 import (
 	"encoding/csv"
 	"slices"
+	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	connector "sqldb-ws/infrastructure/connector/db"
 	"strings"
@@ -181,11 +182,40 @@ func ImportProjectAxis() {
 			if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.Project.Name, map[string]interface{}{
 				"code": connector.Quote(utils.GetString(record, "code")),
 			}, false); err == nil && len(res) > 0 {
+				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntity.Name, map[string]interface{}{
+					"name": connector.Quote(utils.ToString(res[0]["name"])),
+				}, false); err == nil && len(res) > 0 {
+					d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBEntityDelegation.Name, map[string]interface{}{
+						ds.EntityDBField: res,
+					}, false)
+					wfscheme, _ := schema.GetSchema(ds.DBWorkflow.Name)
+
+					for _, t := range []string{models.ArticleFR.Name, models.ThesisFR.Name, models.HDRFR.Name, models.OtherPublicationFR.Name,
+						models.PosterFR.Name, models.PresentationFR.Name, models.DemoFR.Name, models.ConferenceFR.Name, models.InternshipFR.Name} {
+						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+							ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
+								"name": "'" + t + "'",
+							}, false, utils.SpecialIDParam),
+						}, false); err == nil && len(wfs) > 0 {
+							for _, wf := range wfs {
+								_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntityDelegation.Name, map[string]interface{}{
+									ds.EntityDBField:       res,
+									ds.SchemaDBField:       wfscheme,
+									ds.DestTableDBField:    wf[utils.SpecialIDParam],
+									"delete_access":        true,
+									"hierarchy_delegation": true,
+								}, func(s string) (string, bool) { return "", true })
+								fmt.Println("ENT DEL", err)
+							}
+						}
+					}
+				}
 
 				record[utils.SpecialIDParam] = res[0][utils.SpecialIDParam]
 				d.GetDb().ClearQueryFilter().UpdateQuery(models.Project.Name, record, map[string]interface{}{
 					utils.SpecialIDParam: res[0][utils.SpecialIDParam],
 				}, false)
+
 				m := map[string]interface{}{
 					ds.UserDBField: respPrj,
 				}
@@ -209,6 +239,31 @@ func ImportProjectAxis() {
 					"parent_id": parentID,
 				}, func(s string) (string, bool) { return "", true })
 				if err == nil {
+					d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBEntityDelegation.Name, map[string]interface{}{
+						ds.EntityDBField: res,
+					}, false)
+					wfscheme, _ := schema.GetSchema(ds.DBWorkflow.Name)
+
+					for _, t := range []string{models.ArticleFR.Name, models.ThesisFR.Name, models.HDRFR.Name, models.OtherPublicationFR.Name,
+						models.PosterFR.Name, models.PresentationFR.Name, models.DemoFR.Name, models.ConferenceFR.Name, models.InternshipFR.Name} {
+						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+							ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
+								"name": "'" + t + "'",
+							}, false, utils.SpecialIDParam),
+						}, false); err == nil && len(wfs) > 0 {
+							for _, wf := range wfs {
+								_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntityDelegation.Name, map[string]interface{}{
+									ds.EntityDBField:       res,
+									ds.SchemaDBField:       wfscheme,
+									ds.DestTableDBField:    wf[utils.SpecialIDParam],
+									"delete_access":        true,
+									"hierarchy_delegation": true,
+								}, func(s string) (string, bool) { return "", true })
+								fmt.Println("ENT DEL", err)
+							}
+						}
+					}
+
 					record[ds.EntityDBField] = res
 
 					d.GetDb().ClearQueryFilter().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
@@ -218,6 +273,31 @@ func ImportProjectAxis() {
 					"name": record["name"],
 				}, func(s string) (string, bool) { return "", true })
 				if err == nil {
+					d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBEntityDelegation.Name, map[string]interface{}{
+						ds.EntityDBField: res,
+					}, false)
+					wfscheme, _ := schema.GetSchema(ds.DBWorkflow.Name)
+
+					for _, t := range []string{models.ArticleFR.Name, models.ThesisFR.Name, models.HDRFR.Name, models.OtherPublicationFR.Name,
+						models.PosterFR.Name, models.PresentationFR.Name, models.DemoFR.Name, models.ConferenceFR.Name, models.InternshipFR.Name} {
+						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
+							ds.SchemaDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBSchema.Name, map[string]interface{}{
+								"name": "'" + t + "'",
+							}, false, utils.SpecialIDParam),
+						}, false); err == nil && len(wfs) > 0 {
+							for _, wf := range wfs {
+								_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBEntityDelegation.Name, map[string]interface{}{
+									ds.EntityDBField:       res,
+									ds.SchemaDBField:       wfscheme,
+									ds.DestTableDBField:    wf[utils.SpecialIDParam],
+									"delete_access":        true,
+									"hierarchy_delegation": true,
+								}, func(s string) (string, bool) { return "", true })
+								fmt.Println("ENT DEL", err)
+							}
+						}
+					}
+
 					record[ds.EntityDBField] = res
 
 					d.GetDb().ClearQueryFilter().CreateQuery(models.Project.Name, record, func(s string) (string, bool) { return "", true })
