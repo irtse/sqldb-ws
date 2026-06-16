@@ -294,7 +294,7 @@ func ImportPublication() {
 			} else if len(data) > i {
 				fmt.Println(model, mapped[i], i)
 				if createDate, err := time.Parse("02/01/2006", data[i]); err != nil {
-					model[mapped[i]] = strings.ReplaceAll(data[i], "'", "\\'")
+					model[mapped[i]] = strings.ReplaceAll(data[i], "'", "''")
 				} else {
 					model[mapped[i]] = createDate
 				}
