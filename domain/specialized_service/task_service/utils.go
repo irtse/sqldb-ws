@@ -280,6 +280,7 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		} else {
 			arr = append(arr, "(('"+utils.GetString(delegated, "end_date")+"' > end_date AND '"+utils.GetString(delegated, "start_date")+"' <= end_date)  OR end_date IS NULL)")
 		}
+		fmt.Println("SHARE", share)
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 			share["start_date"] = delegated["start_date"]
 			share["end_date"] = delegated["end_date"]
