@@ -44,7 +44,10 @@ func ImportPublication() {
 		12: "conference_country",
 		13: "conference_link",
 		14: "media_name",
-		15: "publishing_date",                         // date for date
+		15: "publishing_date", // date for date
+		16: "volume",          // date for date
+		17: "pages",           // date for date
+		19: "doi",
 		23: "effective_publishing_date",               // date for date
 		25: "authors",                                 // special OK
 		26: "affiliation",                             // special OK
@@ -101,7 +104,7 @@ func ImportPublication() {
 			affDbName = models.OtherPublicationAffiliationAuthorsFR.Name
 			authorsDbName = models.OtherPublicationAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "article") {
-			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15, 47, 48}
+			dt = []int{5, 16, 17, 19, 41, 42, 3, 30, 23, 25, 26, 39, 14, 15, 47, 48}
 			dbName = models.ArticleFR.Name
 			affDbName = models.ArticleAffiliationAuthorsFR.Name
 			authorsDbName = models.ArticleAuthorsFR.Name
@@ -364,6 +367,9 @@ func ImportPublication() {
 							auth[ds.RootID(dbName)] = id
 
 							fmt.Println(affDbName, auth, m)
+							if auth["affiliation"] == nil || auth["affiliation"] == "" {
+								auth["affiliation"] = "IRT Saint Exupéry"
+							}
 							if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
 								for _, mm := range m {
 									mm[ds.RootID(affDbName)] = id
