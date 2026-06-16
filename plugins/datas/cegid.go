@@ -115,10 +115,11 @@ var ArticleFR = models.SchemaModel{
 
 		{Name: "authors", Type: models.ONETOMANY.String(), Required: true, Index: 8, Label: "auteurs  et affiliations", ForeignTable: ArticleAffiliationAuthorsFR.Name},
 		{Name: "reread", Label: "publication soumise à une revue par les pairs. En cas de doute, contacter la DRAI", Type: models.ENUMBOOLEAN.String(), Default: "false", Required: false, Readonly: false, Index: 9},
-		{Name: "media_name", Label: "nom du journal", Type: models.VARCHAR.String(), Required: true, Readonly: false, Translatable: false, Index: 10},
+		{Name: "media_name", Label: "nom du journal", Type: models.BIGVARCHAR.String(), Required: true, Readonly: false, Translatable: false, Index: 10},
 		{Name: "publishing_date", Label: "date objective de publication", Type: models.TIMESTAMP.String(), Required: false, Readonly: false, Index: 12},
 		{Name: "volume", Label: "volume du journal", Type: models.BIGVARCHAR.String(), Required: false, Readonly: false, Index: 13},
 		{Name: "pages", Label: "pages du journal", Type: models.BIGVARCHAR.String(), Required: false, Readonly: false, Index: 14},
+		{Name: "doi", Label: "doi", Type: models.BIGVARCHAR.String(), Required: false, Readonly: false, Index: 15},
 	}...),
 }
 
