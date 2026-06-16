@@ -417,7 +417,15 @@ func GetWorkflowToDelegate(domain utils.DomainITF, task utils.Record) map[string
 	return users
 }
 
-func GetUserToDelegate(domain utils.DomainITF, record map[string]interface{}, schemaID string, id string, from string) map[string]map[string]interface{} {
+func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, schemaID string, id string, from string) map[string]map[string]interface{} {
+	sch, _ := schema.GetSchemaByID(utils.GetInt(task, ds.SchemaDBField))
+	record := map[string]interface{}{}
+	if rr, err := domain.GetDb().SelectQueryWithRestriction(sch.Name, map[string]interface{}{
+		utils.SpecialIDParam: task[ds.DestTableDBField],
+	}, false); err == nil && len(rr) > 0 {
+		record = rr[0]
+	}
+
 	users := map[string]map[string]interface{}{}
 	now := time.Now().UTC()
 	start := "('" + now.Format("2006-01-02 15:04:05") + "' >= start_date"
@@ -440,7 +448,7 @@ func GetUserToDelegate(domain utils.DomainITF, record map[string]interface{}, sc
 						"start_date":                  time.Now().Add(-1 * time.Hour),
 						"delete_access":               utils.GetBool(f, "delete_access"),
 					}
-				} else {
+				} else if f[ds.UserDBField] != nil {
 					users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
 						"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
 						ds.UserDBField:                f[ds.UserDBField],
