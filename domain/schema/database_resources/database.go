@@ -404,7 +404,6 @@ var DBWorkflowSchema = models.SchemaModel{
 		{Name: "override_state_refused", Type: models.VARCHAR.String(), Required: false, Index: 16},
 	},
 }
-
 var DBEntityDelegation = models.SchemaModel{
 	Name:     RootName("entity_delegation"),
 	Label:    "entity delegation",
@@ -436,6 +435,8 @@ var DBUserDelegation = models.SchemaModel{
 	Label:    "user delegation",
 	Category: "user",
 	Fields: []models.FieldModel{
+		{Name: "value", Type: models.TEXT.String(), Required: false, Readonly: true, Label: "raw delegation", Index: 1},
+		{Name: "field", Type: models.TEXT.String(), Required: false, Readonly: true, Label: "target field", Index: 1},
 		{Name: RootID(DBUser.Name), Type: models.INTEGER.String(), ForeignTable: DBUser.Name, Required: false, Readonly: true, Label: "user delegation", Index: 1},
 		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "dependent schema", Index: 2},
 		{Name: RootID("dest_table"), Type: models.INTEGER.String(), Required: true, Readonly: true, Label: "reference", Index: 2},
