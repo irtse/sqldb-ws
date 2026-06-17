@@ -221,13 +221,18 @@ func ImportProjectAxis() {
 			m2 := map[string]interface{}{
 				ds.UserDBField: respPrj,
 			}
+			wfscheme, _ := schema.GetSchema(ds.DBWorkflow.Name)
+
 			if respPrj >= 0 { // add a CDP to a project
 				m2["is_hierarch"] = true
-				d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
-					"value": prjid,
-					"field": "project_accronym",
-				}, false)
-				wfscheme, _ := schema.GetSchema(ds.DBWorkflow.Name)
+				fmt.Println("DELETE", d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
+					"value":                prjid,
+					"field":                "'project_accronym'",
+					ds.UserDBField:         respPrj,
+					ds.SchemaDBField:       wfscheme.ID,
+					"delete_access":        true,
+					"hierarchy_delegation": false,
+				}, false))
 
 				for _, t := range []string{models.ArticleFR.Name, models.ThesisFR.Name, models.HDRFR.Name, models.OtherPublicationFR.Name,
 					models.PosterFR.Name, models.PresentationFR.Name, models.DemoFR.Name, models.ConferenceFR.Name, models.InternshipFR.Name} {
