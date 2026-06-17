@@ -234,6 +234,8 @@ func ImportProjectAxis() {
 					}, false); err == nil && len(wfs) > 0 {
 						for _, wf := range wfs {
 							d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
+								"value":                "'" + utils.ToString(prjid) + "'",
+								"field":                "'project_accronym'",
 								ds.SchemaDBField:       wfscheme.ID,
 								ds.DestTableDBField:    wf[utils.SpecialIDParam],
 								"delete_access":        true,
