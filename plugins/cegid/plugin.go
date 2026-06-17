@@ -225,15 +225,6 @@ func ImportProjectAxis() {
 
 			if respPrj >= 0 { // add a CDP to a project
 				m2["is_hierarch"] = true
-				fmt.Println("DELETE", d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
-					"value":                prjid,
-					"field":                "'project_accronym'",
-					ds.UserDBField:         respPrj,
-					ds.SchemaDBField:       wfscheme.ID,
-					"delete_access":        true,
-					"hierarchy_delegation": false,
-				}, false))
-
 				for _, t := range []string{models.ArticleFR.Name, models.ThesisFR.Name, models.HDRFR.Name, models.OtherPublicationFR.Name,
 					models.PosterFR.Name, models.PresentationFR.Name, models.DemoFR.Name, models.ConferenceFR.Name, models.InternshipFR.Name} {
 					if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
@@ -242,6 +233,12 @@ func ImportProjectAxis() {
 						}, false, utils.SpecialIDParam),
 					}, false); err == nil && len(wfs) > 0 {
 						for _, wf := range wfs {
+							d.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBUserDelegation.Name, map[string]interface{}{
+								ds.SchemaDBField:       wfscheme.ID,
+								ds.DestTableDBField:    wf[utils.SpecialIDParam],
+								"delete_access":        true,
+								"hierarchy_delegation": false,
+							}, false)
 							_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUserDelegation.Name, map[string]interface{}{
 								"value":                prjid,
 								"field":                "project_accronym",

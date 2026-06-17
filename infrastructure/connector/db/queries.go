@@ -18,6 +18,7 @@ func (db *Database) DeleteQueryWithRestriction(name string, restrictions map[str
 		name = name + " as main "
 		q = db.BuildDeleteQueryWithRestriction(name, restrictions, isOr)
 	}
+	fmt.Println("DELETE ", q)
 	_, err := db.Conn.Exec(q)
 	if err != nil {
 		return nil
