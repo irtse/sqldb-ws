@@ -212,6 +212,7 @@ func ImportProjectAxis() {
 					}
 				}
 			}
+			fmt.Println("ADD PROJECT", prjid, respPrj)
 			if prjid == -1 {
 				continue
 			}
