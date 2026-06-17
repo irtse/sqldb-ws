@@ -409,6 +409,8 @@ var DBEntityDelegation = models.SchemaModel{
 	Label:    "entity delegation",
 	Category: "entity",
 	Fields: []models.FieldModel{
+		{Name: "value", Type: models.TEXT.String(), Required: false, Readonly: true, Label: "raw delegation", Index: 1},
+		{Name: "field", Type: models.TEXT.String(), Required: false, Readonly: true, Label: "target field", Index: 1},
 		{Name: RootID(DBEntity.Name), Type: models.INTEGER.String(), ForeignTable: DBEntity.Name, Required: true, Readonly: true, Label: "entity delegation", Index: 1},
 		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "dependent schema", Index: 2},
 		{Name: RootID("dest_table"), Type: models.INTEGER.String(), Required: true, Readonly: true, Label: "reference", Index: 2},
@@ -422,6 +424,8 @@ var DBRoleDelegation = models.SchemaModel{
 	Label:    "role delegation",
 	Category: "role",
 	Fields: []models.FieldModel{
+		{Name: "value", Type: models.TEXT.String(), Required: false, Readonly: true, Label: "raw delegation", Index: 1},
+		{Name: "field", Type: models.TEXT.String(), Required: false, Readonly: true, Label: "target field", Index: 1},
 		{Name: RootID(DBRole.Name), Type: models.INTEGER.String(), ForeignTable: DBRole.Name, Required: true, Readonly: true, Label: "role delegation", Index: 1},
 		{Name: RootID(DBSchema.Name), Type: models.INTEGER.String(), ForeignTable: DBSchema.Name, Required: true, Readonly: true, Label: "dependent schema", Index: 2},
 		{Name: RootID("dest_table"), Type: models.INTEGER.String(), Required: true, Readonly: true, Label: "reference", Index: 2},

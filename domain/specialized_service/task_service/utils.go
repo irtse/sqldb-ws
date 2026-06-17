@@ -441,20 +441,11 @@ func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, sche
 		for _, f := range founded {
 			fmt.Println("FOUNDED ", record, f["field"], utils.ToString(record[utils.ToString(f["field"])]), utils.ToString(f["value"]))
 			if f["field"] == nil || f["value"] == nil || utils.ToString(record[utils.ToString(f["field"])]) == utils.ToString(f["value"]) {
-				if users[utils.ToString(f[ds.UserDBField])] == nil {
-					users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
-						"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
-						ds.UserDBField:                from,
-						"start_date":                  time.Now().Add(-1 * time.Hour),
-						"delete_access":               utils.GetBool(f, "delete_access"),
-					}
-				} else if f[ds.UserDBField] != nil {
-					users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
-						"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
-						ds.UserDBField:                f[ds.UserDBField],
-						"start_date":                  time.Now().Add(-1 * time.Hour),
-						"delete_access":               utils.GetBool(f, "delete_access"),
-					}
+				users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
+					"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
+					ds.UserDBField:                from,
+					"start_date":                  time.Now().Add(-1 * time.Hour),
+					"delete_access":               utils.GetBool(f, "delete_access"),
 				}
 			}
 		}
@@ -468,22 +459,12 @@ func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, sche
 	if err == nil && len(hierarchDels) > 0 { // only need one
 		for _, hd := range hierarchDels {
 			if hd["field"] != nil && hd["value"] != nil && utils.ToString(record[utils.ToString(hd["field"])]) == utils.ToString(hd["value"]) {
-				if users[utils.ToString(hd[ds.UserDBField])] == nil {
-					users[utils.ToString(hd[ds.UserDBField])] = map[string]interface{}{
-						"delegated_" + ds.UserDBField: utils.ToString(hd[ds.UserDBField]),
-						ds.UserDBField:                from,
-						"start_date":                  time.Now().Add(-1 * time.Hour),
-						"delete_access":               utils.GetBool(hd, "delete_access"),
-					}
-				} else {
-					users[utils.ToString(hd[ds.UserDBField])] = map[string]interface{}{
-						"delegated_" + ds.UserDBField: utils.ToString(hd[ds.UserDBField]),
-						ds.UserDBField:                hd[ds.UserDBField],
-						"start_date":                  time.Now().Add(-1 * time.Hour),
-						"delete_access":               utils.GetBool(hd, "delete_access"),
-					}
+				users[utils.ToString(hd[ds.UserDBField])] = map[string]interface{}{
+					"delegated_" + ds.UserDBField: utils.ToString(hd[ds.UserDBField]),
+					ds.UserDBField:                from,
+					"start_date":                  time.Now().Add(-1 * time.Hour),
+					"delete_access":               utils.GetBool(hd, "delete_access"),
 				}
-
 			} else {
 				foundedHierarch, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBHierarchy.Name, map[string]interface{}{
 					ds.UserDBField:  domain.GetUserID(), // TODO : moi même
@@ -492,14 +473,13 @@ func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, sche
 				}, false)
 				if err == nil && len(foundedHierarch) > 0 {
 					for _, f := range foundedHierarch {
-						if users[utils.ToString(f[utils.SpecialIDParam])] == nil {
-							users[utils.ToString(f[utils.SpecialIDParam])] = map[string]interface{}{
-								"delegated_" + ds.UserDBField: utils.ToString(f["parent_"+ds.UserDBField]),
-								ds.UserDBField:                from,
-								"start_date":                  time.Now().Add(-1 * time.Hour),
-								"delete_access":               utils.GetBool(hierarchDels[0], "delete_access"),
-							}
+						users[utils.ToString(f[utils.SpecialIDParam])] = map[string]interface{}{
+							"delegated_" + ds.UserDBField: utils.ToString(f["parent_"+ds.UserDBField]),
+							ds.UserDBField:                from,
+							"start_date":                  time.Now().Add(-1 * time.Hour),
+							"delete_access":               utils.GetBool(hierarchDels[0], "delete_access"),
 						}
+
 					}
 				}
 				break
@@ -512,25 +492,26 @@ func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, sche
 	}, false)
 	if err == nil && len(roleDels) > 0 {
 		for _, rd := range roleDels {
-			foundedRole, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-				utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
-					ds.RoleDBField:  utils.ToString(rd[ds.RoleDBField]),
-					models.STARTKEY: []string{start},
-					models.ENDKEY:   []string{end},
-					"is_hierarch":   utils.GetBool(rd, "hierarchy_delegation"),
-				}, true, ds.UserDBField),
-				utils.SpecialIDParam + "_1": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+			if rd["field"] == nil || rd["value"] == nil || utils.ToString(record[utils.ToString(rd["field"])]) == utils.ToString(rd["value"]) {
+
+				foundedRole, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
 						ds.RoleDBField:  utils.ToString(rd[ds.RoleDBField]),
 						models.STARTKEY: []string{start},
 						models.ENDKEY:   []string{end},
 						"is_hierarch":   utils.GetBool(rd, "hierarchy_delegation"),
-					}, false, ds.EntityDBField),
-				}, true, ds.UserDBField),
-			}, false)
-			if err == nil && len(foundedRole) > 0 {
-				for _, f := range foundedRole {
-					if users[utils.ToString(f[utils.SpecialIDParam])] == nil {
+					}, true, ds.UserDBField),
+					utils.SpecialIDParam + "_1": domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+						utils.SpecialIDParam: domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRoleAttribution.Name, map[string]interface{}{
+							ds.RoleDBField:  utils.ToString(rd[ds.RoleDBField]),
+							models.STARTKEY: []string{start},
+							models.ENDKEY:   []string{end},
+							"is_hierarch":   utils.GetBool(rd, "hierarchy_delegation"),
+						}, false, ds.EntityDBField),
+					}, true, ds.UserDBField),
+				}, false)
+				if err == nil && len(foundedRole) > 0 {
+					for _, f := range foundedRole {
 						users[utils.ToString(f[utils.SpecialIDParam])] = map[string]interface{}{
 							"delegated_" + ds.UserDBField: utils.ToString(f[utils.SpecialIDParam]),
 							ds.UserDBField:                from,
@@ -548,20 +529,22 @@ func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, sche
 	}, false)
 	if err == nil && len(entDels) > 0 {
 		for _, rd := range entDels {
-			foundedEnt, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
-				ds.EntityDBField: utils.ToString(rd[ds.EntityDBField]),
-				models.STARTKEY:  []string{start},
-				models.ENDKEY:    []string{end},
-				"is_hierarch":    utils.GetBool(rd, "hierarchy_delegation"),
-			}, false)
-			if err == nil && len(foundedEnt) > 0 {
-				for _, f := range foundedEnt {
-					if users[utils.ToString(f[ds.UserDBField])] == nil {
-						users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
-							"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
-							ds.UserDBField:                from,
-							"start_date":                  time.Now().Add(-1 * time.Hour),
-							"delete_access":               utils.GetBool(rd, "delete_access"),
+			if rd["field"] == nil || rd["value"] == nil || utils.ToString(record[utils.ToString(rd["field"])]) == utils.ToString(rd["value"]) {
+				foundedEnt, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
+					ds.EntityDBField: utils.ToString(rd[ds.EntityDBField]),
+					models.STARTKEY:  []string{start},
+					models.ENDKEY:    []string{end},
+					"is_hierarch":    utils.GetBool(rd, "hierarchy_delegation"),
+				}, false)
+				if err == nil && len(foundedEnt) > 0 {
+					for _, f := range foundedEnt {
+						if users[utils.ToString(f[ds.UserDBField])] == nil {
+							users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
+								"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
+								ds.UserDBField:                from,
+								"start_date":                  time.Now().Add(-1 * time.Hour),
+								"delete_access":               utils.GetBool(rd, "delete_access"),
+							}
 						}
 					}
 				}
