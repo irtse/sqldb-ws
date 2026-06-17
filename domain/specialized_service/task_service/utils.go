@@ -278,20 +278,15 @@ func CreateDelegated(record utils.Record, request utils.Record, id int64, initia
 		arr := []interface{}{
 			connector.FormatSQLRestrictionWhereByMap("", share, false),
 		}
-		fmt.Println("DELEGATE", utils.GetString(delegated, "start_date"), utils.GetString(delegated, "end_date"))
 		if utils.GetString(delegated, "end_date") == "" {
 			arr = append(arr, "(('"+utils.GetString(delegated, "start_date")[0:10]+"' <= end_date)  OR end_date IS NULL)")
 		} else {
 			arr = append(arr, "(('"+utils.GetString(delegated, "end_date")[0:10]+"' > end_date AND '"+utils.GetString(delegated, "start_date")[0:10]+"' <= end_date)  OR end_date IS NULL)")
 		}
-		fmt.Println("SHARE", share)
 		if res, err := domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBShare.Name, arr, false); err == nil && len(res) == 0 {
 			share["start_date"] = utils.GetString(delegated, "start_date")[0:10]
 			share["end_date"] = utils.GetString(delegated, "start_date")[0:10]
-			s, err := domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
-			fmt.Println("sharing pb", share, s, err)
-		} else {
-			fmt.Println("SHERE pb", err)
+			domain.GetDb().ClearQueryFilter().CreateQuery(ds.DBShare.Name, share, func(s string) (string, bool) { return "", true })
 		}
 		if request[ds.DestTableDBField] != share[ds.DestTableDBField] && request[ds.SchemaDBField] != share[ds.SchemaDBField] {
 			delete(share, "start_date")
@@ -436,7 +431,6 @@ func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, sche
 		ds.DestTableDBField:    id,
 		"hierarchy_delegation": false,
 	}, false)
-
 	if err == nil && len(founded) > 0 {
 		for _, f := range founded {
 			fmt.Println("FOUNDED ", record, f["field"], utils.ToString(record[utils.ToString(f["field"])]), utils.ToString(f["value"]))

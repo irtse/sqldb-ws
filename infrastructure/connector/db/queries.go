@@ -137,9 +137,6 @@ func (db *Database) CreateQuery(name string, record map[string]interface{}, veri
 					return i, errors.New("we found a <" + field + "> already existing, it should be unique !")
 				}
 			}
-			if err != nil {
-				fmt.Println("CREATE ERR", err, query)
-			}
 			return i, err
 		} else if db.GetDriver() == MySQLDriver {
 			if stmt, err := db.Prepare(query); err != nil {

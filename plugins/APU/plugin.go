@@ -112,7 +112,6 @@ func ImportPublication() {
 			authorsDbName = models.ArticleAuthorsFR.Name
 		} else if strings.Contains(strings.ToLower(data[4]), "communication") {
 			// TODO DEFINE IF CONFERENCE OR PRESENTATION
-			fmt.Println("NO MODEL ONE")
 			no_model = true
 			continue
 		}

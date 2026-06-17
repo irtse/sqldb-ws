@@ -21,9 +21,7 @@ import (
 )
 
 func Run() {
-	fmt.Println("CEGID RUN")
 	for {
-		fmt.Println("ImportUserHierachy")
 		ImportUserHierachy()
 		ImportProjectAxis()
 		ImportVisibility()
@@ -71,7 +69,6 @@ func ImportVisibility() {
 }
 
 func ImportProjectAxis() {
-	fmt.Println("ImportProjectAxis")
 	mapped := map[int]string{
 		4: "code",
 		5: "name",
@@ -170,7 +167,6 @@ func ImportProjectAxis() {
 				}
 			}
 		}
-		fmt.Println("REC", record, respPrj)
 		if len(record) > 0 {
 			record["name"] = utils.ToString(record["name"]) + " (" + utils.ToString(record["code"]) + ")"
 			// depend to
@@ -216,7 +212,6 @@ func ImportProjectAxis() {
 					}
 				}
 			}
-			fmt.Println("ADD PROJECT", prjid, respPrj)
 			if prjid == -1 {
 				continue
 			}
@@ -249,7 +244,7 @@ func ImportProjectAxis() {
 								ds.SchemaDBField:       wfscheme.ID,
 								ds.DestTableDBField:    wf[utils.SpecialIDParam],
 								"delete_access":        true,
-								"hierarchy_delegation": true,
+								"hierarchy_delegation": false,
 							}, func(s string) (string, bool) { return "", true })
 							fmt.Println("ENT DEL", err)
 						}
