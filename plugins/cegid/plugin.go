@@ -241,7 +241,7 @@ func ImportProjectAxis() {
 								"delete_access":        true,
 								"hierarchy_delegation": false,
 							}, false)
-							_, err := d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUserDelegation.Name, map[string]interface{}{
+							d.GetDb().ClearQueryFilter().CreateQuery(ds.DBUserDelegation.Name, map[string]interface{}{
 								"value":                prjid,
 								"field":                "project_accronym",
 								ds.UserDBField:         respPrj,
@@ -250,7 +250,6 @@ func ImportProjectAxis() {
 								"delete_access":        true,
 								"hierarchy_delegation": false,
 							}, func(s string) (string, bool) { return "", true })
-							fmt.Println("ENT DEL", err)
 						}
 					}
 
