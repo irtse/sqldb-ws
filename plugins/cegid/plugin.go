@@ -21,7 +21,9 @@ import (
 )
 
 func Run() {
+	fmt.Println("CEGID RUN")
 	for {
+		fmt.Println("ImportUserHierachy")
 		ImportUserHierachy()
 		ImportProjectAxis()
 		ImportVisibility()
