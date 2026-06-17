@@ -69,6 +69,7 @@ func ImportVisibility() {
 }
 
 func ImportProjectAxis() {
+	fmt.Println("ImportProjectAxis")
 	mapped := map[int]string{
 		4: "code",
 		5: "name",
@@ -167,6 +168,7 @@ func ImportProjectAxis() {
 				}
 			}
 		}
+		fmt.Println("REC", record, respPrj)
 		if len(record) > 0 {
 			record["name"] = utils.ToString(record["name"]) + " (" + utils.ToString(record["code"]) + ")"
 			// depend to
