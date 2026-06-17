@@ -39,8 +39,8 @@ services:
       DBSSL: ${DBSSL:-disable}
       PLUGINS: cegid,APU
       HOST: ${HOST:-https://opps.irt-saintexupery.com}
-      USER_FILE_PATH: ${USER_FILE_PATH:-Salarié.csv}
-      PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-Projets.csv}
+      # USER_FILE_PATH: ${USER_FILE_PATH:-Salarié.csv}
+      # PROJECT_FILE_PATH: ${PROJECT_FILE_PATH:-Projets.csv}
       VISIBILITY_FILE_PATH: ${VISIBILITY_FILE_PATH:-Visibilité_projet.csv}
 networks:
   sqldb:
