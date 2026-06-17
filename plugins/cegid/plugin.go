@@ -246,7 +246,7 @@ func ImportProjectAxis() {
 								"value":                prjid,
 								"field":                "project_accronym",
 								ds.UserDBField:         respPrj,
-								ds.SchemaDBField:       wfscheme,
+								ds.SchemaDBField:       wfscheme.ID,
 								ds.DestTableDBField:    wf[utils.SpecialIDParam],
 								"delete_access":        true,
 								"hierarchy_delegation": true,
@@ -320,15 +320,7 @@ func ImportUserHierachy() {
 			}
 		}
 		if len(record) > 0 {
-			m := map[string]interface{}{
-				ds.UserDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
-					"name": connector.Quote(utils.ToString(record["name"])),
-				}, false, "id"),
-				ds.EntityDBField: d.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(
-					ds.DBEntity.Name, map[string]interface{}{
-						"name": cocName,
-					}, false, "id"),
-			}
+			m := map[string]interface{}{}
 			if cocName != "" { // add a CDP to a project
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBUser.Name, map[string]interface{}{
 					"name": connector.Quote(utils.ToString(record["name"])),
