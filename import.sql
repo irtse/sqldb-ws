@@ -1,3 +1,18 @@
+INSERT INTO "dbschema_column" ("id", "active", "is_draft", "name", "label", "type", "description", "placeholder", "default_value", "index", "readonly", "required", "read_level", "dbschema_id", "constraints", "link_id", "hidden", "translatable", "transform_function", "group_by", "in_resume", "subsection", "info") VALUES
+(6044367,	't',	'f',	'volume',	'volume du journal',	'varchar(128)',	NULL,	NULL,	NULL,	13,	'f',	'f',	'normal',	46,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	NULL,	NULL),
+(6044368,	't',	'f',	'pages',	'pages du journal',	'varchar(128)',	NULL,	NULL,	NULL,	14,	'f',	'f',	'normal',	46,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	NULL,	NULL);
+
+INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
+(152,	't',	'f',	6044367,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	97,	'f',	'f',	NULL,	NULL,	NULL),
+(153,	't',	'f',	6044368,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	97,	'f',	'f',	NULL,	NULL,	NULL);
+
+INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
+(155,	't',	'f',	6044367,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	354,	'f',	'f',	NULL,	NULL,	NULL),
+(156,	't',	'f',	6044368,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	354,	'f',	'f',	NULL,	NULL,	NULL);
+
+INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
+(157,	't',	'f',	6044367,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	965,	'f',	'f',	NULL,	NULL,	NULL),
+(158,	't',	'f',	6044368,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	965,	'f',	'f',	NULL,	NULL,	NULL);
 
 
 # INSERT NEW FIELD
