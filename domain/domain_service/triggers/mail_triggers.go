@@ -105,17 +105,17 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 		return mailings
 	}
 	rules := t.GetTriggerRules(triggerID, fromSchema, mailSchema.GetID(), record)
+	fmt.Println("TRIGGER RULES", triggerID, len(rules))
 	for _, r := range rules {
 		mailID := r["value"]
+		fmt.Println("MAIL ID", mailID)
 		if mailID == nil {
-			fmt.Println("TRIGGER MAIL ID IS NIL")
 			continue
 		}
 		mails, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailTemplate.Name, map[string]interface{}{
-			utils.SpecialIDParam: "'" + fmt.Sprintf("%v", mailID) + "'",
+			utils.SpecialIDParam: mailID,
 		}, false)
 		if err != nil || len(mails) == 0 {
-			fmt.Println("TRIGGER MAIL ID IS EMPTY", mailID, mails)
 			continue
 		}
 		mail := mails[0]
