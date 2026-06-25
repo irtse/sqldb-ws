@@ -117,12 +117,12 @@ func (v *ViewConvertor) transformFullView(schemas []*models.SchemaModel, results
 		view.Consents = []map[string]interface{}{}
 	} else {
 		for _, record := range results {
-			view.Triggers = append(view.Triggers, triggers.NewTrigger(v.Domain).GetViewTriggers(
+			trigs := triggers.NewTrigger(v.Domain).GetViewTriggers(
 				record.Copy(), v.Domain.GetMethod(), schema,
 				utils.GetInt(record, ds.SchemaDBField),
-				utils.GetInt(record, ds.DestTableDBField))...,
-			)
-			fmt.Println("TRIGGERS EXTRACT", view.Triggers)
+				utils.GetInt(record, ds.DestTableDBField))
+			view.Triggers = append(view.Triggers, trigs...)
+			fmt.Println("TRIGGERS EXTRACT", len(trigs), len(view.Triggers))
 		}
 	}
 	sort.SliceStable(view.Items, func(i, j int) bool { return view.Items[i].Sort < view.Items[j].Sort })

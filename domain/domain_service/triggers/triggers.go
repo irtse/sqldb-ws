@@ -51,7 +51,7 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 			}
 		}
 	}
-	fmt.Println("MT sfsceef", mt)
+	fmt.Println("MT sfsceef", len(mt))
 	return mt
 }
 
