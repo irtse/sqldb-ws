@@ -79,7 +79,7 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 	}, false); err == nil {
 		for _, r := range res {
 			fmt.Println("TRIGGER MAIL UPDATE STEP", r["name"], r["on_update_step"])
-			if r["on_update_step"] != nil && recordID != "" {
+			if r["on_update"] == true && r["on_update_step"] != nil && recordID != "" {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
 					map[string]interface{}{
 						"is_close": false,
@@ -92,6 +92,14 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 						ds.SchemaDBField:         fromSchemaID,
 						ds.DestTableDBField:      recordID,
 						ds.WorkflowSchemaDBField: utils.GetString(r, "on_update_step"),
+					}, false); err == nil && len(res) == 0 {
+					continue
+				}
+			} else if r["on_create"] == true && r["on_update_step"] != nil {
+				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
+					map[string]interface{}{
+						utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
+						"index":              1,
 					}, false); err == nil && len(res) == 0 {
 					continue
 				}
