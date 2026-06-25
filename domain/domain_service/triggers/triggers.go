@@ -69,12 +69,14 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		}
 	}
 	trgs := []map[string]interface{}{}
+	fmt.Println("TRIGGER MAIL")
 	if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTrigger.Name, map[string]interface{}{
 		"on_" + method.String(): true,
 		"mode":                  conn.Quote(mode),
 		ds.SchemaDBField:        fromSchemaID,
 	}, false); err == nil {
 		for _, r := range res {
+			fmt.Println("TRIGGER MAIL UPDATE STEP", r["name"], r["on_update_step"])
 			if r["on_update_step"] != nil && recordID != "" {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
 					map[string]interface{}{
@@ -92,6 +94,7 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 					continue
 				}
 			}
+			fmt.Println("ADD TRIGGER", r)
 			trgs = append(trgs, r)
 		}
 	}
