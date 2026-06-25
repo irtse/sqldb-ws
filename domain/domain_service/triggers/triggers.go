@@ -45,15 +45,13 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 			case "mail":
 				if t, err := t.GetViewMailTriggers(record, fromSchema, utils.GetString(r, "description"), utils.GetString(r, "name"),
 					utils.GetInt(r, utils.SpecialIDParam), toSchemaID, destID); err == nil {
-					fmt.Println("TRIGGER ADDITION", t)
+					fmt.Println("TRIGGER ADDITION", len(t))
 					mt = append(mt, t...)
-				} else {
-					fmt.Println("TRIGGER ADDITION ERR", err)
 				}
 			}
 		}
 	}
-	fmt.Println("MT ", mt)
+	fmt.Println("MT sfsceef", mt)
 	return mt
 }
 
