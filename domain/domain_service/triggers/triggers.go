@@ -289,7 +289,7 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 		}
 		s := t.Domain.GetSpecialized(toSchema.Name)
 		s.SpecializedUpdateRow([]map[string]interface{}{
-			map[string]interface{}{
+			{
 				field.Name:           value,
 				utils.SpecialIDParam: destID,
 			},

@@ -122,6 +122,7 @@ func (v *ViewConvertor) transformFullView(schemas []*models.SchemaModel, results
 				utils.GetInt(record, ds.SchemaDBField),
 				utils.GetInt(record, ds.DestTableDBField))...,
 			)
+			fmt.Println("TRIGGERS EXTRACT", view.Triggers)
 		}
 	}
 	sort.SliceStable(view.Items, func(i, j int) bool { return view.Items[i].Sort < view.Items[j].Sort })
@@ -196,6 +197,7 @@ func (v *ViewConvertor) transformShallowedView(results utils.Results, tableName 
 			if !utils.GetBool(record, "is_draft") && !newView.Readonly {
 				newView.Triggers = triggers.NewTrigger(v.Domain).GetViewTriggers(
 					record, v.Domain.GetMethod(), &sch, utils.GetInt(record, ds.SchemaDBField), utils.GetInt(record, ds.DestTableDBField))
+				fmt.Println("TRIGGERS EXTRACT is_draft", newView.Triggers)
 			}
 		}
 		res = append(res, newView.ToRecord())
