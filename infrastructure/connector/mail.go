@@ -176,7 +176,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 	writeLine("<body style=\"margin:0; padding:0; font-family:Arial, sans-serif;\">")
 	writeLine(utils.GetString(mail, "content"))
 
-	code := utils.GetString(mail, "code")
+	/*code := utils.GetString(mail, "code")
 	if isValidButton {
 		host := os.Getenv("HOST")
 		if host == "" {
@@ -213,7 +213,7 @@ func sendMail(from, to string, mail utils.Record, isValidButton bool) (CachedMai
 					</td>
 				</tr>
 				</table><br>`, host, code, host, code))
-	}
+	}*/
 
 	writeLine("</body></html>")
 

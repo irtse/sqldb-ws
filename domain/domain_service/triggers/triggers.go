@@ -75,7 +75,7 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		ds.SchemaDBField:        fromSchemaID,
 	}, false); err == nil {
 		for _, r := range res {
-			if method.String() == "update" && r["on_update_step"] != nil && recordID != "" {
+			if r["on_update_step"] != nil && recordID != "" {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
 					map[string]interface{}{
 						"is_close": false,
