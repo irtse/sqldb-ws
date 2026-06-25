@@ -329,5 +329,6 @@ func (t *TriggerService) GetTriggerRules(triggerID int64, fromSchema *sm.SchemaM
 		fmt.Println("TRIGGER RULES EE ERR", err, toSchemaID, triggerID)
 		return []map[string]interface{}{}
 	}
+	fmt.Println("TRIGGER RULES EE ERR 22", err, toSchemaID, triggerID, rules)
 	return rules
 }
