@@ -167,7 +167,7 @@ DELETE * FROM "dbworkflow_schema" WHERE dbworkflow_id IN (34,35);
 # IMPORT CONFERENCE
 
 INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "description", "index", "urgency", "priority", "optionnal", "hub", "dbworkflow_id", "dbschema_id", "dbuser_id", "dbentity_id", "wrapped_dbworkflow_id", "before_hierarchical_validation", "custom_progressing_status", "view_dbfilter_id", "readonly_not_assignee", "assign_to_creator", "override_state_completed", "override_state_dismiss", "override_state_refused") VALUES
-(9,	't',	'f',	'validation de l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	35,	44,	NULL,	NULL,	NULL,	NULL,	NULL,	100,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication'),
+(90,	't',	'f',	'autorisation à publier l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	35,	44,	NULL,	NULL,	NULL,	NULL,	NULL,	100,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication'),
 (10,	't',	'f',	'publication primée ? ',	NULL,	3,	'normal',	'normal',	't',	'f',	35,	44,	NULL,	NULL,	NULL,	NULL,	NULL,	986,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication'),
 (11,	't',	'f',	'publication en cours de validation par la conférence',	NULL,	2,	'normal',	'normal',	't',	'f',	35,	44,	NULL,	NULL,	NULL,	NULL,	NULL,	637,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication');
 
@@ -175,14 +175,14 @@ INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "descriptio
 INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "description", "index", "urgency", "priority", "optionnal", "hub", "dbworkflow_id", "dbschema_id", "dbuser_id", "dbentity_id", "wrapped_dbworkflow_id", "before_hierarchical_validation", "custom_progressing_status", "view_dbfilter_id", "readonly_not_assignee", "assign_to_creator", "override_state_completed", "override_state_dismiss", "override_state_refused") VALUES
 (18,	't',	'f',	'publication en cours de validation et d''acceptation de la conférence',	NULL,	2,	'normal',	'normal',	'f',	'f',	36,	42,	NULL,	NULL,	NULL,	NULL,	NULL,	424,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication'),
 (19,	't',	'f',	'publication primée ? ',	NULL,	3,	'normal',	'normal',	't',	'f',	36,	42,	NULL,	NULL,	NULL,	NULL,	NULL,	49632,	't',	't',	'valider la publication',	'NA',	'abandonner la publication'),
-(20,	't',	'f',	'validation de l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	36,	42,	NULL,	NULL,	NULL,	NULL,	NULL,	103,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication');
+(20,	't',	'f',	'autorisation à publier l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	36,	42,	NULL,	NULL,	NULL,	NULL,	NULL,	103,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication');
 
 # IMPORT PRESENTATION
 
 INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "description", "index", "urgency", "priority", "optionnal", "hub", "dbworkflow_id", "dbschema_id", "dbuser_id", "dbentity_id", "wrapped_dbworkflow_id", "before_hierarchical_validation", "custom_progressing_status", "view_dbfilter_id", "readonly_not_assignee", "assign_to_creator", "override_state_completed", "override_state_dismiss", "override_state_refused") VALUES
 (15,	't',	'f',	'publication primée ? ',	NULL,	3,	'normal',	'normal',	't',	'f',	34,	43,	NULL,	NULL,	NULL,	NULL,	NULL,	555,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication'),
 (5,	't',	'f',	'publication en cours de validation par la conférence',	NULL,	2,	'normal',	'normal',	't',	'f',	34,	43,	NULL,	NULL,	NULL,	NULL,	NULL,	453,	't',	't',	'valider la publication',	'revenir à l''étape précédente',	'abandonner la publication'),
-(100,	't',	'f',	'validation de l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	34,	43,	NULL,	NULL,	NULL,	NULL,	NULL,	101,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication');
+(100,	't',	'f',	'autorisation à publier l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	34,	43,	NULL,	NULL,	NULL,	NULL,	NULL,	101,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication');
 
 
 DELETE * FROM dbtriggers WHERE mode = 'manual' and dbschema_id IN (44,43)
