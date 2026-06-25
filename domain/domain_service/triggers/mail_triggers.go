@@ -18,6 +18,7 @@ func (t *TriggerService) GetViewMailTriggers(record utils.Record, fromSchema *sm
 		return nil, err
 	} else {
 		mails := t.TriggerManualMail("manual", record, fromSchema, triggerID, toSchemaID, destID)
+		fmt.Println("TRIGGER MAIL FOUNDED", mails)
 		bodies := []sm.ManualTriggerModel{}
 		s := sch.ToMapRecord()
 		for _, f := range sch.Fields {
@@ -89,11 +90,13 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 	if len(dest) > 0 {
 		if toUsers = t.handleOverrideEmailTo(record, dest[0], toSchema, triggerID); len(toUsers) == 0 {
 			if mode == "auto" {
+				fmt.Println("TRIGGER MAIL RETURN 1", mailings)
 				return mailings
 			}
 		}
 	} else if toUsers = t.handleOverrideEmailTo(record, map[string]interface{}{}, toSchema, triggerID); len(toUsers) == 0 {
 		if mode == "auto" {
+			fmt.Println("TRIGGER MAIL RETURN 2", mailings)
 			return mailings
 		}
 	}
@@ -105,12 +108,14 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 	for _, r := range rules {
 		mailID := r["value"]
 		if mailID == nil {
+			fmt.Println("TRIGGER MAIL ID IS NIL")
 			continue
 		}
 		mails, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailTemplate.Name, map[string]interface{}{
 			utils.SpecialIDParam: mailID,
 		}, false)
 		if err != nil || len(mails) == 0 {
+			fmt.Println("TRIGGER MAIL ID IS EMPTY", mailID, mails)
 			continue
 		}
 		mail := mails[0]
