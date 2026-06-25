@@ -320,11 +320,13 @@ func (t *TriggerService) GetTriggerRules(triggerID int64, fromSchema *sm.SchemaM
 			}
 		}
 	}
+
 	rules, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTriggerRule.Name, map[string]interface{}{
 		ds.TriggerDBField:        triggerID,
 		"to_" + ds.SchemaDBField: toSchemaID,
 	}, false)
 	if err != nil {
+		fmt.Println("TRIGGER RULES EE ERR", err, toSchemaID, triggerID)
 		return []map[string]interface{}{}
 	}
 	return rules
