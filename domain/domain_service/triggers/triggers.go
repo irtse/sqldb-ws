@@ -53,6 +53,7 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 			}
 		}
 	}
+	fmt.Println("MT ", mt)
 	return mt
 }
 
