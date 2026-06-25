@@ -45,7 +45,6 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 			case "mail":
 				if t, err := t.GetViewMailTriggers(record, fromSchema, utils.GetString(r, "description"), utils.GetString(r, "name"),
 					utils.GetInt(r, utils.SpecialIDParam), toSchemaID, destID); err == nil {
-					fmt.Println("TRIGGER ADDITION", len(t))
 					mt = append(mt, t...)
 				}
 			}
@@ -71,14 +70,12 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		}
 	}
 	trgs := []map[string]interface{}{}
-	fmt.Println("TRIGGER MAIL")
 	if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTrigger.Name, map[string]interface{}{
 		"on_" + method.String(): true,
 		"mode":                  conn.Quote(mode),
 		ds.SchemaDBField:        fromSchemaID,
 	}, false); err == nil {
 		for _, r := range res {
-			fmt.Println("TRIGGER MAIL UPDATE STEP", r["name"], r["on_update_step"])
 			if r["on_update"] == true && r["on_update_step"] != nil && recordID != "" {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
 					map[string]interface{}{
@@ -104,7 +101,6 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 					continue
 				}
 			}
-			fmt.Println("ADD TRIGGER", r)
 			trgs = append(trgs, r)
 		}
 	}
@@ -274,19 +270,16 @@ func (t *TriggerService) triggerData(record utils.Record, fromSchema *sm.SchemaM
 	rules := t.GetTriggerRules(triggerID, fromSchema, toSchemaID, record)
 	for _, r := range rules {
 		if toSchemaID != utils.GetInt(r, "to_"+ds.SchemaDBField) {
-			fmt.Println("ERR", toSchemaID, utils.GetInt(r, "to_"+ds.SchemaDBField))
 			continue
 		}
 
 		toSchema, err := schema.GetSchemaByID(toSchemaID)
 		if err != nil {
-			fmt.Println("ERR", err)
 			continue
 		}
 
 		field, err := toSchema.GetFieldByID(utils.GetInt(r, "to_"+ds.SchemaFieldDBField))
 		if err != nil {
-			fmt.Println("ERR2", err)
 			continue
 		}
 
@@ -333,9 +326,7 @@ func (t *TriggerService) GetTriggerRules(triggerID int64, fromSchema *sm.SchemaM
 		"to_" + ds.SchemaDBField: toSchemaID,
 	}, false)
 	if err != nil {
-		fmt.Println("TRIGGER RULES EE ERR", err, toSchemaID, triggerID)
 		return []map[string]interface{}{}
 	}
-	fmt.Println("TRIGGER RULES EE ERR 22", err, toSchemaID, triggerID, rules)
 	return rules
 }

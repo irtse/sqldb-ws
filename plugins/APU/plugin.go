@@ -70,8 +70,7 @@ func ImportPublication() {
 		3:  "project_accronym", // special OK // TODO ajouté dans un csv.
 	}
 	_, datas := importFile(filepath)
-	for index, data := range datas {
-		fmt.Println(index, data)
+	for _, data := range datas {
 		model := map[string]interface{}{}
 		no_model := false
 
@@ -136,7 +135,6 @@ func ImportPublication() {
 			} else if i == 42 {
 				if data[i] == "0" {
 					model[mapped[i]] = false
-					fmt.Println("NO MODEL ONE 42")
 					no_model = true
 					break
 				} else {
@@ -255,7 +253,6 @@ func ImportPublication() {
 						model["axis"] = res[0][utils.SpecialIDParam]
 					}
 				} else {
-					fmt.Println("FOUND MISSING PRJ", data[i])
 					missing_project = append(missing_project, data[i])
 					no_model = true
 					break
@@ -266,7 +263,6 @@ func ImportPublication() {
 				aa := []map[string]interface{}{}
 				for y, authors := range strings.Split(data[i], ",") {
 					restr := []interface{}{}
-					fmt.Println("FOUND AUTHOR", authors)
 					for _, n := range strings.Split(authors, " ") {
 						restr = append(restr, "name::text LIKE '%"+strings.Trim(strings.ReplaceAll(strings.ToLower(n), "'", "''"), " ")+"%'")
 					}
@@ -298,7 +294,6 @@ func ImportPublication() {
 
 				}
 			} else if len(data) > i {
-				fmt.Println(model, mapped[i], i)
 				if createDate, err := time.Parse("02/01/2006", data[i]); err != nil {
 					model[mapped[i]] = strings.ReplaceAll(data[i], "'", "''")
 				} else {
@@ -317,13 +312,11 @@ func ImportPublication() {
 		if err != nil {
 			fmt.Println("Erreur :", err)
 		}
-		fmt.Println("MODEL", dbName, model)
 		m2 := map[string]interface{}{}
 		for k, v := range model {
 			m2[k] = v
 		}
 		m2["name"], err = foundDiff(model, dbName, mapped, verifyDT, d)
-		fmt.Println("IS M2", m2, err)
 		if err == nil {
 			delete(m2, "authors")
 			createDate, err := time.Parse("02/01/2006", date)
@@ -333,11 +326,8 @@ func ImportPublication() {
 			if err != nil {
 				createDate = time.Date(1901, 1, 1, 0, 0, 0, 0, time.UTC)
 			}
-			fmt.Println(model["effective_publishing_date"], "//", date)
 			if m2["effective_publishing_date"] == nil || m2["effective_publishing_date"] == "" {
-
 				m2["effective_publishing_date"] = createDate
-				fmt.Println("ADD DATE", date)
 			}
 			if m2["state"] == 6 {
 				m2["is_draft"] = true
@@ -353,11 +343,9 @@ func ImportPublication() {
 						ds.SchemaDBField:    sch.ID,
 						ds.UserDBField:      m2["manager_"+ds.RootID(ds.DBUser.Name)],
 					}, func(s string) (string, bool) { return s, true })
-					fmt.Println("DATAACCESS", err)
 
 					if model["authors"] != nil {
 						for _, auth := range model["authors"].([]map[string]interface{}) {
-							fmt.Println("AUTH", auth)
 							if auth["authors"] == nil {
 								continue
 							}
@@ -368,18 +356,14 @@ func ImportPublication() {
 							delete(auth, "authors")
 							auth[ds.RootID(dbName)] = id
 
-							fmt.Println(affDbName, auth, m)
 							if auth["affiliation"] == nil || auth["affiliation"] == "" {
 								auth["affiliation"] = "IRT Saint Exupéry"
 							}
 							if id, err := d.GetDb().ClearQueryFilter().CreateQuery(affDbName, auth, func(s string) (string, bool) { return s, true }); err == nil {
 								for _, mm := range m {
 									mm[ds.RootID(affDbName)] = id
-									_, err := d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, mm, func(s string) (string, bool) { return s, true })
-									fmt.Println("AUTHORS", mm, err)
+									d.GetDb().ClearQueryFilter().CreateQuery(authorsDbName, mm, func(s string) (string, bool) { return s, true })
 								}
-							} else {
-								fmt.Println("AFF", err)
 							}
 						}
 					}
@@ -437,13 +421,8 @@ func ImportPublication() {
 								}
 							}
 						}
-					} else {
-						fmt.Println("qsdsq", r, err)
 					}
 				}
-
-			} else {
-				fmt.Println("Err create", err)
 			}
 		}
 	}
@@ -462,8 +441,6 @@ func foundDiff(model map[string]interface{}, dbName string, mapped map[int]strin
 				res[0][mapped[v]] = nil
 			}
 			if model[mapped[v]] != res[0][mapped[v]] {
-				fmt.Println("DIFF DETECTED", mapped[v], model[mapped[v]], res[0][mapped[v]])
-
 				model["name"] = utils.ToString(model["name"]) + "."
 				if res, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
 					"name": connector.Quote(utils.GetString(model, "name")),

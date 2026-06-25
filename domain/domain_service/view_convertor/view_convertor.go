@@ -122,7 +122,6 @@ func (v *ViewConvertor) transformFullView(schemas []*models.SchemaModel, results
 				utils.GetInt(record, ds.SchemaDBField),
 				utils.GetInt(record, ds.DestTableDBField))
 			view.Triggers = append(view.Triggers, trigs...)
-			fmt.Println("TRIGGERS EXTRACT", len(trigs), len(view.Triggers))
 		}
 	}
 	sort.SliceStable(view.Items, func(i, j int) bool { return view.Items[i].Sort < view.Items[j].Sort })
@@ -197,7 +196,6 @@ func (v *ViewConvertor) transformShallowedView(results utils.Results, tableName 
 			if !utils.GetBool(record, "is_draft") && !newView.Readonly {
 				newView.Triggers = triggers.NewTrigger(v.Domain).GetViewTriggers(
 					record, v.Domain.GetMethod(), &sch, utils.GetInt(record, ds.SchemaDBField), utils.GetInt(record, ds.DestTableDBField))
-				fmt.Println("TRIGGERS EXTRACT is_draft", newView.Triggers)
 			}
 		}
 		res = append(res, newView.ToRecord())
@@ -431,6 +429,7 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 							ds.DestTableDBField:      results[0][utils.SpecialIDParam],
 							ds.WorkflowSchemaDBField: utils.GetString(c, "on_update_step"),
 						}, false); err == nil && len(taskFound) == 0 {
+						fmt.Println("DBTask Triggers", schemaID, results[0][utils.SpecialIDParam], utils.GetString(c, "on_update_step"))
 						continue
 					}
 				}

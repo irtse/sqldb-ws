@@ -1,7 +1,6 @@
 package task_service
 
 import (
-	"fmt"
 	"sqldb-ws/domain/schema"
 	schserv "sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -437,7 +436,6 @@ func GetUserToDelegate(domain utils.DomainITF, task map[string]interface{}, sche
 	}, false)
 	if err == nil && len(founded) > 0 {
 		for _, f := range founded {
-			fmt.Println("FOUNDED ", record, f["field"], utils.ToString(record[utils.ToString(f["field"])]), utils.ToString(f["value"]))
 			if f["field"] == nil || f["value"] == nil || utils.ToString(record[utils.ToString(f["field"])]) == utils.ToString(f["value"]) {
 				users[utils.ToString(f[ds.UserDBField])] = map[string]interface{}{
 					"delegated_" + ds.UserDBField: utils.ToString(f[ds.UserDBField]),
