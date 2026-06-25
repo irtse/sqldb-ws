@@ -112,7 +112,7 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 			continue
 		}
 		mails, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBEmailTemplate.Name, map[string]interface{}{
-			utils.SpecialIDParam: mailID,
+			utils.SpecialIDParam: "'" + fmt.Sprintf("%v", mailID) + "'",
 		}, false)
 		if err != nil || len(mails) == 0 {
 			fmt.Println("TRIGGER MAIL ID IS EMPTY", mailID, mails)
