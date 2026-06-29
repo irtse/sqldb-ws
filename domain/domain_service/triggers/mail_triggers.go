@@ -146,7 +146,7 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 			if len(dest) > 0 {
 				if m, err := connector.ForgeMail(
 					usfrom[0],
-					utils.Record{}, // always keep a copy
+					usfrom[0], // always keep a copy
 					utils.GetString(mail, "subject"),
 					utils.GetString(mail, "template"),
 					t.getLinkLabel(toSchema, dest[0]),
@@ -164,7 +164,7 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 			} else {
 				if m, err := connector.ForgeMail(
 					usfrom[0],
-					utils.Record{}, // always keep a copy
+					usfrom[0], // always keep a copy
 					utils.GetString(mail, "subject"),
 					utils.GetString(mail, "template"),
 					utils.Record{},
