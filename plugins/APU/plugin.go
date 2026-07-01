@@ -313,13 +313,16 @@ func ImportPublication() {
 		if no_model {
 			continue // do not create anything
 		}
+		var err error
+		if len(missing_project) > 0 {
+			cmd := exec.Command("./id_script.sh", missing_project...) // generate csv with missing project
 
-		cmd := exec.Command("./id_script.sh", missing_project...) // generate csv with missing project
-
-		_, err := cmd.CombinedOutput()
-		if err != nil {
-			fmt.Println("Erreur :", err)
+			_, err = cmd.CombinedOutput()
+			if err != nil {
+				fmt.Println("Erreur :", err)
+			}
 		}
+
 		m2 := map[string]interface{}{}
 		for k, v := range model {
 			m2[k] = v
@@ -431,6 +434,8 @@ func ImportPublication() {
 						}
 					}
 				}
+			} else {
+				fmt.Println("ERR", err)
 			}
 		}
 	}
