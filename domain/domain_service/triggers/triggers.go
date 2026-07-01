@@ -114,6 +114,12 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 					map[string]interface{}{
 						utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
 						"index":              1,
+						ds.WorkflowDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBWorkflow.Name,
+							map[string]interface{}{
+								"is_close":          false,
+								ds.SchemaDBField:    fromSchemaID,
+								ds.DestTableDBField: recordID,
+							}, false, utils.SpecialIDParam),
 					}, false); err == nil && len(res) == 0 {
 					continue
 				} else {
