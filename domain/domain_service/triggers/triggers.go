@@ -116,9 +116,8 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 						"index":              1,
 						ds.WorkflowDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBWorkflow.Name,
 							map[string]interface{}{
-								"is_close":          false,
-								ds.SchemaDBField:    fromSchemaID,
-								ds.DestTableDBField: recordID,
+								"is_close":       false,
+								ds.SchemaDBField: fromSchemaID,
 							}, false, utils.SpecialIDParam),
 					}, false); err == nil && len(res) == 0 {
 					continue
