@@ -77,43 +77,10 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 	}, false); err == nil {
 		for _, r := range res {
 			fmt.Println("TRIGGERS 1", r["id"], r["on_update_step"], r["on_create"], fromSchemaID, recordID)
-			if r["on_update"] == true && r["on_update_step"] != nil && recordID != "" {
-				if sch, err := schema.GetSchema(ds.DBRequest.Name); err == nil && sch.ID == fromSchemaID {
-					if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
-						map[string]interface{}{
-							"is_close": false,
-							utils.SpecialIDParam: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-								ds.EntityDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
-									ds.UserDBField: t.Domain.GetUserID(),
-								}, false, ds.EntityDBField),
-								ds.UserDBField: t.Domain.GetUserID(),
-							}, true, utils.SpecialIDParam),
-							ds.RequestDBField:        fromSchemaID,
-							ds.DestTableDBField:      recordID,
-							ds.WorkflowSchemaDBField: utils.GetString(r, "on_update_step"),
-						}, false); err == nil && len(res) == 0 {
-						continue
-					}
-				} else if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
-					map[string]interface{}{
-						"is_close": false,
-						utils.SpecialIDParam: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBTask.Name, map[string]interface{}{
-							ds.EntityDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBEntityUser.Name, map[string]interface{}{
-								ds.UserDBField: t.Domain.GetUserID(),
-							}, false, ds.EntityDBField),
-							ds.UserDBField: t.Domain.GetUserID(),
-						}, true, utils.SpecialIDParam),
-						ds.SchemaDBField:         fromSchemaID,
-						ds.DestTableDBField:      recordID,
-						ds.WorkflowSchemaDBField: utils.GetString(r, "on_update_step"),
-					}, false); err == nil && len(res) == 0 {
-					continue
-				}
-			} else if r["on_write"] == true && r["on_update_step"] != nil {
+			if r["on_update_step"] != nil {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
 					map[string]interface{}{
 						utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
-						"index":              1,
 						ds.WorkflowDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name,
 							map[string]interface{}{
 								"is_close":          false,
