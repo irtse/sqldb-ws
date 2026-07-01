@@ -99,8 +99,11 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 						"index":              1,
 					}, false); err == nil && len(res) == 0 {
 					continue
+				} else {
+					fmt.Println("TRIGGERS ERR", err)
 				}
 			}
+			fmt.Println("TRIGGERS", r["id"], r["on_update_step"], r["on_create"])
 			trgs = append(trgs, r)
 		}
 	}
