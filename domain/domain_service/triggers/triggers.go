@@ -87,8 +87,6 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 							}, false, ds.EntityDBField),
 							ds.UserDBField: t.Domain.GetUserID(),
 						}, true, utils.SpecialIDParam),
-						ds.SchemaDBField:         fromSchemaID,
-						ds.DestTableDBField:      recordID,
 						ds.WorkflowSchemaDBField: utils.GetString(r, "on_update_step"),
 					}, false); err == nil && len(res) == 0 {
 					continue
