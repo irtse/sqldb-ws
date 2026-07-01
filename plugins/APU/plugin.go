@@ -114,13 +114,13 @@ func ImportPublication() {
 			dbName = models.PresentationFR.Name
 			affDbName = models.PresentationAffiliationAuthorsFR.Name
 			authorsDbName = models.PresentationAuthorsFR.Name
-			model["reread"] = false
+			model["reread"] = 2
 		} else if strings.Contains(strings.ToLower(data[4]), "conference") {
 			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 9, 11, 12, 13, 47, 48}
 			dbName = models.ConferenceFR.Name
 			affDbName = models.ConferenceAffiliationAuthorsFR.Name
 			authorsDbName = models.ConferenceAuthorsFR.Name
-			model["reread"] = true
+			model["reread"] = 1
 		}
 		missing_project := []string{}
 		date := ""
