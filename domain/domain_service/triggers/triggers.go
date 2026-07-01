@@ -83,7 +83,6 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 						utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
 						ds.WorkflowDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name,
 							map[string]interface{}{
-								"is_close":          false,
 								ds.SchemaDBField:    fromSchemaID,
 								ds.DestTableDBField: recordID,
 							}, false, ds.WorkflowDBField),
