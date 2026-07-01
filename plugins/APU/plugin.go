@@ -7,6 +7,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"os/exec"
+	"slices"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
 	"sqldb-ws/domain/specialized_service/task_service"
@@ -78,7 +79,7 @@ func ImportPublication() {
 		affDbName := models.OtherPublicationAffiliationAuthorsFR.Name
 		authorsDbName := models.OtherPublicationAuthorsFR.Name
 		dt := []int{5, 41, 42, 3, 30, 23, 25, 26, 39, 8, 15, 47}
-		verifyDT := []int{5, 8, 11, 12, 13, 14, 37, 47, 48}
+		verifyDTFields := []int{5, 8, 11, 12, 13, 14, 37, 47, 48}
 		if strings.Contains(strings.ToLower(data[4]), "these") {
 			dt = []int{5, 41, 42, 3, 30, 23, 25, 26, 34, 39, 35, 36, 47}
 			dbName = models.ThesisFR.Name
@@ -122,6 +123,14 @@ func ImportPublication() {
 			authorsDbName = models.ConferenceAuthorsFR.Name
 			model["reread"] = 1
 		}
+		// only compare fields that this publication type actually populates,
+		// otherwise fields left nil by dt would be compared against unrelated DB columns
+		verifyDT := []int{}
+		for _, v := range verifyDTFields {
+			if slices.Contains(dt, v) {
+				verifyDT = append(verifyDT, v)
+			}
+		}
 		missing_project := []string{}
 		date := ""
 		for _, i := range dt {
@@ -162,7 +171,9 @@ func ImportPublication() {
 						model["state"] = st[0][utils.SpecialIDParam]
 					}
 				} else if strings.Contains(strings.ToLower(data[i]), "réalis") {
-					if model["is_awarded"] == true {
+					// read is_awarded straight from the CSV: index 30 may not have been
+					// processed yet at this point since dt lists 41 before 30 for every type
+					if len(data) > 30 && strings.Trim(data[30], " ") == "oui" {
 						if st, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.PublicationStatusFR.Name, []interface{}{
 							"name::text LIKE '%prim%'",
 						}, false); err == nil && len(st) > 0 {
@@ -261,6 +272,7 @@ func ImportPublication() {
 						model["axis"] = res[0][utils.SpecialIDParam]
 					}
 				} else {
+					fmt.Println("SKIP", utils.GetString(model, "name"), ": unknown project code", data[i])
 					missing_project = append(missing_project, data[i])
 					no_model = true
 					break
@@ -328,6 +340,9 @@ func ImportPublication() {
 			m2[k] = v
 		}
 		m2["name"], err = foundDiff(model, dbName, mapped, verifyDT, d)
+		if err != nil {
+			fmt.Println("SKIP", utils.GetString(model, "name"), ":", err)
+		}
 		if err == nil {
 			delete(m2, "authors")
 			createDate, err := time.Parse("02/01/2006", date)
@@ -380,7 +395,7 @@ func ImportPublication() {
 					}
 
 					if r, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(dbName, map[string]interface{}{
-						"name": connector.Quote(utils.GetString(model, "name")),
+						"name": connector.Quote(utils.GetString(m2, "name")),
 					}, false); err == nil && len(r) > 0 {
 
 						if wfs, err := d.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflow.Name, map[string]interface{}{
@@ -435,7 +450,7 @@ func ImportPublication() {
 					}
 				}
 			} else {
-				fmt.Println("ERR", err)
+				fmt.Println("SKIP", utils.GetString(m2, "name"), ":", err)
 			}
 		}
 	}
