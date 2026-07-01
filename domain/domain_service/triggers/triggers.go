@@ -78,18 +78,17 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		for _, r := range res {
 			fmt.Println("TRIGGERS 1", r["id"], r["on_update_step"], r["on_create"], fromSchemaID, recordID)
 			if r["on_update_step"] != nil {
-				if req, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name,
+				if req, _ := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name,
 					map[string]interface{}{
 						ds.SchemaDBField:    fromSchemaID,
 						ds.DestTableDBField: recordID,
-					}, false); err == nil && len(req) > 0 {
-					fmt.Println("REQ WF FIELD", req[0][ds.WorkflowDBField])
-					if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
+					}, false); len(req) > 0 {
+					fmt.Println("REQ WF FIELD", utils.GetString(r, "on_update_step"), req[0][ds.WorkflowDBField])
+					if res, _ := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
 						map[string]interface{}{
 							utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
 							ds.WorkflowDBField:   req[0][ds.WorkflowDBField],
-						}, false); err == nil && len(res) == 0 {
-						fmt.Println("EERR ", err)
+						}, false); len(res) == 0 {
 						continue
 					}
 				}
