@@ -76,7 +76,7 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		ds.SchemaDBField:        fromSchemaID,
 	}, false); err == nil {
 		for _, r := range res {
-			fmt.Println("TRIGGERS 1", r["id"], r["on_update_step"], r["on_create"])
+			fmt.Println("TRIGGERS 1", r["id"], r["on_update_step"], r["on_create"], fromSchemaID, recordID)
 			if r["on_update"] == true && r["on_update_step"] != nil && recordID != "" {
 				if sch, err := schema.GetSchema(ds.DBRequest.Name); err == nil && sch.ID == fromSchemaID {
 					if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBTask.Name,
@@ -114,11 +114,12 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 					map[string]interface{}{
 						utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
 						"index":              1,
-						ds.WorkflowDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBWorkflow.Name,
+						ds.WorkflowDBField: t.Domain.GetDb().ClearQueryFilter().BuildSelectQueryWithRestriction(ds.DBRequest.Name,
 							map[string]interface{}{
-								"is_close":       false,
-								ds.SchemaDBField: fromSchemaID,
-							}, false, utils.SpecialIDParam),
+								"is_close":          false,
+								ds.SchemaDBField:    fromSchemaID,
+								ds.DestTableDBField: recordID,
+							}, false, ds.WorkflowDBField),
 					}, false); err == nil && len(res) == 0 {
 					continue
 				} else {
