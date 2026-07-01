@@ -18,6 +18,7 @@ func (t *TriggerService) GetViewMailTriggers(record utils.Record, fromSchema *sm
 		return nil, err
 	} else {
 		mails := t.TriggerManualMail("manual", record, fromSchema, triggerID, toSchemaID, destID)
+		fmt.Println("MAIL", len(mails))
 		bodies := []sm.ManualTriggerModel{}
 		s := sch.ToMapRecord()
 		for _, f := range sch.Fields {
