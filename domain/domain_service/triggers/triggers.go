@@ -83,11 +83,11 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 						ds.SchemaDBField:    fromSchemaID,
 						ds.DestTableDBField: recordID,
 					}, false); err == nil && len(req) > 0 {
-					fmt.Println("REQ", req[0])
+					fmt.Println("REQ WF FIELD", req[0][ds.WorkflowDBField])
 					if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
 						map[string]interface{}{
 							utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
-							ds.WorkflowDBField:   req[0][utils.SpecialIDParam],
+							ds.WorkflowDBField:   req[0][ds.WorkflowDBField],
 						}, false); err == nil && len(res) == 0 {
 						continue
 					}
