@@ -39,6 +39,7 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 	}
 	mt := []sm.ManualTriggerModel{}
 	if res, err := t.GetTriggers("manual", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
+		fmt.Println("RES", len(res))
 		for _, r := range res {
 			typ := utils.GetString(r, "type")
 			switch typ {
