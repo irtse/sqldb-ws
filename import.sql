@@ -185,11 +185,6 @@ INSERT INTO "dbworkflow_schema" ("id", "active", "is_draft", "name", "descriptio
 (100,	't',	'f',	'autorisation à publier l''abstract',	NULL,	1,	'normal',	'normal',	'f',	'f',	34,	43,	NULL,	NULL,	NULL,	NULL,	NULL,	101,	't',	't',	'valider l''abstract',	'revenir à l''étape précédente',	'abandonner la publication');
 
 
-DELETE * FROM dbtriggers WHERE mode = 'manual' and dbschema_id IN (44,43)
-
-INSERT INTO "dbtriggers" ("id", "active", "is_draft", "name", "type", "mode", "dbschema_id", "on_write", "on_update", "description", "job_duration", "job_start_date", "on_update_step") VALUES
-(2,	't',	'f',	'envoyer un email : "autorisation de publication d''une conférence"',	'mail',	'manual',	44,	'f',	't',	'Nous te proposons d''envoyer cet email aux personne en charge de valider que les informations contenues dans cette publication ne sont pas confidentielles. Cet email n''est cependant pas obligatoire',	NULL,	NULL,	5),
-(3,	't',	'f',	'envoyer un email : "autorisation de publication d''une présentation sans relecture"',	'mail',	'manual',	43,	'f',	't',	'Nous te proposons d''envoyer cet email aux personne en charge de valider que les informations contenues dans cette publication ne sont pas confidentielles. Cet email n''est cependant pas obligatoire',	NULL,	NULL,	NULL);
 
 INSERT INTO "dbconsent" ("id", "active", "is_draft", "name", "optionnal", "dbschema_id", "on_create", "on_update", "on_update_step") VALUES
 (22,	't',	'f',	'j''ai suivi le processus proposé en informant les membres du projet et en CAPITALISANT leur accord pour cette publication',	'f',	42,	'f',	't',	20),
