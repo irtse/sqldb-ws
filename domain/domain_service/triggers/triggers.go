@@ -89,6 +89,7 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 							utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
 							ds.WorkflowDBField:   req[0][ds.WorkflowDBField],
 						}, false); err == nil && len(res) == 0 {
+						fmt.Println("EERR ", err)
 						continue
 					}
 				}
