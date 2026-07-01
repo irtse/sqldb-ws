@@ -18,7 +18,6 @@ func (t *TriggerService) GetViewMailTriggers(record utils.Record, fromSchema *sm
 		return nil, err
 	} else {
 		mails := t.TriggerManualMail("manual", record, fromSchema, triggerID, toSchemaID, destID)
-		fmt.Println("MAIL", len(mails))
 		bodies := []sm.ManualTriggerModel{}
 		s := sch.ToMapRecord()
 		for _, f := range sch.Fields {
@@ -103,6 +102,8 @@ func (t *TriggerService) TriggerManualMail(mode string, record utils.Record, fro
 		return mailings
 	}
 	rules := t.GetTriggerRules(triggerID, fromSchema, mailSchema.GetID(), record)
+	fmt.Println("RULES", len(rules))
+
 	for _, r := range rules {
 		mailID := r["value"]
 		if mailID == nil {
