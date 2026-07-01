@@ -92,7 +92,7 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 					}, false); err == nil && len(res) == 0 {
 					continue
 				}
-			} else if r["on_create"] == true && r["on_update_step"] != nil {
+			} else if r["on_write"] == true && r["on_update_step"] != nil {
 				if res, err := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
 					map[string]interface{}{
 						utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
