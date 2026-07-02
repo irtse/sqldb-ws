@@ -375,7 +375,7 @@ func ImportPublication() {
 						ds.DestTableDBField: id,
 						ds.SchemaDBField:    sch.ID,
 					}, func(s string) (string, bool) { return s, true })
-
+					fmt.Println("ADD PUBLICATION", err, createDate)
 					if model["authors"] != nil {
 						for _, auth := range model["authors"].([]map[string]interface{}) {
 							if auth["authors"] == nil {
