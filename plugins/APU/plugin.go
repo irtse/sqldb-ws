@@ -369,6 +369,12 @@ func ImportPublication() {
 						ds.SchemaDBField:    sch.ID,
 						ds.UserDBField:      m2["manager_"+ds.RootID(ds.DBUser.Name)],
 					}, func(s string) (string, bool) { return s, true })
+					_, err = d.GetDb().ClearQueryFilter().CreateQuery(models.PublicationHistoryStatusFR.Name, map[string]interface{}{
+						ds.RootID(models.PublicationStatusFR.Name): m2["state"],
+						"update_date":       createDate,
+						ds.DestTableDBField: id,
+						ds.SchemaDBField:    sch.ID,
+					}, func(s string) (string, bool) { return s, true })
 
 					if model["authors"] != nil {
 						for _, auth := range model["authors"].([]map[string]interface{}) {
