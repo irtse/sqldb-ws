@@ -23,22 +23,18 @@ func Autoload() []sm.SchemaModel {
 	for _, sch := range []string{models.PresentationFR.Name, models.ConferenceFR.Name, models.PosterFR.Name, models.OtherPublicationFR.Name} {
 		if resources, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch, map[string]interface{}{}, false); err == nil {
 			for _, r := range resources {
-				ok := false
-				isNotFound := true
+				m := map[string]interface{}{
+					"major_conference": false,
+				}
 				if res, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 					for _, r := range res {
 						if strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))) {
-							ok = true
-							isNotFound = false
+							m["major_conference"] = true
 							break
 						}
 					}
 				}
-				if isNotFound {
-					ok = false
-				}
-				r["major_conference"] = ok
-				if ok == true {
+				if m["major_conference"] == true {
 					r["reread"] = 1
 				}
 				err := s.GetDb().ClearQueryFilter().UpdateQuery(sch, r, map[string]interface{}{
