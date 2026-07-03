@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -177,12 +178,14 @@ func (s *PublicationService) Entity() utils.SpecializedServiceInfo {
 }
 
 func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, tablename string) (map[string]interface{}, error, bool) {
+	fmt.Println("MAJOR CONF", s.Sch.HasField("major_conference"))
 	if s.Sch.HasField("major_conference") {
 		ok := record["major_conference"]
 		isNotFound := true
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 			for _, r := range res {
-				if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_name")), strings.ToUpper(utils.GetString(r, "name"))) || strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
+				fmt.Println(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name")), strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))))
+				if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
 					ok = true
 					isNotFound = false
 					break
