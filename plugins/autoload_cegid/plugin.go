@@ -44,7 +44,7 @@ func Autoload() []sm.SchemaModel {
 				err := s.GetDb().ClearQueryFilter().UpdateQuery(sch, r, map[string]interface{}{
 					utils.SpecialIDParam: r[utils.SpecialIDParam],
 				}, false)
-				fmt.Println("ERR", err)
+				fmt.Println("ERR", r, err)
 			}
 		}
 	}
