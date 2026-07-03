@@ -5,6 +5,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"sqldb-ws/domain"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/schema"
 	ds "sqldb-ws/domain/schema/database_resources"
@@ -17,6 +19,36 @@ import (
 )
 
 func Autoload() []sm.SchemaModel {
+	s := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
+	for _, sch := range []string{models.PresentationFR.Name, models.ConferenceFR.Name, models.PosterAuthorsFR.Name, models.OtherPublicationAuthorsFR.Name} {
+		if resources, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch, map[string]interface{}{}, false); err == nil {
+			for _, r := range resources {
+				ok := false
+				isNotFound := true
+				if res, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
+					for _, r := range res {
+						if strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))) {
+							ok = true
+							isNotFound = false
+							break
+						}
+					}
+				}
+				if isNotFound {
+					ok = false
+				}
+				r["major_conference"] = ok
+				if ok == true {
+					r["reread"] = 1
+				}
+				err := s.GetDb().ClearQueryFilter().UpdateQuery(sch, r, map[string]interface{}{
+					utils.SpecialIDParam: r[utils.SpecialIDParam],
+				}, false)
+				fmt.Println("ERR", err)
+			}
+		}
+	}
+
 	ds.OWNPERMISSIONEXCEPTION = append(ds.OWNPERMISSIONEXCEPTION, []string{
 		models.CoCFR.Name, models.ProjectFR.Name, models.Axis.Name,
 		models.ProofreadingStatus.Name, models.MajorConference.Name,
