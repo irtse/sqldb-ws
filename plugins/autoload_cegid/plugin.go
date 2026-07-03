@@ -20,7 +20,7 @@ import (
 
 func Autoload() []sm.SchemaModel {
 	s := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
-	for _, sch := range []string{models.PresentationFR.Name, models.ConferenceFR.Name, models.PosterAuthorsFR.Name, models.OtherPublicationAuthorsFR.Name} {
+	for _, sch := range []string{models.PresentationFR.Name, models.ConferenceFR.Name, models.PosterFR.Name, models.OtherPublicationFR.Name} {
 		if resources, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch, map[string]interface{}{}, false); err == nil {
 			for _, r := range resources {
 				ok := false
