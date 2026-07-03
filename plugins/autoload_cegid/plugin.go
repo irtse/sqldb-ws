@@ -184,8 +184,8 @@ func (s *PublicationService) VerifyDataIntegrity(record map[string]interface{}, 
 		isNotFound := true
 		if res, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
 			for _, r := range res {
-				fmt.Println(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name")), strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))))
-				if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))) {
+				fmt.Println(record, strings.ToUpper(utils.GetString(record, "conference_acronym")), "//", strings.ToUpper(utils.GetString(r, "name")), strings.Contains(strings.ToUpper(utils.GetString(record, "conference_accronym")), strings.ToUpper(utils.GetString(r, "name"))))
+				if strings.Contains(strings.ToUpper(utils.GetString(record, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))) {
 					ok = true
 					isNotFound = false
 					break
