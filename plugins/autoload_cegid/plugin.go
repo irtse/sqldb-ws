@@ -35,12 +35,12 @@ func Autoload() []sm.SchemaModel {
 					}
 				}
 				if m["major_conference"] == true {
-					r["reread"] = 1
+					m["reread"] = 1
 				}
-				err := s.GetDb().ClearQueryFilter().UpdateQuery(sch, r, map[string]interface{}{
+				err := s.GetDb().ClearQueryFilter().UpdateQuery(sch, m, map[string]interface{}{
 					utils.SpecialIDParam: r[utils.SpecialIDParam],
 				}, false)
-				fmt.Println("ERR", r, err)
+				fmt.Println("ERR", m, err)
 			}
 		}
 	}
