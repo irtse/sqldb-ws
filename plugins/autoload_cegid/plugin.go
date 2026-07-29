@@ -20,18 +20,20 @@ import (
 
 func Autoload() []sm.SchemaModel {
 	s := domain.Domain(true, os.Getenv("SUPERADMIN_NAME"), nil)
+	confs, _ := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false)
 	for _, sch := range []string{models.PresentationFR.Name, models.ConferenceFR.Name, models.PosterFR.Name, models.OtherPublicationFR.Name} {
 		if resources, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch, map[string]interface{}{}, false); err == nil {
 			for _, r := range resources {
 				m := map[string]interface{}{
 					"major_conference": false,
 				}
-				if res, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false); err == nil && len(res) > 0 {
-					for _, r := range res {
-						if strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))) {
-							m["major_conference"] = true
-							break
-						}
+				for _, r := range confs {
+					if r["name"] == "Bringing NLP Explainability to Critical Sectors: A Case Study on NOTAMs in Aviation" {
+						fmt.Println("WHY NOT MAJOR ????", strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name")), strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))))
+					}
+					if strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))) {
+						m["major_conference"] = true
+						break
 					}
 				}
 				if m["major_conference"] == true {
