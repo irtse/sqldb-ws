@@ -29,9 +29,6 @@ func Autoload() []sm.SchemaModel {
 					"major_conference": false,
 				}
 				for _, c := range confs {
-					if strings.Contains(fmt.Sprintf("%v", r["name"]), "Bringing NLP") {
-						fmt.Println("WHY NOT MAJOR ????", strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name")), strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))))
-					}
 					if strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(c, "name"))) {
 						m["major_conference"] = true
 						break
