@@ -23,7 +23,6 @@ func Autoload() []sm.SchemaModel {
 	confs, _ := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(models.MajorConference.Name, map[string]interface{}{}, false)
 	for _, sch := range []string{models.PresentationFR.Name, models.ConferenceFR.Name, models.PosterFR.Name, models.OtherPublicationFR.Name} {
 		if resources, err := s.GetDb().ClearQueryFilter().SelectQueryWithRestriction(sch, map[string]interface{}{}, false); err == nil {
-			fmt.Println("SNKJS", sch, len(resources), err)
 			for _, r := range resources {
 				m := map[string]interface{}{
 					"major_conference": false,
@@ -37,10 +36,9 @@ func Autoload() []sm.SchemaModel {
 				if m["major_conference"] == true {
 					m["reread"] = 1
 				}
-				err := s.GetDb().ClearQueryFilter().UpdateQuery(sch, m, map[string]interface{}{
+				_ = s.GetDb().ClearQueryFilter().UpdateQuery(sch, m, map[string]interface{}{
 					utils.SpecialIDParam: r[utils.SpecialIDParam],
 				}, false)
-				fmt.Println("ERR", m, err)
 			}
 		}
 	}
