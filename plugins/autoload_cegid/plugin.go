@@ -28,11 +28,11 @@ func Autoload() []sm.SchemaModel {
 				m := map[string]interface{}{
 					"major_conference": false,
 				}
-				for _, r := range confs {
-					if r["name"] == "Bringing NLP Explainability to Critical Sectors: A Case Study on NOTAMs in Aviation" {
+				for _, c := range confs {
+					if strings.Contains(fmt.Sprintf("%v", r["name"]), "Bringing NLP") {
 						fmt.Println("WHY NOT MAJOR ????", strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name")), strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))))
 					}
-					if strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(r, "name"))) {
+					if strings.Contains(strings.ToUpper(utils.GetString(r, "conference_acronym")), strings.ToUpper(utils.GetString(c, "name"))) {
 						m["major_conference"] = true
 						break
 					}
