@@ -67,10 +67,13 @@ func DeleteFieldInInjection(injection string, searchField string) string {
 	return injection
 }
 
-func GetFieldInInjection(injection string, searchField string) (string, string, string) {
+func GetKeyInInjection(injection string) ([]string, []string, []string, []string) {
 	injection = SQLInjectionProtector(injection)
 	ands := strings.Split(injection, "+")
-	beforeSeparator := "and"
+	keys := []string{}
+	beforeSeparators := []string{}
+	operators := []string{}
+	vals := []string{}
 	for _, andUndecoded := range ands {
 		and, _ := url.QueryUnescape(fmt.Sprint(andUndecoded))
 		ors := strings.Split(and, "|")
@@ -93,17 +96,28 @@ func GetFieldInInjection(injection string, searchField string) (string, string, 
 			if len(keyVal) != 2 {
 				continue
 			}
-			if keyVal[0] == searchField {
-				if i < len(ors)-1 {
-					beforeSeparator = "or"
-				}
-				return keyVal[1], operator, beforeSeparator
+			keys = append(keys, keyVal[0])
+			if i < len(ors)-1 {
+				beforeSeparators = append(beforeSeparators, "or")
+			} else {
+				beforeSeparators = append(beforeSeparators, "and")
 			}
-			beforeSeparator = "or"
+			operators = append(operators, operator)
+			vals = append(vals, keyVal[1])
 		}
-		beforeSeparator = "and"
 	}
-	return "", "", beforeSeparator
+	return keys, vals, beforeSeparators, operators
+}
+
+func GetFieldInInjection(injection string, searchField string) (string, string, string) {
+	injection = SQLInjectionProtector(injection)
+	keys, vals, seps, operators := GetKeyInInjection(injection)
+	for i, key := range keys {
+		if key == searchField {
+			return vals[i], operators[i], seps[i]
+		}
+	}
+	return "", "", "and"
 }
 
 func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTypeAndLink func(string, string, string, func(string, string)) (string, string, string, string, string, error), special func(string, string)) string {
