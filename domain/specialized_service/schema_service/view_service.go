@@ -167,16 +167,20 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 			}
 			schemas = rschemas
 		}
-		rschemas := []*models.SchemaModel{}
 		keys, _, _, _ := connector.GetKeyInInjection(line)
-		for _, sch := range schemas {
-			for _, k := range keys {
-				if _, err := sch.GetField(k); err == nil {
-					rschemas = append(rschemas, sch)
+		if len(keys) > 0 {
+			rschemas := []*models.SchemaModel{}
+
+			for _, sch := range schemas {
+				for _, k := range keys {
+					if _, err := sch.GetField(k); err == nil {
+						rschemas = append(rschemas, sch)
+					}
 				}
 			}
+			schemas = rschemas
 		}
-		schemas = rschemas
+
 	}
 
 	dp := domainParams.Copy()
