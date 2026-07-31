@@ -165,7 +165,7 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 					return
 				}
 			}
-			fmt.Println("ssdss", len(rschemas))
+			fmt.Println("SSDSDDS", len(rschemas))
 			schemas = rschemas
 		}
 		keys, _, _, _ := connector.GetKeyInInjection(line)
