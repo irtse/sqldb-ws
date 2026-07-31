@@ -111,41 +111,13 @@ func GetKeyInInjection(injection string) ([]string, []string, []string, []string
 
 func GetFieldInInjection(injection string, searchField string) (string, string, string) {
 	injection = SQLInjectionProtector(injection)
-	ands := strings.Split(injection, "+")
-	beforeSeparator := "and"
-	for _, andUndecoded := range ands {
-		and, _ := url.QueryUnescape(fmt.Sprint(andUndecoded))
-		ors := strings.Split(and, "|")
-		if len(ors) == 0 {
-			continue
+	keys, vals, seps, ops := GetKeyInInjection(injection)
+	for i, k := range keys {
+		if k == searchField {
+			return vals[i], ops[i], seps[i]
 		}
-		for i, or := range ors {
-			operator := "~"
-			keyVal := []string{}
-			if strings.Contains(or, "<>~") {
-				keyVal = strings.Split(or, "<>~")
-				operator = " NOT LIKE "
-			} else if strings.Contains(or, "~") {
-				keyVal = strings.Split(or, "~")
-				operator = " LIKE "
-			} else if strings.Contains(or, ":") {
-				keyVal = strings.Split(or, ":")
-				operator = "="
-			}
-			if len(keyVal) != 2 {
-				continue
-			}
-			if keyVal[0] == searchField {
-				if i < len(ors)-1 {
-					beforeSeparator = "or"
-				}
-				return keyVal[1], operator, beforeSeparator
-			}
-			beforeSeparator = "or"
-		}
-		beforeSeparator = "and"
 	}
-	return "", "", beforeSeparator
+	return "", "", "and"
 }
 
 func FormatSQLRestrictionWhereInjection(injection string, schemaID string, getTypeAndLink func(string, string, string, func(string, string)) (string, string, string, string, string, error), special func(string, string)) string {

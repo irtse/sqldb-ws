@@ -429,7 +429,6 @@ func (s *ViewConvertor) getConsent(schemaID string, results utils.Results) []map
 							ds.DestTableDBField:      results[0][utils.SpecialIDParam],
 							ds.WorkflowSchemaDBField: utils.GetString(c, "on_update_step"),
 						}, false); err == nil && len(taskFound) == 0 {
-						fmt.Println("DBTask Triggers", schemaID, results[0][utils.SpecialIDParam], utils.GetString(c, "on_update_step"))
 						continue
 					}
 				}

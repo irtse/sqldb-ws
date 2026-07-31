@@ -39,7 +39,6 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 	}
 	mt := []sm.ManualTriggerModel{}
 	if res, err := t.GetTriggers("manual", method, fromSchema.ID, utils.GetString(record, utils.SpecialIDParam)); err == nil {
-		fmt.Println("RES", len(res))
 		for _, r := range res {
 			typ := utils.GetString(r, "type")
 			switch typ {
@@ -51,7 +50,6 @@ func (t *TriggerService) GetViewTriggers(record utils.Record, method utils.Metho
 			}
 		}
 	}
-	fmt.Println("MT sfsceef", len(mt))
 	return mt
 }
 
@@ -77,14 +75,12 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 		ds.SchemaDBField:        fromSchemaID,
 	}, false); err == nil {
 		for _, r := range res {
-			fmt.Println("TRIGGERS 1", r["id"], r["on_update_step"], r["on_create"], fromSchemaID, recordID)
 			if r["on_update_step"] != nil {
 				if req, _ := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name,
 					map[string]interface{}{
 						ds.SchemaDBField:    fromSchemaID,
 						ds.DestTableDBField: recordID,
 					}, false); len(req) > 0 {
-					fmt.Println("REQ WF FIELD", utils.GetString(r, "on_update_step"), req[0][ds.WorkflowDBField])
 					if res, _ := t.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBWorkflowSchema.Name,
 						map[string]interface{}{
 							utils.SpecialIDParam: utils.GetString(r, "on_update_step"),
@@ -94,7 +90,6 @@ func (t *TriggerService) GetTriggers(mode string, method utils.Method, fromSchem
 					}
 				}
 			}
-			fmt.Println("TRIGGERS", r["id"], r["on_update_step"], r["on_create"])
 			trgs = append(trgs, r)
 		}
 	}
