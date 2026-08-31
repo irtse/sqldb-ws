@@ -1,6 +1,7 @@
 package task_service
 
 import (
+	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
@@ -43,6 +44,7 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 
 func (s *WorkflowService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
 	s1, s2, s3, s4 := filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
+	fmt.Println("WORKFLOW QUERY", s1, s2, s3, s4, innerestr)
 	return s1, s2, s3, s4
 }
 
