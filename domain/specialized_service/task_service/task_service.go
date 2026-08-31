@@ -111,12 +111,9 @@ func (s *TaskService) Write(results []map[string]interface{}, record map[string]
 		if _, ok := res["is_draft"]; (ok && utils.GetBool(res, "is_draft")) || !CheckStateIsEnded(res["state"]) {
 			continue
 		}
-		if sch, err := schema.GetSchema(ds.DBTask.Name); err == nil {
-			s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
-				ds.DestTableDBField: res[utils.SpecialIDParam],
-				ds.SchemaDBField:    sch.ID,
-			}, false)
-		}
+		s.Domain.GetDb().ClearQueryFilter().DeleteQueryWithRestriction(ds.DBNotification.Name, map[string]interface{}{
+			ds.DestTableDBField: res[utils.SpecialIDParam],
+		}, false)
 
 		requests, err := s.Domain.GetDb().ClearQueryFilter().SelectQueryWithRestriction(ds.DBRequest.Name, map[string]interface{}{
 			utils.SpecialIDParam: utils.GetInt(res, RequestDBField),
