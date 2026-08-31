@@ -32,7 +32,7 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 		}
 	}
 	rr := view_convertor.NewViewConvertor(s.Domain).TransformToView([]*models.SchemaModel{}, res, tableName, true, s.Domain.GetParams().Copy())
-	fmt.Println("WORKFLOW", len(results), len(res), rr[0])
+	fmt.Println("WORKFLOW", len(results), len(res), len(rr))
 	if _, ok := s.Domain.GetParams().Get(utils.SpecialIDParam); ok && len(results) == 1 && len(rr) == 1 {
 		r := results[0]
 		rr[0]["schema"] = view_convertor.GetNewSchemaByWF(r, rr[0]["schema"].(map[string]interface{}), s.Domain)
