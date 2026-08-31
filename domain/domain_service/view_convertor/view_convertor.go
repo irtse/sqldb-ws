@@ -175,12 +175,10 @@ func (v *ViewConvertor) transformShallowedView(results utils.Results, tableName 
 	scheme, id, order, _, addAction, _ := v.GetViewFields(t, false, utils.Results{})
 	for _, record := range results {
 		if _, ok := record["is_draft"]; ok && record.GetBool("is_draft") && !v.Domain.IsOwn(false, false, utils.SELECT) {
-			fmt.Println("SKIP", ok, record.GetBool("is_draft"), !v.Domain.IsOwn(false, false, utils.SELECT))
 			continue
 		}
 		if record.GetString(sm.NAMEKEY) == "" {
 			res = append(res, record)
-			fmt.Println("SKIP2")
 			continue
 		}
 		newView := v.createShallowedViewItem(record, tableName, &sch, max, isWorkflow)
