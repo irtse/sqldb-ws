@@ -16,7 +16,7 @@ INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", 
 
 
 INSERT INTO "dbschema_column" ("id", "active", "is_draft", "name", "label", "type", "description", "placeholder", "default_value", "index", "readonly", "required", "read_level", "dbschema_id", "constraints", "link_id", "hidden", "translatable", "transform_function", "group_by", "in_resume", "subsection", "info") VALUES
-(6044347,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	44,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL),
+(6044346,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	44,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL),
 (16846,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	43,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL),
 (864,	't',	'f',	'abstract_publication',	'abstract finalisée',	'upload',	NULL,	NULL,	NULL,	-15,	'f',	'f',	'normal',	42,	NULL,	NULL,	'f',	't',	NULL,	NULL,	NULL,	'acte de publication',	NULL);
 
@@ -120,14 +120,14 @@ INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", 
 (210,	't',	'f',	676,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	100,	'f',	'f',	NULL,	NULL,	NULL),
 (220,	't',	'f',	677,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	100,	'f',	'f',	NULL,	NULL,	NULL),
 (230,	't',	'f',	340,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	100,	'f',	'f',	NULL,	NULL,	NULL),
-(240,	't',	'f',	6044347,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	100,	'f',	't',	NULL,	NULL,	NULL);
+(240,	't',	'f',	6044346,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	100,	'f',	't',	NULL,	NULL,	NULL);
 
 INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
-(79,	't',	'f',	6044347,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	637,	'f',	'f',	NULL,	NULL,	NULL);
+(79,	't',	'f',	6044346,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	637,	'f',	'f',	NULL,	NULL,	NULL);
 
 
 INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
-(78,	't',	'f',	6044347,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	986,	'f',	'f',	NULL,	NULL,	NULL);
+(78,	't',	'f',	6044346,	NULL,	NULL,	NULL,	NULL,	1,	NULL,	'f',	986,	'f',	'f',	NULL,	NULL,	NULL);
 
 
 INSERT INTO "dbfilter_field" ("id", "active", "is_draft", "dbschema_column_id", "value", "operator", "separator", "dir", "index", "width", "is_own", "dbfilter_id", "is_task_concerned", "force_not_readonly", "name", "is_hierarch_concerned", "is_hierarch_only") VALUES
