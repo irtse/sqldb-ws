@@ -653,15 +653,6 @@ func (d *ViewConvertor) HandleManyField(record utils.Record, field sm.FieldModel
 			if _, ok := manyVals[field.Name]; !ok {
 				manyVals[field.Name] = utils.Results{}
 			}
-			// field link is a many to many... such as authors
-			// link is related tableName : demo_authors
-			// f is the field from some_authors that not correspond to the schema.Name _ id : exemple demo_id -> demo
-			// lid is the link of this field for exemple : user & rootID(lid.Name) == user_id
-
-			// on veut former une requête comme suit : SELECT * FROM dbuser WHERE id IN (SELECT dbuser_id FROM demo_authors WHERE dbdemo_id = ?)
-			// HERE IS REGULARY MALFORMED REQUEST FOR AUTHORS
-			// SELECT * FROM article_authors WHERE id IN (SELECT id FROM article_affiliation_authors WHERE dbarticle_id=197 AND dbarticle_authors_id IS NOT NULL) pq: column "dbarticle_authors_id" does not exist
-			// TODO make a proper loop to reach table with name
 			if lid, err := scheme.GetSchemaByID(f.GetLink()); err == nil && f.GetLink() != schema.GetID() {
 				linkTable, err := scheme.GetSchema(link)
 				if err != nil {
@@ -801,7 +792,7 @@ func IsReadonly(tableName string, record utils.Record, createdIds []string, d ut
 				}, false); err == nil && len(res) > 0 {
 					return false
 				}
-				for k, _ := range d.GetParams().Values {
+				for k := range d.GetParams().Values {
 					if sch.HasField(k) { // a method to override per params
 						return false
 					}

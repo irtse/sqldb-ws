@@ -73,6 +73,7 @@ func (s *ViewService) TransformToGenericView(results utils.Results, tableName st
 			}
 		}
 	}
+	fmt.Println("SCH!!", schemas)
 	channel := make(chan utils.Record, len(results))
 	for _, record := range results {
 		go s.TransformToView(schemas, record, false, nil, params, channel, dest_id...)
@@ -181,6 +182,8 @@ func (s *ViewService) TransformToView(schemas []*models.SchemaModel, record util
 			schemas = rschemas
 		}
 	}
+
+	fmt.Println("SCH", schema)
 
 	dp := domainParams.Copy()
 	if schema == nil {
