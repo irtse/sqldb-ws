@@ -1,7 +1,6 @@
 package task_service
 
 import (
-	"fmt"
 	"sqldb-ws/domain/domain_service/filter"
 	"sqldb-ws/domain/domain_service/view_convertor"
 	"sqldb-ws/domain/schema"
@@ -24,7 +23,6 @@ func (s *WorkflowService) Entity() utils.SpecializedServiceInfo { return ds.DBWo
 
 func (s *WorkflowService) TransformToGenericView(results utils.Results, tableName string, dest_id ...string) utils.Results {
 	res := utils.Results{}
-
 	for _, rec := range results { // filter by allowed schemas
 		schema, err := schema.GetSchemaByID(utils.ToInt64(rec[SchemaDBField]))
 		if err == nil && s.Domain.VerifyAuth(schema.Name, "", "", utils.CREATE) {
@@ -32,7 +30,6 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 		}
 	}
 	rr := view_convertor.NewViewConvertor(s.Domain).TransformToView([]*models.SchemaModel{}, res, tableName, true, s.Domain.GetParams().Copy())
-	fmt.Println("WORKFLOW", len(results), len(res), len(rr))
 	if _, ok := s.Domain.GetParams().Get(utils.SpecialIDParam); ok && len(results) == 1 && len(rr) == 1 {
 		r := results[0]
 		rr[0]["schema"] = view_convertor.GetNewSchemaByWF(r, rr[0]["schema"].(map[string]interface{}), s.Domain)
@@ -45,8 +42,7 @@ func (s *WorkflowService) TransformToGenericView(results utils.Results, tableNam
 }
 
 func (s *WorkflowService) GenerateQueryFilter(tableName string, innerestr ...string) (string, string, string, string) {
-	s1, s2, s3, s4 := filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
-	fmt.Println("WORKFLOW QUERY", s1, s2, s3, s4, innerestr)
+	s1, s2, _, s4 := filter.NewFilterService(s.Domain).GetQueryFilter(tableName, s.Domain.GetParams().Copy(), false, innerestr...)
 	return s1, s2, "", s4
 }
 
